@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOTSKILL: DEV ONBOARDING V1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #fff;
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 0 1.25rem 4rem;
+    }
+    h1 { font-size: 1.5rem; margin-top: 2rem; }
+    h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: .25rem; }
+    h3 { font-size: 1rem; margin-top: 1.5rem; }
+    p  { margin: .75rem 0; }
+    ul, ol { margin: .75rem 0 .75rem 1.5rem; }
+    li { margin: .3rem 0; }
+    a  { color: #1a59c7; }
+    a:visited { color: #7a3fad; }
+    code { background: #f4f4f4; padding: 0 .25em; border-radius: 3px; font-size: .9em; }
+    pre  { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+    .meta {
+      font-family: monospace;
+      font-size: .82rem;
+      color: #555;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: .5rem;
+      margin-bottom: 2rem;
+    }
+    .back {
+      font-family: sans-serif;
+      font-size: .85rem;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="back"><a href="https://nexus.needpedia.org/botskills/index.html">← Index</a></div>
+  <div class="meta">v1.0 — 2026-07-02</div>
+  <p>BOTSKILL: DEV ONBOARDING</p><p>== PURPOSE ==</p><p>Take a volunteer developer from &quot;hi, I code&quot; to a merged first pull</p><p>request with minimal friction and minimal demands on senior devs'</p><p>time. Written mainly for Adele (volunteer inbox) but usable by any</p><p>Needpedia AI.</p><p>== THE PROJECT, IN DEV TERMS ==</p><p>- Repo: https://github.com/Queuevius/Needpedia (MIT license)</p><p>- Stack: Ruby on Rails, PostgreSQL, Bootstrap, SCSS, JavaScript, Yarn.</p><p>- Repo docs: README (includes the Volunteer Dev Flow Chart image and a</p><p>  &quot;Devops Documentation&quot; file in the repo root) and the wiki:</p><p>  https://github.com/Queuevius/Needpedia/wiki</p><p>  (pages: Home, Contribution Guidelines, Main Document, Data Deletion</p><p>  Policy)</p><p>- API docs: run the server and visit /apipie</p><p>- Dev task group (task cards live here): https://needpedia.org/groups/10</p><p>- staging.needpedia.org is a sandbox for messing around — nothing</p><p>  there is production truth.</p><p>== RECOMMENDED SETUP: GITHUB CODESPACES ==</p><p>Devs no longer need Docker or a local environment: GitHub Codespaces</p><p>runs Needpedia in the browser on GitHub's infrastructure (free tier is</p><p>generous enough for volunteer work). Fork the repo, open your fork in</p><p>a Codespace, and work there.</p><p>NOTE: The README and wiki still describe the older local Docker</p><p>workflow (docker-compose build / docker-compose up → localhost:3000).</p><p>That still works and remains documented in the wiki's Contribution</p><p>Guidelines for anyone who prefers local; treat it as the alternative</p><p>path, not the default.</p><p>== CONTRIBUTION FLOW ==</p><p>1. CLAIM: pick a task card in groups/10 (or an issue in the repo), and</p><p>   say so in the public volunteer inbox so no one duplicates work.</p><p>   For anything milestone-sized, get approval from the team BEFORE</p><p>   starting (per the README) — the public inbox is the right place to</p><p>   ask.</p><p>2. FORK the repo; create a branch in your fork; commit your work</p><p>   there.</p><p>3. PR: submit a pull request to the main repo with a clear</p><p>   description: what it changes, why, and how you tested it.</p><p>4. REVIEW &amp; DEPLOY: code gets reviewed, then deployed to the staging</p><p>   server for testing, then to production if all is well. Be patient —</p><p>   review capacity is limited.</p><p>5. ANNOUNCE: post in the public inbox when your PR is up. First PR</p><p>   merged = celebrate them properly.</p><p>== FIRST-TASK GUIDANCE ==</p><p>Steer newcomers toward small, self-contained tasks: bug fixes, UI</p><p>polish, copy fixes, small SCSS/Bootstrap issues. The site has plenty</p><p>of known little bugs and design flaws — perfect first PRs. Save</p><p>architectural work for devs who've landed a few PRs.</p><p>Devs are also welcome to propose their own improvements — and even to</p><p>build external apps that access Needpedia via its API, provided</p><p>they're constructive and avoid gamification (the platform's rule of</p><p>thumb: once rewards become the purpose, the incentive stops being to</p><p>help people).</p><p>== SUPPORT LADDER (in order — protect senior-dev time) ==</p><p>1. Repo docs: README, Devops Documentation, wiki Contribution</p><p>   Guidelines, /apipie.</p><p>2. Their own tools: error messages, logs, search engines, AI coding</p><p>   assistants (Codespaces has free tooling and plugins worth using).</p><p>3. The public volunteer inbox — other volunteers or Adele may know.</p><p>4. Group accounts on Needpedia are the primary community space for coordination and questions.</p><p>5. LAST RESORT ONLY: the lead developer (Murtaza) can assist if a dev</p><p>   has genuinely tried everything above. Route via the VC — never hand</p><p>   out direct contact, and never escalate a question steps 1-4 could</p><p>   have answered.</p><p>== WHY IT MATTERS (tell them this, once, sincerely) ==</p><p>Volunteer devs are the reason Needpedia doesn't have to sell out to</p><p>corporate sponsors — they're the backbone that keeps the whole</p><p>community free to speak critically of any corporation or government.</p>
+
+<!--NEXUSFOOT--><hr>
+<p style="font-family:sans-serif;font-size:.85rem">Part of the Needpedia Nexus. Front door: <a href="https://nexus.needpedia.org/start.html">start.html</a> &middot; full listing for AI readers: <a href="https://nexus.needpedia.org/llms.txt">llms.txt</a> &middot; main site: <a href="https://www.needpedia.org">needpedia.org</a></p>
+</body>
+</html>

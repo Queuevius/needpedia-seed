@@ -1,0 +1,16 @@
+$('.modal-backdrop').first().remove();
+$("#modal-window").html('<%= escape_javascript(render 'conversations/navbar_message_section', conversation: @conversation) %>')
+$('#navbar-chat-messages').modal('show');
+
+$('#modal-window').on('shown.bs.modal', function (event) {
+    $target = $('#section-3');
+    console.log('$target.offset()', $target.offset());
+    $('.scroll_wantedd').animate({
+        scrollTop: 30000 + 'px'
+    }, 'fast');
+
+    $('.modal-body').animate({
+       scrollTop: $target.offset().top + 'px'
+   }, 'fast');
+
+});

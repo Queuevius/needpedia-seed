@@ -1,0 +1,12 @@
+WHAT'S MISSING FROM TRIAL 1
+
+- rebuild/: step-by-step rebuild instructions are not written yet.
+  For now, work from inventory.txt, the code in code/, and the
+  test-site package instructions in documents/developer-wiki/
+  (Needpedia-Test-Site-Package.md).
+- The Nexus code and the Chrome capture extension: not included yet.
+- Email templates and page pop-up guides from Needpedia's admin
+  pages: not saved. Write your own.
+
+If you get stuck, write down exactly where and why. That
+list is the most useful result of this trial.

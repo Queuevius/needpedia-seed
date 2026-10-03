@@ -1,0 +1,47 @@
+Needpedia Nexus - articles index
+Rebuilt 2026-09-29 - 13 documents
+Description: Long-form articles, core facts, glossary, use cases, episodes
+
+Every document below is a plain public page. Fetch any URL directly.
+
+Doing the impossible
+https://nexus.needpedia.org/articles/doing-the-impossible.html
+
+Exhaustive Needpedia Use Case Scenarios
+https://nexus.needpedia.org/articles/use-case-scenarios-160.html
+
+HOW THE PUBLIC EMAIL SYSTEM WORKS & WHY V1
+https://nexus.needpedia.org/articles/public-email-system.html
+
+NEEDPEDIA CORE FACTS V1
+https://nexus.needpedia.org/articles/core-facts.html
+
+Needpedia Glossary V1
+https://nexus.needpedia.org/articles/glossary.html
+
+Needpedia Use Cases
+https://nexus.needpedia.org/articles/use-cases.html
+
+New Space, New Steward: Why Open Source Social Spaces Are Better for Your Brain
+https://nexus.needpedia.org/articles/new-space-new-steward.html
+
+Official needpedian compendium
+https://nexus.needpedia.org/articles/official-needpedian-compendium.html
+
+Potential collaboration modes celtc needpedia
+https://nexus.needpedia.org/articles/potential-collaboration-modes-celtc-needpedia.html
+
+The end of war
+https://nexus.needpedia.org/articles/the-end-of-war.html
+
+The People's Mastermind: How One Brilliant Mind Can Change Everything
+https://nexus.needpedia.org/articles/the-peoples-mastermind.html
+
+Tiffanys idea
+https://nexus.needpedia.org/articles/tiffanys-idea.html
+
+YOUR FIRST WEEK AS A VOLUNTEER V1
+https://nexus.needpedia.org/articles/first-week-volunteer.html
+
+Nexus front door: https://nexus.needpedia.org/start.html
+Full nexus listing: https://nexus.needpedia.org/llms.txt

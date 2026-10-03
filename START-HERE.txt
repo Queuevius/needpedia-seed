@@ -1,0 +1,127 @@
+TRIAL 1 OF THE NEEDPEDIA PROJECT SEED. Incomplete on purpose:
+this copy tests how far someone gets with what exists so far.
+Read MISSING.txt for what isn't in here yet.
+
+START HERE: THE NEEDPEDIA PROJECT SEED
+
+DRAFT 1, 1 October 2026. Written by the JOHN thread (an AI chat) with
+Tony Brasher, Needpedia's founder. Not final until Tony approves it.
+
+
+WHAT THIS IS
+
+This folder is a seed: everything needed to start your own independent
+version of Needpedia and the support systems around it. You don't need
+anyone's permission and you don't need any of our accounts. You make
+your own. An AI assistant can read this folder and walk you through it
+one step at a time.
+
+Needpedia is a civic collaboration website, the wiki for all solutions
+to all problems. People post a Subject, the Problems within it, and
+Ideas to solve them, then work on them together with groups, task
+cards, note/question/debate tokens, ratings and a time bank. It is a
+humanitarian project, not a business.
+
+
+IF YOU ARE AN AI READING THIS
+
+Read these, in this order, before advising anyone:
+1. This file.
+2. inventory.txt : every system, what it does, what it runs on, and
+   which accounts it needs.
+3. documents/core-facts.html and documents/glossary.html : what
+   Needpedia is, and the words it uses.
+4. documents/needpedia-capabilities.txt : every feature of the site and
+   whether it works.
+5. The rebuild instructions (rebuild/) for whichever system the person
+   wants to start with.
+
+Explain things in plain language. Don't assume the person is technical.
+Say what a thing is and what it does before using its name.
+
+
+FIRST: LOOK FOR OTHER COPIES
+
+Other people may have unpacked this seed before you and kept their
+copies online, possibly newer than this one. Search for them before
+starting from scratch. A newer copy could save a lot of work.
+
+
+WHAT'S IN THIS FOLDER
+
+START-HERE.txt      this file
+inventory.txt       every system and account, one section each
+documents/          Needpedia's reference articles, the botskill posts
+                    (guides for AI assistants), the glossary, core
+                    facts, the capabilities file, and how the thread
+                    system works
+knowledge-bases/    the instructions and background knowledge of the
+                    three AI assistants, Florence, Lotte and Adele
+info-resources/     Needpedia's public info pages saved as text: the
+                    homepage and its How-To section, FAQ, About Us,
+                    Terms of Service, Privacy, Careers, Contact Us
+code/               a copy of every code project
+rebuild/            step-by-step rebuild instructions, one per system
+old-work/           whole systems no longer in use, kept so nothing is
+                    lost
+
+
+WHAT'S NOT IN THIS FOLDER
+
+- Needpedia's database: no users, posts or messages. Your site starts
+  empty. The public info pages are in info-resources/, incomplete as
+  they are; you put your own versions of them into your site.
+- Some content that lived only inside Needpedia's admin pages, such as
+  email templates and page pop-up guides. Your new site starts without
+  them; write your own.
+- Passwords, keys and accounts. None are in here, ever. You make your
+  own.
+- The scheduling app. Needpedia had to make its own because other apps
+  didn't let people schedule at any time, and Needpedia is too
+  international for that. Its code wasn't kept. There are many
+  scheduling apps to choose from, and an AI can build a custom one.
+
+
+THE SYSTEMS, AND A SUGGESTED ORDER
+
+1. Try Needpedia on your own computer first. The test-site package
+   (code/needpedia-test-sites) runs copies of the site on any Linux
+   computer with Docker and at least 4 GB of memory. You can see it
+   working before you spend any money.
+2. Make your accounts. The inventory lists them: a rented server, a
+   domain name, an email-sending service, a map service (Mapbox), an
+   AI account, a website hosting account for the assistants, and a
+   Google account for phone notifications.
+3. Needpedia itself, on your rented server.
+4. Florence (greets visitors) and Lotte (helps logged-in users).
+5. Adele and the public email page, where volunteer coordination
+   happens in the open.
+6. The phone notification app, which tells people when there's
+   activity they care about so they come back.
+7. The Nexus, a document server for reference articles, AI guides and
+   volunteer AI studios.
+8. The thread system, a way of working with many AI chats at once, one
+   per project. Set up one thread for each part of the system, plus
+   one for your own ideal workflow. Tony found it more practical to
+   shape his workflow while working in the other threads. Still, you
+   never know.
+
+All of Needpedia's AI goes through OpenRouter, one account that reaches
+many AI models. You can use a different AI setup; the inventory says
+how.
+
+
+MAKING IT YOUR OWN
+
+- Edit your "about us" section.
+- The assistants' knowledge bases are Needpedia's, left as they are.
+  They name Needpedia's Patreon, its fiscal sponsor's donation portal
+  and Needpedia's email addresses. Put in your own, or take them out.
+- The contacts in the inventory are Needpedia's people, not yours.
+
+
+CONTACTS
+
+The inventory's last section lists Needpedia's founder, lead developer
+and support staff, in case any of us are still around. If we are, we
+might have all kinds of useful updates to share.

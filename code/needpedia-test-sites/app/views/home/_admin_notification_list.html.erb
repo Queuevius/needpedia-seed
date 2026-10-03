@@ -1,0 +1,20 @@
+<% notifications.each do |an| %>
+  <div class="alert alert-<%= color %> alert-dismissible fade show" role="alert">
+    <%= an.message %>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+<% end %>
+<style>
+  .trix-content img {
+    padding: 2%;
+  }
+
+  .trix-content > img {
+    max-width: 50% !important;
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-bottom: 5%;
+  }
+</style>

@@ -1,0 +1,17 @@
+<%# if message.user == current_user %>
+<!--  <li class="chat-right">-->
+<!--    <div class="chat-hour"><%#= message.created_at.strftime('%l:%M %p') %></div>-->
+<!--    <div class="chat-text"><%#= message.body %></div>-->
+<!--  </li>-->
+<%# else %>
+<!--  <li class="chat-left">-->
+<!--    <div class="chat-text"><%#= message.body %></div>-->
+<!--    <div class="chat-hour"><%#= message.created_at.strftime('%l:%M %p') %></div>-->
+<!--  </li>-->
+<%# end %>
+
+<% if message.user == current_user %>
+  <%= render 'right_message', message: message %>
+<% else %>
+  <%= render 'left_message', message: message %>
+<% end %>

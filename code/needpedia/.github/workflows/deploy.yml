@@ -1,0 +1,49 @@
+name: Deploy To Server.
+
+on:
+  push:
+    branches: [ staging-deploy ]
+
+jobs:
+  deploy:
+    name: Capistrano Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Write the SSH key
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add known hosts
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          
+          # Create SSH config
+          cat > ~/.ssh/config <<EOF
+          Host ${{ secrets.SSH_HOST }}
+            HostName ${{ secrets.SSH_HOST }}
+            User deploy
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no
+          EOF
+          
+          chmod 600 ~/.ssh/config
+      
+      - name: Test SSH Connection
+        run: ssh deploy@${{ secrets.SSH_HOST }} 'echo "SSH connection successful"'
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7.8
+          bundler-cache: true
+
+      - name: Deploy to Production
+        run: bundle exec cap production deploy

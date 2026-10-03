@@ -1,0 +1,290 @@
+NEEDPEDIA INVENTORY
+
+Every system, account and piece of code that makes up Needpedia: what it
+is, what it does, where its code lives, what it runs on, and where its
+rebuild instructions are. Part of the project seed: a public package
+anyone can unpack, with an AI's help, to run their own independent
+version of all of this.
+
+Edition 4, 1 October 2026. Written by the JOHN thread with Tony Brasher.
+New in edition 4: Needpedia's money links (section 11) and what to
+replace in the assistants' knowledge bases (section 15).
+Canonical copies:
+https://nexus.needpedia.org/needpedia-inventory.txt
+https://github.com/Queuevius/Needpedia/wiki/Needpedia-Inventory
+
+Public. No passwords, keys or private contact details are in here, and
+none ever go in. Handing over Needpedia's own accounts is a separate job.
+
+Each entry has some of these:
+- What it does
+- Code: where the code lives
+- Runs on: what keeps it running
+- Needs: accounts a new person would make for their own version
+- Rebuild instructions: where they are, or "not written yet"
+- Status
+
+
+## 1. needpedia.org, the main site
+
+- What it does: a civic collaboration site. People post a Subject, the
+  Problems within it and Ideas to solve them, and work on them together
+  with groups, task cards, note/question/debate tokens, ratings and a
+  time bank.
+- Every feature, what it does and whether it works:
+  https://nexus.needpedia.org/needpedia-capabilities.txt
+- Where each feature lives in the code:
+  https://raw.githubusercontent.com/wiki/Queuevius/Needpedia/Needpedia-Repo-Map.md
+- Code: https://github.com/Queuevius/Needpedia
+- Runs on: a rented server at Amazon Web Services. Built with Ruby on
+  Rails (a framework for websites), a PostgreSQL database, and a
+  background worker for slow jobs.
+- Needs: a server, a domain name, an email-sending service (for
+  account confirmations and password resets), a Mapbox account (the
+  map on location posts), an AI account (see section 9).
+- Not in the code: some content lives only in the site's database and
+  is entered through the admin pages: the assistants' instructions,
+  email templates, how-tos, FAQs, page pop-up guides, homepage
+  messages. A new empty site starts without them. Export: not done yet.
+- Rebuild instructions: not written yet. The test-site package (section
+  6) builds the whole site from scratch and is the closest thing.
+- Status: live. Built almost entirely by Murtaza, the lead developer.
+- The site's own code calls no AI service. Lotte and Florence (sections
+  2 and 3) do the AI work and use the site's public API to read and
+  make posts.
+- Unchecked: the code names Mailjet as its email-sending service; the
+  live site has also used Mailgun. Which one the live site uses now.
+
+Needpedia's three AI assistants, Florence, Lotte and Adele, are named
+after librarians who resisted fascism.
+
+## 2. Florence, the greeter
+
+- What it does: the AI assistant that greets visitors who are not
+  logged in, answers questions and helps them decide whether to join.
+- Code: https://github.com/Queuevius/needpedia-greeter-production
+- Runs on: Vercel (a website hosting service), from Tony's account.
+  Live at https://needpedia-greeter-production.vercel.app
+- Needs: a Vercel account (or other hosting), an OpenRouter account.
+- AI: OpenRouter, checked in the code 1 October 2026. It uses OpenAI's
+  free software toolkit pointed at OpenRouter's address with an
+  OpenRouter key, so it needs no OpenAI account.
+- To switch her to another AI service: change three settings, the
+  service's address (OPENROUTER_BASE_URL), its key (OPENROUTER_API_KEY)
+  and the model (OPENROUTER_MODEL). No code change.
+- Her project's front page (README) lists every setting she reads and
+  what it does. Rewritten 1 October 2026 to match the code.
+- Rebuild instructions: not written yet.
+- Status: live. Last updated 20 August 2026, when conversation saving
+  was added.
+- Unchecked: how needpedia.org reaches it; the Needpedia code never
+  names its address.
+
+## 3. Lotte, the main assistant
+
+- What it does: the AI assistant for logged-in users. Finds, creates
+  and edits posts for them, in many languages.
+- Code: https://github.com/Queuevius/needpedia-assistant-production
+- Runs on: Vercel, from Tony's account.
+  Live at https://needpedia-assistant-production.vercel.app
+- Needs: a Vercel account (or other hosting), an OpenRouter account.
+- AI: OpenRouter, checked in the code 1 October 2026, with a setting
+  for a full model and one for a cheaper "eco" model. No OpenAI account
+  needed.
+- To switch her to another AI service: her service's address is written
+  into her code, in app/api/chat/route.ts
+  (baseURL: 'https://openrouter.ai/api/v1'). Change that one line, then
+  her key (OPENROUTER_API_KEY) and model settings.
+- Rebuild instructions: not written yet.
+- Status: live. Last updated 20 August 2026.
+- Unchecked: same as Florence.
+
+## 4. Adele and the public email page (Public Coms)
+
+- What it does: a public web page showing the mail of the volunteer
+  coordination address, VC@Needpedia.org, with the AI assistant Adele
+  working in it. Public on purpose, so anyone can see what volunteers
+  and leaders are doing. New senders' mail stays private until they
+  agree to it being shown.
+- Code: https://github.com/Queuevius/vc-email
+- Runs on: Vercel, from Tony's account.
+  Live at https://vc-email-five.vercel.app/inbox
+- Needs: a Vercel account (or other hosting), an email mailbox the page
+  can sign in to, an AI account.
+- Rebuild instructions: not written yet.
+- Status: live.
+
+## 5. The phone notification app
+
+- What it does: tells people on their phones when there is activity
+  they care about, so they come back, collaborate and build
+  communities. The site side already sends alerts for private messages
+  and edits to tracked posts.
+- Code: https://github.com/Queuevius/Needpedia-phone-app
+- Runs on: people's phones, plus a Google notification project that
+  delivers the alerts.
+- Needs: a Google account with its own notification project.
+- Rebuild instructions: not written yet.
+- Status: not published yet.
+
+## 6. The test sites
+
+- What it does: runs several separate copies of Needpedia on one
+  machine, each at its own web address, so volunteers can show work in
+  progress before it goes to the lead developer for review.
+- Code: https://github.com/Queuevius/needpedia-test-sites
+- Runs on: any Linux computer with Docker and at least 4 GB of memory.
+  One idle copy uses about 490 MB.
+- Rebuild instructions:
+  https://raw.githubusercontent.com/wiki/Queuevius/Needpedia/Needpedia-Test-Site-Package.md
+- Status: working, tested 30 September 2026. Built by John Sunday.
+
+## 7. The Nexus
+
+- What it does: Needpedia's own document server, at
+  https://nexus.needpedia.org. Holds the reference articles, the
+  botskill posts (behaviour guides for AI assistants), the AI studios
+  where volunteers work with an assistant, an activity page watching
+  needpedia.org, and an admin chat.
+- Code: on Tony's desktop computer only. Not online yet. Keys must be
+  taken out before it goes online.
+- Runs on: an ordinary Linux desktop. A web server in Docker, a small
+  Python program for admin features, and Cloudflare Tunnel, which makes
+  a home computer reachable at a web address.
+- Needs: a computer that stays on, a domain name, a Cloudflare account,
+  an AI account.
+- Rebuild instructions: not written yet.
+- Status: live.
+
+## 8. The thread system
+
+- What it does: a way of working with many AI chats at once, one per
+  project ("threads"). Each thread keeps a public prompt accomplice
+  (its standing facts and rules) and public posts where other threads
+  leave it news, all run by one small script.
+- How it works, in full:
+  https://nexus.needpedia.org/working-with-tony.html
+- Code: public copies of the two scripts:
+  https://nexus.needpedia.org/botcouncil/threads-script.txt
+  https://nexus.needpedia.org/botcouncil/make-tony-page-script.txt
+- Runs on: any computer with Python, publishing to a web folder.
+- In the seed: one thread for each part of the system, plus one for the
+  person's own ideal workflow. Tony's note: for him it turned out more
+  practical to work on his workflow as he used the other threads.
+  Still, you never know.
+- Rebuild instructions: a general starter kit is planned (offered to
+  John as a job, 30 September 2026).
+- Optional add-on, the Chrome capture extension: saves Claude
+  conversations into the Nexus sidebar. Code on Tony's desktop only.
+
+## 9. AI
+
+- All of Needpedia's AI goes through OpenRouter, one account that
+  reaches many AI models. Checked in Florence's and Lotte's code on
+  1 October 2026.
+- Recommended model: DeepSeek V4 v0813. Very cheap, and it can run on
+  European servers that protect user data.
+- You can use a different AI setup. Any AI service that accepts the
+  same kind of messages works: another provider, a model's own maker,
+  or a model running on your own computer. Florence switches by
+  changing settings; Lotte by changing one line of code (sections 2
+  and 3). Leaving OpenRouter out this way has not been tried yet.
+
+Knowledge bases (KBs): each assistant's instructions and background
+knowledge, written in plain language. They are not in the assistants'
+code.
+- Florence and Lotte: stored in needpedia.org's database, written and
+  saved in versions on the master admin page "Ai Prompts" (proposed new
+  name "AI KBs"). Each time someone talks to her, Florence asks the site
+  for the version that is switched on, at
+  /api/v1/ai_prompt?ai_type=Florence&token=(the prompt token).
+- Adele: her main instruction sheet is stored in Upstash (an online
+  storage service the email page uses) and edited on the email page's
+  "Update KB" page, logged in as admin. A short set of built-in
+  instructions also sits in her code (src/lib/ai.ts).
+- In the seed: copies of all three, version 2.2, dated 24 and 25 July
+  2026, taken from Tony's saved files. The live versions may have been
+  changed since then.
+
+## 10. Domain names
+
+- needpedia.org and nexus.needpedia.org. Needpedia's are registered
+  with IONOS, with their address records at Cloudflare.
+- A new person chooses their own.
+
+## 11. Other places Needpedia lives
+
+- Developer wiki: https://github.com/Queuevius/Needpedia/wiki
+- Developer group with paid tasks: https://needpedia.org/groups/10
+- Discord: https://discord.gg/B7VNVQmHwG
+- Nonprofit records (articles of incorporation, bylaws, board,
+  conflict-of-interest policy):
+  https://nexus.needpedia.org/Articles/Nonprofit%20Documents%20for%20Needpedia/
+- Fiscal sponsor: The Know Agenda Foundation. Tax-deductible
+  donations go through its donation portal:
+  https://www.powr.io/checkout_screen?unique_label=c180d20e_1753127961
+- Patreon: https://patreon.com/cw/Needpedia
+- Using Needpedia is free.
+
+## 12. Documents copied into the seed
+
+Copied in as files, not links, so an AI unpacking the seed can read
+them even if these addresses stop working. Also copied in: the three
+assistants' knowledge bases (section 9).
+- The reference articles: https://nexus.needpedia.org/articles/index.txt
+- The botskill posts: https://nexus.needpedia.org/botskills/index.txt
+- The glossary: https://nexus.needpedia.org/articles/glossary.html
+- Core facts: https://nexus.needpedia.org/articles/core-facts.html
+- The capabilities file:
+  https://nexus.needpedia.org/needpedia-capabilities.txt
+- How to work with Tony and the thread system:
+  https://nexus.needpedia.org/working-with-tony.html
+- This inventory.
+
+## 13. Old work
+
+Whole systems no longer in use, kept so nothing is lost:
+- https://github.com/Queuevius/Assistant : Needpedia's first AI
+  assistant. Last changed March 2024. Not running anywhere.
+- https://github.com/Queuevius/npdragonfly : the start of a radically
+  transparent messaging system. It became the public email page
+  (section 4).
+
+## 14. Left out
+
+- The Scrap-Yard projects and layout_fe: early work, used nowhere.
+- The scheduler. We had to create our own scheduling app due to others
+  not letting us schedule at any time. Needpedia's so international
+  that wouldn't work. Its code was not kept. There are many scheduling
+  apps to choose from, and an AI can build a custom one.
+
+## 15. Making it your own
+
+- Whoever sprouts the seed will have to edit their "about us" section
+  too.
+- The assistants' knowledge bases in the seed are Needpedia's, left as
+  they are. They name Needpedia's Patreon, its fiscal sponsor's
+  donation portal, and Needpedia's email addresses (Needpedia@gmail.com,
+  VC@Needpedia.org). Put your own money links and contact addresses in
+  your copies, or take them out.
+- The contacts below are Needpedia's people, not yours.
+
+## 16. Other copies of the seed
+
+Others may have unpacked this seed and kept copies online. Look for
+them before starting from scratch.
+
+## 17. Contacts
+
+In case any of us are still around and available. If we're still
+around, we might have all kinds of useful updates to share.
+- Designer and founder: Tony Brasher, anthonydunn97202@gmail.com
+- Lead Dev: Murtaza (GitHub: murtazazarkhwan), murtazazarkhwan@gmail.com
+  He built almost all of needpedia.org.
+- New support staff / freelancer: John Sunday (GitHub: eberechi10),
+  eberechukwunemeremjohnsunday@gmail.com. He built the test sites.
+
+Needpedia's addresses:
+- Info@Needpedia.org : general
+- Needpedia@gmail.com : general, and private or anonymous matters
+- VC@Needpedia.org : volunteer coordination (shown publicly)

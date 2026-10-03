@@ -1,0 +1,83 @@
+<div class="row">
+  <div class="col-lg-6 col-md-6 ml-auto mr-auto">
+    <div class="ui-block shadow-lg rounded">
+      <div class="ui-block-content">
+        <h1 class="text-center">Sign Up</h1>
+        <% questionnaire = Questionnaire.first %>
+        <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+          <%= devise_error_messages! %>
+
+          <div class="form-group">
+            <%= f.text_field :name, autofocus: true, class: 'form-control', placeholder: "Full Name" %>
+          </div>
+
+          <div class="form-group">
+            <%= f.email_field :email, autofocus: false, class: 'form-control', placeholder: "Email Address" %>
+          </div>
+
+
+          <div class="form-group">
+            <%= f.password_field :password, autocomplete: "off", class: 'form-control', placeholder: 'Password' %>
+            <small class="form-text text-muted">
+              Password must include at least one uppercase letter, one lowercase letter, one digit, and one special character from these (#?!@$%^&*_-).
+            </small>
+          </div>
+
+          <div class="form-group">
+            <%= f.password_field :password_confirmation, autocomplete: "off", class: 'form-control', placeholder: 'Confirm Password' %>
+          </div>
+          <div class="cf-turnstile mt-1 mb-1" data-sitekey="<%= ENV['CLOUDFLARE_SITE_KEY'] %>" data-theme="light"></div>
+          <div class="form-group">
+            <% if questionnaire&.active? %>
+              <button type="button" class="btn btn-primary btn-block btn-lg" data-toggle="modal" data-target="#signUpQuestionnaire">
+                Sign up
+              </button>
+            <% else %>
+              <%= f.submit "Sign up", class: "btn btn-primary btn-block btn-lg" %>
+            <% end %>
+          </div>
+
+          <% if questionnaire&.active? %>
+            <!-- Modal -->
+            <div class="modal fade" id="signUpQuestionnaire" tabindex="-1" role="dialog" aria-labelledby="signUpQuestionnaireTitle" aria-hidden="true">
+              <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <%= hidden_field_tag :questionnaire_id, questionnaire&.id %>
+                    <% questionnaire.questions.each_with_index do |q, index| %>
+                      <%= hidden_field_tag "question_#{q.id}_id", q.id %>
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="text-dark">
+                            <h4>Question <%= index + 1 %>: <%= q.body.html_safe %></h4>
+                          </div>
+                          <div class="form-group">
+                            <%= text_field_tag "answer_#{q.id}", "", { autofocus: true, class: 'form-control', placeholder: "Answer"} %>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <%= f.submit "Save changes", class: "btn btn-primary" %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+
+        <div class="text-center mt-3">
+          <%= render "devise/shared/links" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

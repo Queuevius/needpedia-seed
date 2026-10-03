@@ -1,0 +1,93 @@
+Saved from https://needpedia.org/about_us on 2026-10-02
+Needpedia public info page, as a logged-out visitor sees it.
+Saved for the project seed. Incomplete as it is.
+============================================================
+
+Sign Up
+
+Login
+
+About Needpedia
+
+Our Mission
+
+To create the world's greatest archive for all ideas for all problems in human existence.
+
+The world faces countless challenges, yet there is still no centralized place to collect and
+refine solutions. Needpedia exists to change that — empowering people everywhere to share,
+improve, and build upon ideas that can shape a better future for humanity.
+
+Our History
+
+During the Occupy Wall Street movement, it became clear that people needed a more efficient way to
+share ideas for the problems they were facing. Meeting in person took too much energy, so creating
+a digital archive made sense.
+
+In the beginning, we tried obtaining funding by applying for grants. Sadly, we were unable to secure
+financial support, so the project's founder personally funded development. Progress was slow but
+steady — it took years to bring everything together on such a meager budget.
+
+Many programmers and volunteers contributed their time and knowledge, helping shape the platform
+and teaching us invaluable lessons about nonprofit management. With support from fiscal sponsors
+like the Know Agenda Foundation, Needpedia is now able to offer community service hours, accept
+tax-deductible donations, and provide other services.
+
+While the platform still doesn’t have a huge user base or content library, even a single news
+article could instantly change that. Our focus remains on building the best possible technology
+to empower people everywhere to share ideas and solve real-world problems.
+
+Project Founder
+Anthony Brasher
+
+"Half Middle-Eastern and raised in post-9/11 America, I've been an activist my entire life.
+I was inspired by the Occupy Wall Street movement around the same time I began studying a
+conflict resolution language called Nonviolent Communication in college, which I later
+chose to major in.
+
+It has always been clear to me that people need better ways of coming together — making
+smarter decisions, identifying objectives, and actually achieving results.
+
+Time and again, activists repeat the same processes, burn out, and watch the next generation
+do the exact same thing. I want to live in a world where all that knowledge is archived —
+where people can continuously build on it and see all their options side by side."
+
+Lead Engineer
+Murtaza Zarkhwan
+
+"I live in a remote area in Pakistan far away from cities where I enjoy the peace and quiet and can focus on
+my work. I prefer having few people around me who are pure rather than a crowd where nobody cares.
+I am a problem solver and help people solve their problems using my skills in web development. I had a hard
+background, so I now work to make sure others don't have to. I've seen too much from a very young age, I
+have survived terrorism, wars, floods, and earthquakes. That's why I appreciate every day of my life."
+
+Our Digital Assistants
+
+All our AI systems are named in honor of civil servants who dared to oppose fascism
+
+Lotte Bergtel-Schleif
+
+Anti-Nazi Resister | Knowledge Protector
+
+A German librarian and anti-Nazi resistance agent. In the early 1930s, she risked her life by aiding those persecuted by the Nazis and disseminating anti-Nazi literature. Even after being imprisoned by the Gestapo, her resolve never wavered. Her work as a librarian and a resister reminds us that protecting knowledge and fighting oppression often go hand in hand.
+
+Florence Mendheim
+
+Undercover Defender | Democracy Guardian
+
+A Jewish librarian at the New York Public Library during the 1930s. As the Nazi movement gained traction in the United States, she infiltrated pro-Nazi organizations under the pseudonym "Gertrude Mueller," gathering intelligence and documenting their propaganda efforts. Her courage in confronting fascist ideologies on American soil highlights the vital role librarians play in defending freedom of information and democracy.
+
+© 2026 Needpedia
+
+Contact Us
+
+FAQs
+
+About Us
+
+Terms of Service
+
+Privacy
+
+Careers
+
+API Docs

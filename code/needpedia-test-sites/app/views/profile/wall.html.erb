@@ -1,0 +1,139 @@
+<%= render "shared/tutorial" %>
+
+<!-- Improved Navigation Tabs -->
+<ul class="nav nav-tabs nav-fill mb-4" id="socialNavigation" role="tablist">
+  <li class="nav-item" role="presentation">
+    <%= link_to feed_path(uuid: params[:uuid]), class: "nav-link d-flex align-items-center justify-content-center" do %>
+      <i class="fa fa-stream mr-2"></i>
+      <span class="font-weight-bold">Feed</span>
+    <% end %>
+  </li>
+  <li class="nav-item" role="presentation">
+    <%= link_to feed_path(uuid: params[:uuid], tab: 'fediverse'), class: "nav-link d-flex align-items-center justify-content-center" do %>
+      <i class="fa fa-globe mr-2"></i>
+      <span class="font-weight-bold">Fediverse</span>
+    <% end %>
+  </li>
+  <li class="nav-item" role="presentation">
+    <%= link_to '#wall-content', class: 'nav-link active d-flex align-items-center justify-content-center',
+                id: 'wall-tab', data: { mdb_toggle: 'tab' }, role: 'tab',
+                aria: { controls: 'wall-content', selected: 'true' } do %>
+      <i class="fa fa-th-list mr-2"></i>
+      <span class="font-weight-bold">Wall</span>
+    <% end %>
+  </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content bg-light rounded-lg p-3" id="wallTabContent">
+  <div class="tab-pane fade show active" id="wall-content" role="tabpanel" aria-labelledby="wall-tab">
+    <!-- Main Layout -->
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-12 col-md-3 mb-4">
+        <%= render 'shared/sidebar' %>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-12 col-md-9">
+        <!-- Search Bar -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-0">
+            <%= search_form_for @f, url: wall_path, method: :get do |f| %>
+              <div class="input-group">
+                <%= f.text_field :title_or_content_body_or_tags_name_cont,
+                                 class: 'form-control border-0',
+                                 placeholder: "Search wall posts..." %>
+                <div class="input-group-append">
+                  <button class="btn btn-primary" type="submit">
+                    <i class="fa fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div id="content" class="card shadow-sm mb-4">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Your Posts</h5>
+            <%= link_to new_post_path(post_type: Post::POST_TYPE_SOCIAL_MEDIA, uuid: params[:uuid]),
+                        class: 'btn btn-primary' do %>
+              <i class="fa fa-plus-circle mr-2"></i>Add New Post
+            <% end %>
+          </div>
+
+          <div class="card-body">
+            <!-- Posts List -->
+            <div class="posts-container">
+              <%= render 'posts/list', posts: @posted_posts, type: nil %>
+
+              <% if @posted_posts.blank? %>
+                <div class="text-center py-4">
+                  <div class="mb-3">
+                    <i class="fa fa-clipboard-list text-muted fa-3x"></i>
+                  </div>
+                  <h5 class="text-muted">You haven't posted anything yet</h5>
+                  <p class="text-muted small">Share your thoughts with your community</p>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Pagination -->
+            <div id="infinite-scrolling" class="d-flex justify-content-center mt-3">
+              <%= paginate @posted_posts, param_name: :page %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Sections -->
+        <% { liked_posts: "Liked", shared_posts: "Shared",
+             commented_posts: "Commented", flagged_posts: "Flagged" }.each do |var, title| %>
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">
+                <i class="<%=
+                  case title
+                  when "Liked" then "fa fa-heart text-danger"
+                  when "Shared" then "fa fa-share-alt text-success"
+                  when "Commented" then "fa fa-comment text-primary"
+                  when "Flagged" then "fa fa-flag text-warning"
+                  end %> mr-2"></i>
+                <%= title %> Posts
+              </h5>
+            </div>
+
+            <div class="card-body">
+              <%= render 'posts/list', posts: instance_variable_get("@#{var}"), type: nil %>
+
+              <% if instance_variable_get("@#{var}").blank? %>
+                <div class="text-center py-3">
+                  <h6 class="text-muted">
+                    You haven't <%= title.downcase %> any posts yet
+                  </h6>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <style>
+    /* Navigation styling */
+    .nav-tabs .nav-link {
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+      font-size: 1rem;
+      padding: 0.75rem 1.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tabs .nav-link.active {
+      background-color: #f8f9fa;
+      border-bottom-color: transparent;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    }
+  </style>

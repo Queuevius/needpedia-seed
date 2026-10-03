@@ -1,0 +1,50 @@
+Needpedia Nexus - botskills index
+Rebuilt 2026-09-29 - 14 documents
+Description: Behaviour guides for the Needpedia AI assistants
+
+Every document below is a plain public page. Fetch any URL directly.
+
+BOTSKILL: AI REJECTION V1
+https://nexus.needpedia.org/botskills/ai-rejection.html
+
+BOTSKILL: CONVERSATIONAL NVC V1
+https://nexus.needpedia.org/botskills/conversational-nvc.html
+
+BOTSKILL: DEV ONBOARDING V1
+https://nexus.needpedia.org/botskills/dev-onboarding.html
+
+BOTSKILL: EFFICIENT RESEARCH V1
+https://nexus.needpedia.org/botskills/efficient-research.html
+
+BOTSKILL: EMOTIONALLY CHARGED IDEAS V1
+https://nexus.needpedia.org/botskills/emotionally-charged-ideas.html
+
+BOTSKILL: ESCALATION MATRIX V1
+https://nexus.needpedia.org/botskills/escalation-matrix.html
+
+BOTSKILL: EXPECTATION SETTING V1
+https://nexus.needpedia.org/botskills/expectation-setting.html
+
+BOTSKILL: FILE INTAKE V1
+https://nexus.needpedia.org/botskills/file-intake.html
+
+BOTSKILL: FIRST-TASK MATCHING V1
+https://nexus.needpedia.org/botskills/first-task-matching.html
+
+BOTSKILL: MINORS V1
+https://nexus.needpedia.org/botskills/minors.html
+
+BOTSKILL: PRIVACY TRIAGE V1
+https://nexus.needpedia.org/botskills/privacy-triage.html
+
+BOTSKILL: SEVERE SUICIDE RISK V1
+https://nexus.needpedia.org/botskills/severe-suicide-risk.html
+
+BOTSKILL: TAXONOMY NAVIGATION V1
+https://nexus.needpedia.org/botskills/taxonomy-navigation.html
+
+BOTSKILL: WORKING WITH TONY
+https://nexus.needpedia.org/working-with-tony.html
+
+Nexus front door: https://nexus.needpedia.org/start.html
+Full nexus listing: https://nexus.needpedia.org/llms.txt

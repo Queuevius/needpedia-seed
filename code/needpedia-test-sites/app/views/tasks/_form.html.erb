@@ -1,0 +1,186 @@
+<%= form_with(model: task, remote: true) do |form| %>
+  <% if task.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(task.errors.count, "error") %> prohibited this task from being saved:</h2>
+      <ul>
+        <% task.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- Hidden fields -->
+  <% if !task.persisted? %>
+    <%= form.hidden_field :user_id, value: current_user.id %>
+    <%= form.hidden_field :group_id, value: @group.id if @group.present? %>
+  <% end %>
+
+  <div class="form-group">
+    <%= form.label :title, class: 'col-form-label' %>
+    <%= form.text_field :title, autofocus: true, class: 'form-control', placeholder: "Title" %>
+  </div>
+
+  <!-- Image upload field -->
+  <div class="form-group">
+    <%= form.label :images, "Upload Images", class: 'col-form-label' %>
+    <%= form.file_field :images, multiple: true, accept: 'image/jpeg, image/png' %>
+  </div>
+
+  <!-- Skills field -->
+  <div class="form-group">
+    <%= form.label :skills, "Skills (comma separated)" %>
+    <%= form.text_field :skills, value: task.skills.is_a?(Array) ? task.skills.join(', ') : task.skills, class: 'form-control', placeholder: "Enter skills like: JavaScript, Ruby, UI/UX" %>
+  </div>
+
+  <!-- status field -->
+  <div class="form-group mb-3">
+    <%= form.label :status, "Task Status", class: "form-label" %>
+    <%= form.select :status, Task::STATUSES, {}, class: "form-control custom-select" %>
+  </div>
+
+  <!-- priority field -->
+  <div class="form-group mb-3">
+    <%= form.label :priority, "Priority", class: "form-label" %>
+    <%= form.select :priority, Task::PRIORITIES, {}, class: "form-control custom-select" %>
+  </div>
+
+  <!-- hours field -->
+  <div class="form-group mb-3">
+    <%= form.label :hours, "Estimated Hours", class: "form-label" %>
+    <%= form.number_field :hours, step: 0.1, min: 0.1, max: 999.99, class: "form-control", placeholder: "Enter hours (e.g., 1.5)" %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :description, class: 'col-form-label' %>
+    <%= form.text_area :description, rows: 5, class: 'form-control', placeholder: "Task Description" %>
+  </div>
+
+  <div class="form-group mb-3">
+    <%= form.label :check_back_date, "Check Back Date (Est. Finish)", class: "form-label" %>
+    <%= form.date_field :check_back_date, class: "form-control" %>
+    <small class="form-text text-muted">Optional: Estimated date to check back or when it might be done.</small>
+  </div>
+
+  <!-- Location: Map/Text toggle -->
+  <div class="form-group mb-3">
+    <label class="form-label">Location</label>
+    <div class="mb-2">
+      <button type="button" class="btn btn-light btn-sm mr-2" id="task-location-toggle-map">Map</button>
+      <button type="button" class="btn btn-light btn-sm" id="task-location-toggle-text">Text</button>
+    </div>
+    <div id="task-location-text-input">
+      <div class="form-row">
+        <div class="col-12 col-md-6 mb-2">
+          <%= form.text_field :city, class: 'form-control', placeholder: 'City or Online' %>
+        </div>
+        <div class="col-12 col-md-6 mb-2">
+          <%= form.text_field :region, class: 'form-control', placeholder: 'State / Province / Region' %>
+        </div>
+        <div class="col-12 col-md-6 mb-2">
+          <%= form.text_field :country, class: 'form-control', placeholder: 'Country' %>
+        </div>
+        <div class="col-12 col-md-6 mb-2">
+          <%= form.text_field :postal_code, class: 'form-control', placeholder: 'Postal / Area Code' %>
+        </div>
+      </div>
+    </div>
+    <div id="task-location-map-input" class="mt-2" style="height:220px; display:none;">
+      <div id="task-location-map" style="height: 100%; width: 100%;"></div>
+      <%= form.hidden_field :lat, id: 'task_lat' %>
+      <%= form.hidden_field :long, id: 'task_long' %>
+    </div>
+  </div>
+
+  <!-- Cancel/Submit Buttons -->
+  <div class="form-group">
+    <%= form.submit class: 'btn btn-primary' %>
+    <% if task.persisted? %>
+      <div class="float-right">
+        <%= link_to 'Destroy', task, method: :delete, class: "text-danger", data: { confirm: 'Are you sure?' } %>
+      </div>
+    <% end %>
+  </div>
+
+<% end %>
+
+<script>
+  (function initTaskLocation() {
+    function setTaskLocationMode(mode) {
+      if (mode === 'map') {
+        $('#task-location-map-input').show();
+        $('#task-location-text-input').hide();
+        initTaskLocationMap();
+      } else {
+        $('#task-location-map-input').hide();
+        $('#task-location-text-input').show();
+      }
+    }
+
+    $('#task-location-toggle-map').on('click', function(){ setTaskLocationMode('map'); });
+    $('#task-location-toggle-text').on('click', function(){ setTaskLocationMode('text'); });
+
+    setTaskLocationMode('text');
+
+    function initTaskLocationMap() {
+      if ($('#task-location-map').data('initialized')) return;
+      $('#task-location-map').data('initialized', true);
+      try {
+        var coordinates = [32.239491, -83.141719];
+        var map = L.map('task-location-map').setView(coordinates, 5);
+        var accessToken = '<%= ENV["MAPBOX_ACCESS_TOKEN"].to_s %>';
+        if (accessToken && accessToken.length > 0) {
+          L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + accessToken, {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1
+          }).addTo(map);
+        } else {
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(map);
+        }
+
+        function onMapClick(e) {
+          $(".leaflet-marker-icon").remove();
+          $(".leaflet-popup").remove();
+          $(".leaflet-pane.leaflet-shadow-pane").remove();
+          $('#task_lat').val(e.latlng.lat);
+          $('#task_long').val(e.latlng.lng);
+          L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+
+          // Reverse geocode to fill city/region/country/postal_code
+          try {
+            var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + encodeURIComponent(e.latlng.lat) + '&lon=' + encodeURIComponent(e.latlng.lng);
+            fetch(url, { headers: { 'Accept': 'application/json', 'User-Agent': 'Needpedia/1.0 (contact: support@needpedia.org)' } })
+              .then(function(res){ return res.json(); })
+              .then(function(data){
+                if (!data || !data.address) { return; }
+                var addr = data.address;
+                var city = addr.city || addr.town || addr.village || addr.hamlet || '';
+                var region = addr.state || addr.region || addr.county || '';
+                var country = addr.country || '';
+                var postal = addr.postcode || '';
+
+                // Prefer ids Rails generates (task_city, etc.)
+                var $city = $('#task_city');
+                var $region = $('#task_region');
+                var $country = $('#task_country');
+                var $postal = $('#task_postal_code');
+
+                if ($city.length) { $city.val(city); }
+                if ($region.length) { $region.val(region); }
+                if ($country.length) { $country.val(country); }
+                if ($postal.length) { $postal.val(postal); }
+              })
+              .catch(function(err){ console.warn('Reverse geocoding failed', err); });
+          } catch (ge) { console.warn('Reverse geocoding error', ge); }
+        }
+        map.on('click', onMapClick);
+      } catch (e) { console.warn('Task map init failed', e); }
+    }
+  })();
+</script>

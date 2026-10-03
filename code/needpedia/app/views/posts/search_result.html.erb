@@ -1,0 +1,554 @@
+<div class="container mb-5">
+  <%= render "shared/tutorial" %>
+  <div class="row mt-3">
+    <div class="col-md-12 text-center">
+      <h1 class="mb-4"><b>Search</b></h1>
+      <% if @posts&.total_count.present? || @users&.total_count.present? %>
+        <p><%= @posts&.total_count || 0 %> posts and <%= @users&.total_count || 0 %> users
+          found <%= "for '#{@keywords[:title_cont]}'" if @keywords[:title_cont].present? %></p>
+      <% end %>
+    </div>
+
+    <div class="col-md-12">
+      <!-- Simple tabs -->
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link <%= 'active' if @active_tab == 'posts' || @active_tab.blank? %>" id="posts-tab" data-toggle="tab" href="#posts-content" role="tab">
+            <h5><b>Posts</b></h5>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= 'active' if @active_tab == 'people' %>" id="people-tab" data-toggle="tab" href="#people-content" role="tab">
+            <h5><b>People</b></h5>
+          </a>
+        </li>
+      </ul>
+
+      <div class="tab-content mt-4" id="myTabContent">
+        <!-- Posts tab content -->
+        <div class="tab-pane fade  <%= 'show active' if @active_tab == 'posts' || @active_tab.blank? %>" id="posts-content" role="tabpanel">
+          <!-- Search form -->
+          <%= search_form_for @q, url: search_result_posts_path, method: :get, enforce_utf8: false, html: {id: 'posts_search_form'} do |f| %>
+            <div class="bg-white p-4 rounded shadow">
+              <!-- Hidden field to ensure keyword is captured -->
+              <%= hidden_field_tag 'active_tab', 'posts' %>
+              <div class="form-group row">
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-md-4 text-right pt-2">
+                      <label for="q_title_cont">Keyword</label>
+                    </div>
+                    <div class="col-md-8">
+                      <% keyword_value = params.dig(:q, :title_cont).present? ? params.dig(:q, :title_cont) : "" %>
+                      <%= f.text_field :title_cont, class: 'form-control', placeholder: 'Enter search keyword', id: 'q_title_cont', value: keyword_value %>
+                      <% if keyword_value.present? %>
+                        <small class="form-text text-muted">
+                          Currently searching for: "<%= keyword_value %>"
+                        </small>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-md-4 text-right pt-2">
+                      <label>Sort By</label>
+                    </div>
+                    <div class="col-md-8">
+                      <%= select_tag "sorted_by", options_for_select(%w[Highest-Rated Highest-Rated/View New Random], @sorted_by), include_blank: false, class: "form-control" %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Advanced Features -->
+              <div class="form-group row mb-3">
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-md-4 text-right pt-2">
+                      <label>&nbsp;</label>
+                    </div>
+                    <div class="col-md-8">
+                      <a href="#" data-toggle="collapse" data-target="#advancedFeatures" class="text-dark d-block pt-1">
+                        Advanced Features <i class="fa fa-angle-down"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="collapse" id="advancedFeatures">
+                <div class="row mb-3">
+                  <!-- Post Type -->
+                  <div class="col-md-6 mb-3">
+                    <div class="row">
+                      <div class="col-md-4 text-right pt-2">
+                        <label>Post Type</label>
+                      </div>
+                      <div class="col-md-8">
+                        <%= select_tag 'post_type', options_for_select(Post::TYPES_FOR_SEARCH.map {|r| [r.titleize, r]}, @post_type), include_blank: false, class: "form-control" %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Access Type -->
+                  <div class="col-md-6 mb-3">
+                    <div class="row">
+                      <div class="col-md-4 text-right pt-2">
+                        <label>Access Type</label>
+                      </div>
+                      <div class="col-md-8">
+                        <%= select_tag 'access_type', options_for_select(%w[Public All Curated], @access_type), include_blank: false, class: "form-control" %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Skill Tags (only for TaskCard) -->
+                  <div class="col-md-6 mb-3" id="skill-tags-section" style="display:none;">
+                    <div class="row">
+                      <div class="col-md-4 text-right pt-2">
+                        <label>Skill Tag</label>
+                      </div>
+                      <div class="col-md-8">
+                        <%= text_field_tag 'skill_tags', @skill_tags, class: 'form-control', placeholder: 'e.g. Ruby, UI/UX' %>
+                        <small class="form-text text-muted">Comma-separated skills to match TaskCards</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Location (Map/Text toggle) -->
+                  <div class="col-md-6 mb-3" id="location-section">
+                    <div class="row">
+                      <div class="col-md-4 text-right pt-2">
+                        <label>Location</label>
+                      </div>
+                      <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-2">
+                          <button type="button" class="btn btn-light btn-sm mr-2" id="location-toggle-map">Map</button>
+                          <button type="button" class="btn btn-light btn-sm" id="location-toggle-text">Text</button>
+                        </div>
+                        <div id="location-text-input">
+                          <div class="form-row">
+                            <div class="col-12 col-md-6 mb-2">
+                              <input type="text" id="location-city" class="form-control" placeholder="City" value="">
+                            </div>
+                            <div class="col-12 col-md-6 mb-2">
+                              <input type="text" id="location-region" class="form-control" placeholder="State / Province / Region" value="">
+                            </div>
+                            <div class="col-12 col-md-6 mb-2">
+                              <input type="text" id="location-country" class="form-control" placeholder="Country" value="">
+                            </div>
+                            <div class="col-12 col-md-6 mb-2">
+                              <input type="text" id="location-code" class="form-control" placeholder="Postal / Area Code (any country)" value="">
+                            </div>
+                          </div>
+                          <%= hidden_field_tag 'location_tags', @location_tags, id: 'location-tags-hidden' %>
+                          <small class="form-text text-muted">You can fill any combination; we’ll match them together.</small>
+                        </div>
+                        <div id="location-map-input" class="mt-2" style="display:none;">
+                          <div id="search-location-map" style="height: 180px; width: 100%;"></div>
+                          <%= hidden_field_tag 'lat', params[:lat], id: 'location-lat-hidden' %>
+                          <%= hidden_field_tag 'long', params[:long], id: 'location-long-hidden' %>
+                          <%= hidden_field_tag 'location_mode', params[:location_mode], id: 'location-mode-hidden' %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Author -->
+                  <div class="col-md-6 mb-3">
+                    <div class="row">
+                      <div class="col-md-4 text-right pt-2">
+                        <label>Author</label>
+                      </div>
+                      <div class="col-md-8">
+                        <%= f.text_field :user_first_name_cont, class: 'form-control' %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Data Tree -->
+                  <div class="col-md-6 mb-3">
+                    <div class="row">
+                      <div class="col-md-4 text-right pt-2">
+                        <label>Data Tree</label>
+                      </div>
+                      <div class="col-md-8">
+                        <div class="input-group">
+                          <%= text_field_tag 'tree_url', nil, class: 'form-control', placeholder: 'Paste wiki post URL' %>
+                          <div class="input-group-append">
+                          <span class="input-group-text" data-toggle="tooltip" title="Paste a URL from any Subject, Problem, or Idea post to find all related posts in that tree">
+                            <i class="fa fa-question-circle"></i>
+                          </span>
+                          </div>
+                        </div>
+                        <small class="form-text text-muted mt-1">
+                          Shows all related posts in the tree
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Include Content From section (Fediverse) -->
+                  <div class="col-md-6 mb-3" id="fediverse-section">
+                    <div class="row">
+                      <div class="col-md-4 text-right pt-2">
+                        <label>Fediverse</label>
+                      </div>
+                      <div class="col-md-8">
+                        <div class="form-check mb-2">
+                          <%= check_box_tag 'include_mastodon', '1', params[:include_mastodon] == '1', class: 'form-check-input blue-checkbox' %>
+                          <label class="form-check-label" for="include_mastodon">Mastodon.social</label>
+                        </div>
+                        <div class="form-check mb-2">
+                          <%= check_box_tag 'include_lemmy', '1', params[:include_lemmy] == '1', class: 'form-check-input blue-checkbox' %>
+                          <label class="form-check-label" for="include_lemmy">Lemmy.ml</label>
+                        </div>
+                        <div class="form-check mb-2">
+                          <%= check_box_tag 'include_reddit', '1', params[:include_reddit] == '1', class: 'form-check-input blue-checkbox' %>
+                          <label class="form-check-label" for="include_reddit">Reddit</label>
+                        </div>
+                        <div class="form-check mb-2">
+                          <%= check_box_tag 'include_bluesky', '1', params[:include_bluesky] == '1', class: 'form-check-input blue-checkbox' %>
+                          <label class="form-check-label" for="include_bluesky">Bluesky</label>
+                        </div>
+                        <div class="form-check mb-2">
+                          <%= check_box_tag 'include_peer', '1', params[:include_peer] == '1', class: 'form-check-input blue-checkbox' %>
+                          <label class="form-check-label" for="include_peer">Peer Instances</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Resource Tags section -->
+                  <div class="col-md-6 mb-3">
+                    <div class="row">
+                      <div class="col-md-4 text-right ">
+                        <label>Resource Tags</label>
+                      </div>
+                      <div class="col-md-8">
+                        <%= text_field_tag 'resource_tags', @resource_tags, class: 'form-control' %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="text-right mt-3">
+                <%= link_to "Create Post", new_post_path(post_type: Post::POST_TYPE_SUBJECT), class: 'btn btn-primary mr-2', id: 'new_button' %>
+                <%= f.submit 'Search', class: 'btn btn-primary', data: {disable_with: false} %>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Posts Content -->
+          <div id="post-content" class="mt-4">
+            <% if @post_type == 'TaskCard' %>
+              <div class="mb-3">
+                <div id="tasks-result-map" style="height: 380px; width: 100%; display: <%= @task_cards.present? ? 'block' : 'none' %>;"></div>
+              </div>
+            <% end %>
+            <% if @posts.blank? && @task_cards.blank? %>
+              <div class="alert alert-warning text-center">
+                There doesn't currently seem to be anything on that on Needpedia, would you like to be the one to add
+                it?
+                <div class="mt-3">
+                  <%= link_to "Add New Post", new_post_path(post_type: Post::POST_TYPE_SUBJECT), class: 'btn btn-primary' %>
+                </div>
+                Global
+              </div>
+            <% end %>
+
+            <% if @task_cards.present? %>
+              <%= render 'tasks', tasks: @task_cards %>
+            <% else %>
+              <%= render 'posts_list', posts: @sorted_by == 'Random' ? @posts.shuffle : @posts, type: @type %>
+            <% end %>
+          </div>
+
+          <!-- Pagination -->
+          <div class="d-flex justify-content-center mt-4">
+            <%= paginate @posts, param_name: :posts if @posts.present? %>
+          </div>
+        </div>
+
+        <!-- People tab content -->
+        <div class="tab-pane fade <%= 'show active' if @active_tab == 'people' %>" id="people-content" role="tabpanel">
+          <div class="bg-white p-4 rounded shadow">
+            <%= search_form_for @u, url: search_result_posts_path do |f| %>
+              <div class="row align-items-center">
+                <div class="col-2">
+                  <label>Name</label>
+                </div>
+                <div class="col-7">
+                  <%= f.text_field :first_name_or_last_name_or_full_name_cont, class: 'form-control', placeholder: "Search" %>
+                </div>
+                <div class="col-3 text-right">
+                  <%= f.submit 'Search', class: 'btn btn-primary' %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="row justify-content-center mt-4" id="users-content">
+            <%= render 'profile/small_friends_list', friends: @users %>
+          </div>
+
+          <div class="d-flex justify-content-center mt-4">
+            <%= paginate @users, param_name: :users %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    var post_type = $('#q_post_type_cont').val();
+    if (post_type == 'social_media') {
+        $('#access_type').val('');
+        $('#access_type').parent('div').parent('div').toggle('hidden');
+    }
+
+    setUpNewButton();
+    $(document).on("input", "#subject, #problem, #idea, #post_type", function () {
+        setUpNewButton();
+    });
+
+    function setUpNewButton() {
+        var post_type = $('#post_type').val();
+        $('#new_button').attr('href', `/posts/new?post_type=${post_type}`);
+    }
+
+    // Fix for the keyword search
+    $(document).ready(function () {
+        // Debug log the current value
+        console.log('Current keyword value:', $('#q_title_cont').val());
+        console.log('Current URL params:', window.location.search);
+
+        // Ensure form is correctly submitted
+        $('form').submit(function () {
+            // Log the values being submitted
+            console.log('Form submitting, keyword value:', $('#q_title_cont').val());
+            return true;
+        });
+
+        // Show Fediverse options only when Post Type is Social Media
+        function toggleFediverseVisibility() {
+            var pt = $('#post_type').val();
+            if (pt === 'social_media') {
+                $('#fediverse-section').show();
+                $('#location-section').hide();
+            } else {
+                $('#fediverse-section').hide();
+                $('#include_mastodon, #include_lemmy, #include_reddit, #include_bluesky, #include_peer').prop('checked', false);
+                $('.fediverse-notice').remove();
+                $('#location-section').show();
+            }
+
+            // Show Skill Tags only for TaskCard
+            if (pt === 'TaskCard') {
+                $('#skill-tags-section').show();
+            } else {
+                $('#skill-tags-section').hide();
+                $('input[name="skill_tags"]').val('');
+            }
+        }
+
+        toggleFediverseVisibility();
+        $(document).on('change', '#post_type', toggleFediverseVisibility);
+
+        // Add loading spinner for Fediverse searches
+        $('#include_mastodon, #include_lemmy, #include_reddit, #include_bluesky, #include_peer').on('change', function () {
+            // Check if at least one fediverse option is checked
+            var anyFediverseChecked = $('#include_mastodon').is(':checked') ||
+                $('#include_lemmy').is(':checked') ||
+                $('#include_reddit').is(':checked') ||
+                $('#include_bluesky').is(':checked') ||
+                $('#include_peer').is(':checked');
+
+            // Get list of selected platforms for message
+            var selectedPlatforms = [];
+            if ($('#include_mastodon').is(':checked')) selectedPlatforms.push('Mastodon');
+            if ($('#include_lemmy').is(':checked')) selectedPlatforms.push('Lemmy');
+            if ($('#include_reddit').is(':checked')) selectedPlatforms.push('Reddit');
+            if ($('#include_bluesky').is(':checked')) selectedPlatforms.push('Bluesky');
+            if ($('#include_peer').is(':checked')) selectedPlatforms.push('Peer Instances');
+
+            // Only show the notice if there's a search term and at least one checkbox is selected
+            if (anyFediverseChecked && $('#q_title_cont').val()) {
+                // Add notice that searches with Fediverse content may take longer
+                var platformText = selectedPlatforms.length > 0 ?
+                    'Searching ' + selectedPlatforms.join(', ') + ' content may take a little longer' :
+                    'Searching Fediverse content may take a little longer';
+
+                if ($('.fediverse-notice').length === 0) {
+                    $('<div class="alert alert-info mt-2 fediverse-notice">' +
+                        '<small><i class="fas fa-info-circle"></i> ' + platformText + '</small>' +
+                        '</div>').insertAfter('#q_title_cont');
+                } else {
+                    $('.fediverse-notice small').html('<i class="fas fa-info-circle"></i> ' + platformText);
+                }
+            } else {
+                // Remove the notice if no Fediverse sources are selected
+                $('.fediverse-notice').remove();
+            }
+        });
+
+        // Initialize tasks map if TaskCard tab active
+        try {
+            if ($('#tasks-result-map').length) {
+                initTasksMap();
+            }
+        } catch (e) { console.warn('Tasks map init skipped', e); }
+
+        // Debug Fediverse post images
+        $(document).on('error', '.fediverse-post-image', function () {
+            console.log('Failed to load image:', $(this).attr('src'));
+        });
+
+        // Add image loaded success log
+        $(document).on('load', '.fediverse-post-image', function () {
+            console.log('Successfully loaded image:', $(this).attr('src'));
+        });
+    });
+
+    // Initialize tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Handle tree URL input
+        $('#tree_url').on('change', function () {
+            var url = $(this).val();
+            if (url) {
+                // Extract tree number from URL
+                var treeMatch = url.match(/\/posts\/(\d+)/);
+                if (treeMatch && treeMatch[1]) {
+                    var treeNumber = treeMatch[1];
+                    // Store the tree number in a hidden field that will be submitted with the form
+                    if (!$('#tree_number').length) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            id: 'tree_number',
+                            name: 'tree_number',
+                            value: treeNumber
+                        }).appendTo('form');
+                    } else {
+                        $('#tree_number').val(treeNumber);
+                    }
+
+                    // Show visual confirmation to the user
+                    var confirmMsg = $('<small class="text-success ml-2">Tree code extracted: ' + treeNumber + '</small>');
+                    $('#tree_url').parent().find('.text-success').remove();
+                    $('#tree_url').parent().append(confirmMsg);
+                }
+            }
+        });
+    });
+
+    $(function () {
+        // Add custom style for blue checkboxes
+        $('<style>.blue-checkbox:checked { accent-color: #007bff; }</style>').appendTo('head');
+
+        // Location toggle behavior
+        function setLocationMode(mode) {
+            if (mode === 'map') {
+                $('#location-map-input').show();
+                $('#location-text-input').hide();
+                initSearchLocationMap();
+                $('#location-mode-hidden').val('map');
+            } else {
+                $('#location-map-input').hide();
+                $('#location-text-input').show();
+                $('#location-mode-hidden').val('text');
+            }
+        }
+
+        $('#location-toggle-map').on('click', function(){ setLocationMode('map'); });
+        $('#location-toggle-text').on('click', function(){ setLocationMode('text'); });
+
+        // default to text input and keep hidden field updated
+        setLocationMode('text');
+
+        function updateLocationTags() {
+            var city = ($('#location-city').val() || '').trim();
+            var region = ($('#location-region').val() || '').trim();
+            var country = ($('#location-country').val() || '').trim();
+            var code = ($('#location-code').val() || '').trim();
+
+            var parts = [];
+            if (city) parts.push(city);
+            if (region) parts.push(region);
+            if (country) parts.push(country);
+            if (code) parts.push(code);
+            $('#location-tags-hidden').val(parts.join(', '));
+        }
+
+        $(document).on('input change', '#location-city, #location-region, #location-country, #location-code', updateLocationTags);
+
+        function initSearchLocationMap() {
+            if ($('#search-location-map').data('initialized')) return;
+            $('#search-location-map').data('initialized', true);
+
+            try {
+                var coordinates = [32.239491, -83.141719];
+                var mymap = L.map('search-location-map').setView(coordinates, 5);
+                var accessToken = '<%= ENV["MAPBOX_ACCESS_TOKEN"] %>';
+                L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + accessToken, {
+                    maxZoom: 18,
+                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                    id: 'mapbox/streets-v11',
+                    tileSize: 512,
+                    zoomOffset: -1
+                }).addTo(mymap);
+
+                function onMapClick(e) {
+                    $(".leaflet-marker-icon").remove();
+                    $(".leaflet-popup").remove();
+                    $(".leaflet-pane.leaflet-shadow-pane").remove();
+                    $('#location-lat-hidden').val(e.latlng.lat);
+                    $('#location-long-hidden').val(e.latlng.lng);
+                    L.marker([e.latlng.lat, e.latlng.lng]).addTo(mymap);
+                }
+
+                mymap.on('click', onMapClick);
+            } catch (e) {
+                console.warn('Map init failed', e);
+            }
+        }
+    });
+
+    // Render TaskCard markers on a Leaflet map
+    function initTasksMap() {
+        if ($('#tasks-result-map').data('initialized')) return;
+        $('#tasks-result-map').data('initialized', true);
+
+        try {
+            var coordinates = [32.239491, -83.141719];
+            var mymap = L.map('tasks-result-map').setView(coordinates, 3);
+            var accessToken = '<%= ENV["MAPBOX_ACCESS_TOKEN"] %>';
+            L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + accessToken, {
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1
+            }).addTo(mymap);
+
+            var tasks = <%= raw(@task_cards&.map { |t| { id: t.id, title: t.title, lat: t.lat, long: t.long, city: t.city, region: t.region, country: t.country } }.to_json) %>;
+            tasks.forEach(function(t) {
+                if (t.lat && t.long) {
+                    var marker = L.marker([t.lat, t.long]).addTo(mymap);
+                    var city = t.city || '';
+                    var region = t.region || '';
+                    var country = t.country || '';
+                    var loc = [city, region, country].filter(Boolean).join(', ');
+                    marker.bindPopup('<a href="/tasks/' + t.id + '" target="_blank">' + (t.title || '') + '</a><br/>' + (loc || ''));
+                }
+            });
+        } catch (e) {
+            console.warn('initTasksMap failed', e);
+        }
+    }
+</script>

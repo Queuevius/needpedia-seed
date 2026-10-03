@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+# <<<<<<< make_tony_page.py — VERSION 2 >>>>>>>
+# Made at Nexus session N46, 29 September 2026.
+#
+# WHAT IT DOES
+# Turns the botskill post working-with-tony.txt into a web page,
+# working-with-tony.html, in the same folder. Every web address in
+# the post becomes a real clickable link.
+#
+# WHY A WEB PAGE
+# Claude's web fetch tool will not open addresses written inside a
+# plain text file. It will open real links on a web page. Tested at
+# N46: llms.txt was refused when it only appeared in the text post,
+# and opened once it appeared as a link on the botskills web page.
+#
+# WHY FINGERPRINT TAGS (idea from another AI, 29 Sep 2026)
+# Fetch tools keep an old copy per exact address. So every link to a
+# Nexus file gets ?v= plus a short fingerprint of that file's
+# contents. File changes -> new fingerprint -> new address -> fresh
+# copy. File unchanged -> same address. Nobody has to bump anything.
+#
+# THE ONE ADDRESS TO PASTE
+# At the end it prints the page's own fresh address, fingerprinted
+# the same way. That is the address for handoffs and for "check your
+# updates".
+#
+# SAFETY
+# It only ever writes working-with-tony.html, and only when the page
+# would actually change. It stops without changing anything if the
+# text post is missing, or if a working-with-tony.html already exists
+# that this script did not make.
+
+import hashlib
+import html
+import os
+import re
+import sys
+import tempfile
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode, unquote
+
+FOLDER = "/home/clearcrow/Needpedia_Nexus"
+SRC = os.path.join(FOLDER, "working-with-tony.txt")
+DST = os.path.join(FOLDER, "working-with-tony.html")
+PAGE_URL = "https://nexus.needpedia.org/working-with-tony.html"
+MARK = "<!-- made by make_tony_page.py -->"
+URL = re.compile(r"https?://[^\s<>\"']+")
+TRAIL = ".,;:)]}'\""
+
+
+def fingerprint(data):
+    return hashlib.sha256(data).hexdigest()[:12]
+
+
+def local_file(path):
+    """Map a Nexus web path to the file on disk, or None."""
+    rel = unquote(path).lstrip("/")
+    full = os.path.normpath(os.path.join(FOLDER, rel))
+    if full != FOLDER and not full.startswith(FOLDER + os.sep):
+        return None
+    if os.path.isdir(full):
+        full = os.path.join(full, "index.html")
+    return full if os.path.isfile(full) else None
+
+
+def fresh(url):
+    """Tag Nexus addresses with a fingerprint of the file; leave other sites alone."""
+    p = urlsplit(url)
+    if p.hostname != "nexus.needpedia.org":
+        return url, False
+    if p.path == "/working-with-tony.html":
+        return url, False  # the page itself: tagging it would change the page every run
+    f = local_file(p.path)
+    if not f:
+        return url, False  # not a plain file on disk: link it untagged
+    with open(f, "rb") as fh:
+        tag = fingerprint(fh.read())
+    q = [(k, v) for k, v in parse_qsl(p.query, keep_blank_values=True) if k != "v"]
+    q.append(("v", tag))
+    return urlunsplit((p.scheme, p.netloc, p.path, urlencode(q), p.fragment)), True
+
+
+def linkify(text):
+    out, pos, total, tagged = [], 0, 0, 0
+    for m in URL.finditer(text):
+        url = m.group(0)
+        while url and url[-1] in TRAIL:
+            url = url[:-1]
+        out.append(html.escape(text[pos:m.start()]))
+        href, was_tagged = fresh(url)
+        tagged += was_tagged
+        total += 1
+        out.append('<a href="%s">%s</a>' % (html.escape(href, quote=True), html.escape(url)))
+        pos = m.start() + len(url)
+    out.append(html.escape(text[pos:]))
+    return "".join(out), total, tagged
+
+
+def main():
+    if not os.path.isfile(SRC):
+        sys.exit("STOPPED: cannot find %s. Nothing changed." % SRC)
+    old = None
+    if os.path.exists(DST):
+        with open(DST, "rb") as f:
+            old = f.read()
+        if MARK.encode() not in old[:3000]:
+            sys.exit("STOPPED: %s exists and was not made by this script. Nothing changed." % DST)
+
+    body, total, tagged = linkify(open(SRC, encoding="utf-8").read())
+    src_href, _ = fresh("https://nexus.needpedia.org/working-with-tony.txt")
+
+    page = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Working with Tony - botskill post</title>
+<style>
+body {{ max-width: 52rem; margin: 1.5rem auto; padding: 0 1rem; font-family: Georgia, serif; line-height: 1.5; }}
+pre {{ white-space: pre-wrap; overflow-wrap: anywhere; font-family: "DejaVu Sans Mono", Menlo, monospace; font-size: 0.95rem; }}
+</style>
+</head>
+<body>
+{mark}
+<p>Web page copy of the botskill post <a href="{src}">working-with-tony.txt</a>,
+remade automatically. Every address below is a real link that AI tools can open,
+tagged so they get the current copy.</p>
+<pre>{body}</pre>
+</body>
+</html>
+""".format(mark=MARK, src=html.escape(src_href, quote=True), body=body).encode("utf-8")
+
+    if page == old:
+        print("Unchanged: %d links, %d Nexus links tagged." % (total, tagged))
+    else:
+        fd, tmp = tempfile.mkstemp(prefix=".wwt-", suffix=".tmp", dir=FOLDER)
+        try:
+            with os.fdopen(fd, "wb") as f:
+                f.write(page)
+            os.chmod(tmp, 0o644)
+            os.replace(tmp, DST)
+        except Exception:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+            raise
+        print("Made %s: %d links, %d Nexus links tagged." % (DST, total, tagged))
+
+    print("The one address to paste:")
+    print("%s?v=%s" % (PAGE_URL, fingerprint(page)))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,24 @@
+<div class="chatbot my-4 bg-white">
+  <iframe
+    class="chatbot-frame"
+    src="<%= "#{@chatbot_url}?user_token=#{@token}#{'&firsttime=true' if current_user&.chat_threads&.blank?}" %>">
+  </iframe>
+</div>
+<style>
+  .chatbot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+
+  .chatbot-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+
+</style>

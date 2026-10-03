@@ -1,0 +1,213 @@
+class Post < ApplicationRecord
+  include PublicActivity::Model
+  tracked
+  has_rich_text :content
+  has_one :content, class_name: 'ActionText::RichText', as: :record
+  acts_as_taggable_on :tags, :resource_tags
+  has_many_attached :images
+  # after_save :clean_froala_link
+  ################################ Constants ############################
+  POST_TYPE_GEOMAXING = 'geomaxing'.freeze
+  POST_TYPE_SUBJECT = 'subject'.freeze
+  POST_TYPE_PROBLEM = 'problem'.freeze
+  POST_TYPE_IDEA = 'idea'.freeze
+  POST_TYPE_LAYER = 'layer'.freeze
+  POST_TYPE_SOCIAL_MEDIA = 'social_media'.freeze
+  POST_TYPE_WIKI_POSTS_ONLY = 'All Wiki Posts'.freeze
+  POST_TYPE_HAVE = 'have'.freeze
+  POST_TYPE_WANT = 'want'.freeze
+  POST_TYPE_QUICK_SHARE = 'quick_share'.freeze
+  POST_TYPES = [
+    POST_TYPE_GEOMAXING,
+    POST_TYPE_SUBJECT,
+    POST_TYPE_PROBLEM,
+    POST_TYPE_IDEA,
+    POST_TYPE_LAYER,
+    POST_TYPE_SOCIAL_MEDIA,
+    POST_TYPE_HAVE,
+    POST_TYPE_WANT,
+    POST_TYPE_QUICK_SHARE
+  ].freeze
+
+  CORE_POST_TYPES = [
+    POST_TYPE_SUBJECT,
+    POST_TYPE_PROBLEM,
+    POST_TYPE_IDEA,
+    POST_TYPE_QUICK_SHARE,
+    POST_TYPE_GEOMAXING
+  ].freeze
+
+  IDEA_POST_TYPES = [
+    POST_TYPE_SUBJECT,
+    POST_TYPE_IDEA,
+    POST_TYPE_QUICK_SHARE
+  ].freeze
+
+  TYPES_FOR_SEARCH = [POST_TYPE_WIKI_POSTS_ONLY] + POST_TYPES + ['All', 'TaskCard']
+
+  GENERAL_AREA = ENV['GENERAL_AREA_ID']
+  GENERAL_PROBLEM = ENV['GENERAL_PROBLEM_ID']
+  MAX_POST_BODY_LENGTH = 2000
+  ################################ Relationships ########################
+  belongs_to :user, optional: true
+  belongs_to :parent_subject, class_name: 'Post', foreign_key: :subject_id, optional: true
+  has_many :child_posts, class_name: 'Post', foreign_key: :subject_id, dependent: :destroy
+
+  belongs_to :problem, class_name: 'Post', foreign_key: :problem_id, optional: true
+  has_many :ideas, class_name: 'Post', foreign_key: :problem_id, dependent: :destroy
+
+  belongs_to :parent_post, class_name: 'Post', foreign_key: :post_id, optional: true
+  belongs_to :posted_to, class_name: 'User', foreign_key: :posted_to_id, optional: true
+  has_many :layers, class_name: 'Post', foreign_key: :post_id, dependent: :destroy
+
+  has_many :comments, as: :commentable, dependent: :destroy
+  has_many :flags, as: :flagable, dependent: :destroy
+  has_many :likes, as: :likeable, dependent: :destroy
+  has_many :ratings, as: :rateable, dependent: :destroy
+  has_many :shares, as: :shareable, dependent: :destroy
+  has_many :post_tokens, dependent: :destroy
+
+  has_many :user_posts, dependent: :destroy
+  has_many :users, through: :user_posts, dependent: :destroy
+
+  has_many :user_private_posts, dependent: :destroy
+  has_many :private_users, through: :user_private_posts, source: :user, dependent: :destroy
+
+  has_many :user_curated_posts, dependent: :destroy
+  has_many :curated_users, through: :user_curated_posts, source: :user, dependent: :destroy
+
+  has_many :notifications, dependent: :destroy
+  has_many :notification_settings, dependent: :destroy
+
+  has_many :objectives, dependent: :destroy
+  has_many :related_contents, dependent: :destroy
+  has_many :interested_users, dependent: :destroy
+  has_many :deletions, as: :deletable, dependent: :destroy
+
+  has_many :post_versions, dependent: :destroy
+
+  ############################### Validations ###########################
+  validates :title, presence: true
+  validates :post_type, presence: true, inclusion: { in: POST_TYPES }
+  validates :subject_id, presence: true, if: proc { |s| s.post_type == POST_TYPE_PROBLEM }
+  validates :problem_id, presence: true, if: proc { |s| s.post_type == POST_TYPE_IDEA }
+  validate :lat_is_present
+  validate :long_is_present
+  # validates :post_id, presence: true, if: proc { |s| s.post_type == POST_TYPE_LAYER }
+
+  ############################### Scopes ################################
+
+  # default_scope { where(disabled: false) }
+  default_scope { where(deleted_at: nil) }
+  scope :posts_feed, -> { where(disabled: false).where.not('post_type IN (?)', [POST_TYPE_IDEA, POST_TYPE_LAYER]) }
+  scope :area_posts, -> { where(post_type: POST_TYPE_SUBJECT, disabled: false) }
+  scope :problem_posts, -> { where(post_type: POST_TYPE_PROBLEM, disabled: false) }
+  scope :idea_posts, -> { where(post_type: POST_TYPE_IDEA, disabled: false) }
+  scope :layer_posts, -> { where(post_type: POST_TYPE_LAYER, disabled: false) }
+  scope :geo_maxing_posts, -> { where(geo_maxing: true) }
+  scope :federated_posts, -> { where(federated: true).order(created_at: :desc) }
+
+  ################################ Callbacks ########################
+  after_create :send_notification, if: -> { post_type == Post::POST_TYPE_LAYER || post_type.in?(CORE_POST_TYPES) }
+  after_create :send_notification_to_posted_to_user, if: -> { posted_to_id.present? }
+  after_create :send_notification_on_layer_create, if: -> { post_type == Post::POST_TYPE_LAYER && post_id.present? && parent_post.tracking_enabled? }
+  # after_create :deliver_to_followers
+  # after_create :federate_post, if: :should_federate?
+  after_create_commit :send_to_webhooks
+  ############################### Methods ################################
+  def parent_post_id
+    subject_id
+  end
+
+  def clean_froala_link
+    body = self.content.body.to_s.remove("Powered by")
+    self.update(content: body)
+  end
+
+  def type_of?(type)
+    post_type == type
+  end
+
+  def send_notification_to_posted_to_user
+    Notification.post(from: user, notifiable: user, to: posted_to, action: Notification::NOTIFICATION_TYPE_POST_CREATED, post_id: id)
+  end
+
+  def send_notification_on_layer_create
+    Notification.post(from: user, notifiable: user, to: parent_post.user, action: Notification::NOTIFICATION_TYPE_LAYER_CREATED, post_id: id)
+  end
+
+  def send_notification
+    service = NotificationService.new(self, user)
+    service.send
+  end
+
+  def tracking_enabled?
+    UserPost.where(user_id: user_id, post_id: id).exists?
+  end
+
+  def lat_is_present
+    errors.add(:base, 'Latitude cant be blank') if lat.blank? && geo_maxing
+  end
+
+  def long_is_present
+    errors.add(:base, 'Longitude cant be blank, please select a location on map for GeoMaxing post') if long.blank? && geo_maxing
+  end
+
+  def deliver_to_followers
+    ActivityPub::DeliveryJob.perform_later(self)
+  end
+
+  def should_federate?
+    !federated && user.present? && !private
+  end
+
+  def federate_post
+    ActivityPub::RequestService.new(user).send_create_note(self)
+  end
+
+  def url
+    if federated
+      federated_url
+    else
+      Rails.application.routes.url_helpers.post_url(self, host: Rails.application.config.x.domain)
+    end
+  end
+
+  private
+
+  def send_to_webhooks
+    return unless defined?(WebhookSetting)
+    WebhookConfiguration.where("validate_until > ?", Time.current).where(active: true).find_each do |webhook|
+      begin
+        payload = {
+          id: id,
+          title: title,
+          content: content&.body&.to_html,
+          post_type: post_type,
+          user_id: user_id,
+          subject_id: subject_id,
+          problem_id: problem_id,
+          posted_to_id: posted_to_id,
+          group_id: group_id,
+          geo_maxing: geo_maxing,
+          tags: tag_list,
+          resource_tags: resource_tag_list,
+          lat: lat,
+          long: long,
+          created_at: created_at,
+          updated_at: updated_at,
+        }
+
+        response = Faraday.post(webhook.url) do |req|
+          req.headers['Content-Type'] = 'application/json'
+          req.headers['X-Webhook-Secret'] = webhook.secret if webhook.secret.present?
+          req.body = payload.to_json
+        end
+
+        Rails.logger.info("Webhook POST to #{webhook.url} returned #{response.status}")
+      rescue => e
+        Rails.logger.error("Failed to send webhook to #{webhook.url}: #{e.message}")
+      end
+    end
+  end
+end

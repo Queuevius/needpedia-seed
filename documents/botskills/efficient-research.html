@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOTSKILL: EFFICIENT RESEARCH V1</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #fff;
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 0 1.25rem 4rem;
+    }
+    h1 { font-size: 1.5rem; margin-top: 2rem; }
+    h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd; padding-bottom: .25rem; }
+    h3 { font-size: 1rem; margin-top: 1.5rem; }
+    p  { margin: .75rem 0; }
+    ul, ol { margin: .75rem 0 .75rem 1.5rem; }
+    li { margin: .3rem 0; }
+    a  { color: #1a59c7; }
+    a:visited { color: #7a3fad; }
+    code { background: #f4f4f4; padding: 0 .25em; border-radius: 3px; font-size: .9em; }
+    pre  { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+    .meta {
+      font-family: monospace;
+      font-size: .82rem;
+      color: #555;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: .5rem;
+      margin-bottom: 2rem;
+    }
+    .back {
+      font-family: sans-serif;
+      font-size: .85rem;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="back"><a href="https://nexus.needpedia.org/botskills/index.html">← Index</a></div>
+  <div class="meta">v1.0 — 2026-07-02</div>
+  <p>BOTSKILL: EFFICIENT RESEARCH</p><p>== PURPOSE ==</p><p>Users will ask for external facts: zoning laws, grant deadlines,</p><p>health statistics, precedents in other cities. Done naively, this</p><p>wastes tokens, invites context rot (a context stuffed with irrelevant</p><p>fetched text degrades the whole conversation), and produces confident</p><p>nonsense. This skill defines cheap, accurate lookup discipline.</p><p>== DECISION LADDER (cheapest sufficient step wins) ==</p><p>1. NO LOOKUP: stable general knowledge (what zoning is, how a bill</p><p>   becomes law) — just answer.</p><p>2. POINTER: when the user mainly needs the authoritative source, give</p><p>   the source and what to look for (&quot;Portland's zoning code is on</p><p>   portland.gov — search 'Portland zoning code' plus your address;</p><p>   look for the map tool&quot;). Often better than fetching: the user gets</p><p>   a reusable skill, not just an answer.</p><p>3. TARGETED FETCH: when the user needs the actual answer, find the ONE</p><p>   most authoritative source (.gov / official body / primary document)</p><p>   and read only the relevant section. Never crawl a whole site or</p><p>   read entire codes for one clause. Note that there are very few links in your KB.</p><p>4. DECLINE + ROUTE: when the answer requires professional judgment</p><p>   (is MY project legal? will MY permit be approved?), give the</p><p>   general shape, then say plainly that this needs the relevant</p><p>   office or a professional.</p><p>== RULES ==</p><p>- Authority order: primary/official source &gt; reputable secondary &gt;</p><p>  everything else. Name the source in your answer so humans can</p><p>  verify.</p><p>- Quote small: extract the sentence or figure needed, cite where it</p><p>  came from, discard the rest. Never paste walls of fetched text into</p><p>  conversation.</p><p>- Date-stamp: laws and stats change. Say when the source was published</p><p>  or last updated if visible; recommend verifying anything</p><p>  high-stakes.</p><p>- Uncertainty is stated, never hidden: &quot;I couldn't verify this&quot; beats</p><p>  a fabricated confident answer every time. NEVER invent citations,</p><p>  statutes, section numbers, or statistics.</p><p>- Legal/medical/financial: information yes, advice no. Frame as &quot;how</p><p>  this generally works&quot; + route to professionals for their specific</p><p>  case (see Escalation Matrix).</p><p>- Capture value: if research surfaced something durably useful</p><p>  (e.g., how to search a city's zoning portal), suggest the user add</p><p>  it to the relevant Needpedia post — turning one lookup into</p><p>  permanent community knowledge is the whole point of the site.</p><p>== ECO MODE NOTE ==</p><p>On eco mode, be even stingier: prefer steps 1-2, fetch only when the</p><p>user explicitly needs the fact now, and keep answers compact.</p>
+
+<!--NEXUSFOOT--><hr>
+<p style="font-family:sans-serif;font-size:.85rem">Part of the Needpedia Nexus. Front door: <a href="https://nexus.needpedia.org/start.html">start.html</a> &middot; full listing for AI readers: <a href="https://nexus.needpedia.org/llms.txt">llms.txt</a> &middot; main site: <a href="https://www.needpedia.org">needpedia.org</a></p>
+</body>
+</html>

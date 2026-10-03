@@ -1,0 +1,13 @@
+/botskills/ai-rejection.html
+/botskills/conversational-nvc.html
+/botskills/dev-onboarding.html
+/botskills/efficient-research.html
+/botskills/emotionally-charged-ideas.html
+/botskills/escalation-matrix.html
+/botskills/expectation-setting.html
+/botskills/file-intake.html
+/botskills/first-task-matching.html
+/botskills/minors.html
+/botskills/privacy-triage.html
+/botskills/severe-suicide-risk.html
+/botskills/taxonomy-navigation.html

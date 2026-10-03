@@ -1,0 +1,332 @@
+<% if user_masquerade? %>
+  <div class="alert alert-warning text-center">
+    You're logged in as <b><%= current_user.name %> (<%= current_user.email %>)</b>
+    <%= link_to back_masquerade_path(current_user) do %><%= icon("fas", "times") %> Logout
+    <% end %>
+  </div>
+<% end %>
+
+<div class="d-flex navbar navbar-custom sticky-top" id="navbar-container">
+  <ul class="list-inline mx-auto justify-content-center">
+    <li>
+      <%= link_to root_path do %>
+        <span><i class="fa fa-home" style="font-size: x-large" aria-hidden="true"></i></span>
+      <% end %>
+    </li>
+    <% if user_signed_in? %>
+      <li class="nav-item dropdown">
+        <%= link_to "#", id: "navbar-dropdown-search", class: "dropdown-toggle", data: {target: "nav-search-dropdown", toggle: "dropdown"}, aria: {haspopup: true, expanded: false} do %>
+          <i class="fa fa-neuter" style="font-size: x-large; aria-hidden:true" title="Search"></i>
+        <% end %>
+        <div id="nav-search-dropdown" class="dropdown-menu px-4 py-3" aria-labelledby="navbar-dropdown">
+          <%= search_form_for @q, url: search_result_posts_path, id: "drop-down-search" do |f| %>
+            <div class="row no-gutters align-items-center">
+              <div class="col">
+                <%= f.text_field :title_cont, class: 'form-control form-control-sm', placeholder: 'Search' %>
+              </div>
+              <div class="col-auto">
+                <button class="btn btn-sm btn-secondary" type="submit"><i class="fa fa-search"></i></button>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </li>
+      <li class="nav-item dropdown" id="user-chat-icon" data-user-id="<%= current_user&.id %>">
+        <a class="nav-link <%= unread_messages(current_user) %>" href="#" id="<%= set_id_for_icon(current_user, params) %>" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-comment-dots" style="font-size: x-large; aria-hidden:true"></i>
+        </a>
+        <div class="dropdown-menu chat-dropdown" aria-labelledby="navbarDropdown">
+          <%= render 'conversations/chat_menu_section', conversations: @conversations %>
+        </div>
+      </li>
+
+      <li>
+        <%= link_to geo_maxing_posts_posts_path, data: { turbolinks: false } do %>
+          <%= image_tag('map-small.png', height: "60%", width: "60%") %>
+        <% end %>
+      </li>
+
+      <li>
+        <%= link_to time_bank_path do %>
+          <i class="fa fa-university" title="Time Bank" aria-hidden="true" style="font-size: x-large"></i>
+        <% end %>
+      </li>
+      <li>
+        <%= link_to notifications_path, class: "#{unread_notification(current_user)}" do %>
+          <span><i class="far fa-bell" aria-hidden="true" style="font-size: x-large"></i></span>
+        <% end %>
+      </li>
+      <li data-toggle="tooltip" data-placement="bottom" title="Groups">
+        <%= link_to groups_path do %>
+          <span><i class="fas fa-users" aria-hidden="true" style="font-size: x-large" ></i></span>
+        <% end %>
+      </li>
+      <li class="nav-item dropdown">
+        <%= link_to '#', class: "nav-link dropdown-toggle pt-0 mt-2 pb-0", id: "navbarDropdown", role: "button", data: {toggle: "dropdown"}, onclick: "changeImage()" do %>
+          <%= image_tag('buttler.png', id: "toggleImage", class: "img-fluid", style: "max-height: 60%; max-width: 55%;") %>
+        <% end %>
+        <div class="dropdown-menu chat-dropdown  border shadow">
+          <div class="card border-0">
+            <div class="card-body">
+              <div class="d-flex justify-content-end">
+                <%= link_to 'See All', ai_path, class: 'text-primary small' %>
+              </div>
+              <iframe
+                class="w-100"
+                src="<%= "#{@chatbot_url}?user_token=#{@token}&sidebar=false#{'&firsttime=true' if @user.chat_threads.blank?}" %>"
+                frameborder="0">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <%= link_to "#", id: "navbar-dropdown", class: "dropdown-toggle", data: {target: "nav-account-dropdown", toggle: "dropdown"}, aria: {haspopup: true, expanded: false} do %>
+          <i class="fa fa-rss" style="font-size: x-large" aria-hidden="true"></i>
+        <% end %>
+        <div id="nav-account-dropdown" class="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-dropdown">
+          <% if current_user.master_admin? %>
+            <%= link_to "Master Admin Area", master_admin_root_path, class: "dropdown-item" %>
+          <% end %>
+          <% if current_user.admin? %>
+            <%= link_to "Admin Area", admin_root_path, class: "dropdown-item" %>
+          <% end %>
+          <%= link_to current_user ? current_user&.name : 'Profile', feed_path, class: "dropdown-item" %>
+          <div class="dropdown-divider"></div>
+          <%= link_to "Logout", destroy_user_session_path, method: :delete, class: "dropdown-item" %>
+        </div>
+      </li>
+      <% if current_user.default_group_id&.positive? %>
+        <li class="align-items-md-end">
+          <%= select_tag 'current_group', options_for_select(options_for_active_group_select(current_user), current_user.default_group_id), id: 'groupSelectNavbar', class: 'form-select p-3 px-0 border-0 bg-transparent' %>
+        </li>
+      <% end %>
+    <% else %>
+      <li class="nav-item"><%= link_to "Sign Up", new_user_registration_path, class: 'mt-2', data: { turbolinks: false } %></li>
+      <li class="nav-item"><%= link_to "Login", new_user_session_path, class: 'mt-2', data: { turbolinks: false } %></li>
+      <li class="map-icon">
+        <%= link_to geo_maxing_posts_posts_path do %>
+          <%= image_tag('map-small.png', height: "60%", width: "60%") %>
+        <% end %>
+      </li>
+      <li class="nav-item dropdown">
+        <%= link_to '#', class: "nav-link dropdown-toggle pt-0 mt-2 pb-0", id: "navbarDropdown", role: "button", data: {toggle: "dropdown"}, onclick: "changeImage()" do %>
+          <%= image_tag('buttler.png', id: "toggleImage", class: "img-fluid", style: "max-height: 60%; max-width: 55%;") %>
+        <% end %>
+
+        <div class="dropdown-menu chat-dropdown border shadow">
+          <div class="card border-0">
+            <div class="card-body">
+              <iframe
+                class="w-100"
+                src="<%= "#{@chatbot_url}?user_token=#{@token}&sidebar=false" %>"
+                frameborder="0">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</div>
+<script>
+    function changeImage() {
+        let img = document.getElementById("toggleImage");
+        if (img.src.includes("<%= image_path('buttler.png') %>")) {
+            img.src = "<%= image_path('dark_buttler.png') %>";
+        } else {
+            img.src = "<%= image_path('buttler.png') %>";
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const chatDropdown = document.querySelector('.chat-dropdown');
+        const toggleButton = document.getElementById('toggleImage');
+        const navbarDropdown = document.getElementById('navbarDropdown');
+        
+        chatDropdown.classList.add('animate-entry');
+        toggleButton.classList.add('animate-pulse');
+        
+        setTimeout(function () {
+            toggleButton.classList.remove('animate-pulse');
+        }, 2000);
+        
+        <% if (user_signed_in? && controller.action_name == "index") || (!user_signed_in? && controller.action_name == "index") %>
+            $(navbarDropdown).dropdown('show');
+            if (toggleButton.src.includes("<%= image_path('buttler.png') %>")) {
+                toggleButton.src = "<%= image_path('dark_buttler.png') %>";
+            }
+        <% end %>
+        
+        $(navbarDropdown).on('shown.bs.dropdown', function() {
+            if (toggleButton.src.includes("<%= image_path('buttler.png') %>")) {
+                toggleButton.src = "<%= image_path('dark_buttler.png') %>";
+            }
+        });
+        
+        $(navbarDropdown).on('hidden.bs.dropdown', function() {
+            if (toggleButton.src.includes("<%= image_path('dark_buttler.png') %>")) {
+                toggleButton.src = "<%= image_path('buttler.png') %>";
+            }
+        });
+        
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.nav-item.dropdown').length) {
+                $('.dropdown-menu.show').removeClass('show');
+                if (toggleButton.src.includes("<%= image_path('dark_buttler.png') %>")) {
+                    toggleButton.src = "<%= image_path('buttler.png') %>";
+                }
+            }
+        });
+    });
+
+    $('#user').select2({
+        placeholder: 'Search',
+        quietMillis: 200,
+        multiple: true,
+        minimumInputLength: 2
+    });
+    $(document).on('change', '#groupSelectNavbar', function () {
+        var selectedOption = $(this).val();
+        $.ajax({
+            url: '/groups/update_default_group',
+            type: 'PATCH',
+            data: {group_id: selectedOption}
+        });
+    });
+</script>
+<style>
+  @media (max-width: 635px) {
+    .align-items-md-end {
+      margin-top: 3%;
+      margin-left: 20%;
+    }
+  }
+  @media (max-width: 392px) {
+    .align-items-md-end {
+      margin-top: 3%;
+      margin-left: 5%;
+    }
+  }
+
+  .nav-item.dropdown {
+    position: relative;
+  }
+
+  .chat-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0 !important;
+    z-index: 1050;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-entry {
+    animation: fadeIn 0.8s ease;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-pulse {
+    animation: pulse 1s ease-in-out;
+  }
+
+  @media (max-width: 36rem) {
+    .chat-dropdown {
+      position: fixed;
+      top: auto !important;
+      right: 0 !important;
+      left: 0 !important;
+      bottom: 0;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 85vh;
+      margin: 0 !important;
+      transform: none;
+    }
+
+    .chat-dropdown .card {
+      height: 100%;
+    }
+
+    .chat-dropdown iframe {
+      height: calc(85vh - 2.8rem) !important;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-entry {
+      animation: slideUp 0.5s ease-out;
+    }
+  }
+
+  @media (min-width: 36rem) and (max-width: 47.9375rem) {
+    .chat-dropdown {
+      width: 25rem;
+    }
+
+    .chat-dropdown iframe {
+      height: 26rem;
+    }
+  }
+
+  @media (min-width: 48rem) and (max-width: 61.9375rem) {
+    .chat-dropdown {
+      width: 28rem;
+    }
+
+    .chat-dropdown iframe {
+      height: 31.25rem;
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .chat-dropdown {
+      width: 31.25rem;
+    }
+
+    .chat-dropdown iframe {
+      height: 34.375rem;
+    }
+  }
+
+  .card-header .close {
+    opacity: 0.8;
+  }
+
+  .card-header .close:hover {
+    opacity: 1;
+  }
+
+  .chat-dropdown {
+    transition: all 0.3s ease;
+  }
+</style>

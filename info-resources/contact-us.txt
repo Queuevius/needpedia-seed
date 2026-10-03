@@ -1,0 +1,28 @@
+Saved from https://needpedia.org/contact_us on 2026-10-02
+Needpedia public info page, as a logged-out visitor sees it.
+Saved for the project seed. Incomplete as it is.
+============================================================
+
+Sign Up
+
+Login
+
+Contact Us
+
+You can reach us directly at Needpedia@gmail.com or by finding us on Facebook and other social media sites.
+
+© 2026 Needpedia
+
+Contact Us
+
+FAQs
+
+About Us
+
+Terms of Service
+
+Privacy
+
+Careers
+
+API Docs

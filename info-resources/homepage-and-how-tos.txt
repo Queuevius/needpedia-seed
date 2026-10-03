@@ -1,0 +1,97 @@
+Saved from https://needpedia.org/ on 2026-10-02
+Needpedia public info page, as a logged-out visitor sees it.
+Saved for the project seed. Incomplete as it is.
+============================================================
+
+Sign Up
+
+Login
+
+Welcome!
+
+Needpedia currently has very little content because we're still focused on developing software. We're always happy to assist people and take questions at Info@Needpedia.org and have provided our user assistant with a fair amount of information as well.
+
+Needpedia is a humanitarian project, not a business; we firmly believe that often the solutions to our problems already exist, and that by creating an archive for all of them, we make it possible to showcase the best ideas on Earth. Which then enables others to rally around them. People are welcome to share ideas for cities, social movements, spoken languages, and any other subject we didn't have to ban for legal or ethical reasons. We've even provided a world map you can share spatial ideas with.
+
+We've also made a landing page for volunteers and others interested in seeing media we've produced to prep for Needpedia going public, here: https://nexus.needpedia.org
+
+×
+
+Go
+
+NEEDPEDIA
+
+The Wiki for all solutions, to all problems
+
+What makes Needpedia different?
+
+While people already use the internet to find solutions, search engine algorithms tend to care more about SEO scores and traffic than the quality of the answers themselves. -Needpedia provides a space where you can see all your options side by side, and even see what scientists and other experts had to say about them.
+
+How to Section
+
+How do I use the Layer System?
+
+Needpedia makes it easy to create new layers to posts so that citizens and experts can collaborate more easily and effectively than ever before.
+
+Once you've found, (or created), your post of interest, locate the "Layer" button on the upper right corner.
+
+The button should open a drop down menu showing all current layers and the option to make a new one. The truth is making layers is easy, it's understanding all the things you can do with them that's overwhelming. (See "What is the Layer System for?" on our FAQ section here: https://needpedia.org/faq ).
+
+Remember, you don't have to be an expert to make an expert layer. You can create layers for experts you want to join a project, then invite experts to share their knowledge there.
+
+*Always use plain English on public layers, (the layer you see first when you click on a post). In the effort to make Wikipedia a high quality encyclopedia they've relied on professional language so much that it honestly makes it hard for everyone to participate. But Needpedia's not here to look nice, it's here to empower people, so always use plain English on public layers.
+
+As far as we're concerned, black people are experts on what it's like to be black, the same way women are experts on what it's like to be women. So if someone has an idea for a homeless shelter or something, we want there to be experts from ALL related backgrounds, all collaborating together through the layer system. -Sharing important information, in plain English, on the public layer.
+
+And if you learn an effective conflict resolution language such as Dr. Marshal Rosenberg's NonViolent Communication, you can use conflict resolution layers to discuss practically Any subject on Earth, without worrying about name-calling and other useless nonsense. Conflict resolution languages are extremely effective ways to boost your ability to solve problems, and there's a video of a really good one totally free on youtube here: https://www.youtube.com/watch?v=l7TONauJGfc
+
+How do I use the Token System? / What are these?
+
+Tokens are little icons you can drop into text that let you do things like leave notes, ask questions, and start debates. -After any word or comment you want.
+
+To use tokens simply hit the "Edit" button on posts, then click on the area you want a token to appear, and select which token you want. *Please note that the 'drag and drop' function isn't available yet
+
+Also remember that it's still extremely easy for someone to accidentally delete tokens, so if you find content you like, be sure to take a screenshot or something to keep it safe. And as always, please let us know if you have any new ideas for Needpedia too. -Preferably by posting directly to Needpedia here:
+https://www.needpedia.org/posts/25/proposals?post_type=proposal
+
+How do I make a post?
+
+Step 1: make sure it doesn't already exist, (that's why there's no "Create Post" button on Needpedia's homepage).
+
+Step 2: the search results page has a blue 'Create Post' button on it, near the top, to the right.
+
+Step 3: Once you've made a post for the "Subject" you're interested in, you can make posts about problems with it.
+
+And once you have a "problem" post, you can write "idea" posts for it. That's how Needpedia's wiki section is organized: ideas for problems with subjects
+
+If you have any ideas for improving Needpedia remember that we'd love to see them posted to Needpedia. We plan to operate far more democratically, and innovatively, than any other website or app on Earth.
+
+Needpedia's problems:
+
+https://needpedia.org/posts/166/problems?post_type=problem
+
+How do I navigate Needpedia
+
+Needpedia's a big place so we've done a lot of work to make it simple. The nav bar and homepage have search bars you can use to look for content.
+
+Needpedia has a "wiki section" and a "social media section".
+
+The "wiki section" is based on listing "ideas" for "problems" with "subjects". -Which is precisely how it's organized. In order to create a "problem" post there needs to be a "subject" post. And in order to create an "idea" post, there needs to be a "problem" post. The same way a twig needs a branch, which needs a tree-trunk. This keeps everything organized and makes it easy to see what all your options are for any given problem. ​
+
+Needpedia also has a social media section so people can network and share stuff about ideas they're into. Needpedia's search page can be used to find those, (by selecting "Post Type: Social Media"), and also has a tab you can use to find other users.
+
+© 2026 Needpedia
+
+Contact Us
+
+FAQs
+
+About Us
+
+Terms of Service
+
+Privacy
+
+Careers
+
+API Docs

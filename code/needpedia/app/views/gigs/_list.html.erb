@@ -1,0 +1,46 @@
+<div class="row">
+  <% gigs.each do |gig| %>
+    <div class="col-lg-12 col-md-12 ml-auto mr-auto pb-1">
+      <div class="ui-block shadow-lg rounded">
+        <div class="ui-block-content">
+          <div class="row">
+            <% if local_assigns[:search] %>
+              <div class="col-sm-12 text-right mb-2">
+                <% if gig.user == current_user %>
+                  <%= link_to edit_gig_path(gig), class: 'btn btn-default text-primary' do %>
+                    Edit
+                  <% end %>
+                  <% if gig.persisted? %>
+                    <div class="float-right">
+                      <%= link_to gig, method: :delete, class: 'btn btn-light text-danger', data: { confirm: 'Are you sure?' } do %>
+                        <i class="fa fa-trash" aria-hidden="true"></i> Delete
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+            <div class="col-md-8">
+              <div class="row">
+                <div class="col-lg-12">
+                  <h1>
+                    <%= link_to gig.title, gig_path(gig), class: 'text-dark' %>
+                  </h1>
+                  <h5><p><%= gig.area_tag %></p></h5>
+                </div>
+              </div>
+              <em>Author: <%= gig.user.name %></em><br>
+              <em><%= gig.created_at.strftime('%d-%m-%Y') %></em>
+            </div>
+            <div class="col-md-12">
+              <p><%= gig.body %></p>
+            </div>
+            <div class="col-md-12">
+              <p><%= gig.amount %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
