@@ -1,0 +1,967 @@
+== PROMPT ACCOMPLICE - PUBLIC COMS SYSTEM ==
+The universal rules for working with Tony live in the botskill post,
+https://nexus.needpedia.org/working-with-tony.txt (open its web page
+version). This file holds only what is true of the PC thread.
+Stable companion to the PC handoff prompt. Lives on Tony's computer at
+/home/clearcrow/PublicComs/PA-PC.txt, with an identical web copy at
+/home/clearcrow/Needpedia_Nexus/PA-PC.txt. Change both.
+Holds nothing sensitive. Any AI may read it.
+Last updated: 2026-10-02 (session PC-6)
+
+
+
+-- WHAT THIS SYSTEM IS --
+
+A public communications system for Needpedia, an open-source nonprofit
+civic collaboration platform. It is a web page that shows the mail for
+the address VC@Needpedia.org, which stands for Volunteer Coordination.
+Anyone can read the page without signing in. An AI assistant named
+Adele sits on the page and answers questions about the mail. An admin
+can send mail from it.
+
+Live page: https://vc-email-five.vercel.app
+Code: https://github.com/Queuevius/vc-email
+Built with Next.js 16 and React 19, hosted on Vercel.
+Confirmed live build: main branch, commit e8a9514, deployed 2026-07-27
+by AdnanRailsCraft. The code in that repo is the code running.
+
+
+-- WHERE THE MAILBOX ACTUALLY LIVES --
+
+Zoho Mail. Not Gmail, not Google Workspace. The app signs in to
+imappro.zoho.com. Tony's Google admin powers have nothing to do with
+this mailbox and no Gmail setting affects it.
+
+Zoho plan: Mail Lite, 10GB, paid and active. One license, one used.
+Yearly. Expires 2026-12-09. If it lapses, program access to the
+mailbox stops and the public page goes blank again.
+
+Zoho admin console: https://mailadmin.zoho.com
+Zoho webmail: https://mail.zoho.com
+
+DNS for needpedia.org is at Cloudflare. Tony owns that account.
+
+
+-- HOW IT WORKS TODAY, FROM READING THE ACTUAL CODE --
+
+Read at PC-2 from src/services/emailService.ts.
+
+There is no database. Nothing is stored anywhere.
+
+Receiving: every time someone opens the page, the site signs in to the
+Zoho mailbox using the standard mail-reading protocol (IMAP) and asks
+for mail. The code computes a date 30 days back and asks only for mail
+since then. It reads the folder named in a setting, currently INBOX.
+Results are held in memory for 60 seconds.
+
+The fetch limit setting is 500, but the 30-day window is hardcoded in
+the source, not a setting. Changing it means changing code.
+
+Sending: sends through a standard outgoing mail server, then tries to
+copy the sent message back into the mailbox's sent folder so it shows
+in the outbox. If that copy fails the code logs a warning and carries
+on.
+
+Deleting: an admin delete marks the message deleted and immediately
+purges it. That permanently erases it from the real mail account. Not
+trash. Gone.
+
+Adele: sends up to 20 recent messages plus a "guidescript" instruction
+sheet to an AI model through OpenRouter. The guidescript is stored in
+an Upstash store. Her conversations get posted to needpedia.org.
+
+Important about Adele: she does not look anything up. She only sees
+what the app hands her. Anything she says about her own access comes
+from the guidescript, not from checking. Do not treat her answers as
+evidence about system state.
+
+Settings all live as environment variables in the Vercel project.
+
+
+-- WHAT WAS ACTUALLY WRONG, AND WHAT PC-1 GOT WRONG --
+
+PC-1 concluded the mailbox was hiding mail because of a Gmail message
+limit, and that the fix was a rebuild. Both were wrong.
+
+The real cause: needpedia.org had NO mail-delivery records in DNS at
+all. No MX records, no TXT records of any kind. Mail sent to
+VC@Needpedia.org had nowhere to be delivered and died. Outbound was
+unaffected because sending does not consult those records.
+
+Confirmed by measurement, not inference: dig returned status NOERROR
+with ANSWER 0 and a Cloudflare SOA, meaning the records genuinely did
+not exist. Newest message in the Zoho inbox was 2026-04-22.
+
+Mail sent to the address between 2026-04-22 and 2026-09-22 was never
+delivered anywhere. It is not recoverable. There is no backlog waiting
+to be pulled in.
+
+The website was never broken. It was faithfully showing an empty
+mailbox.
+
+How the records disappeared is STILL UNKNOWN. Nobody deletes MX and
+TXT records by accident. Until that is answered it can happen again.
+
+
+-- WHAT WAS FIXED AT PC-2 --
+
+All done in Cloudflare DNS. All confirmed live with dig.
+
+MX records restored, pointing mail to Zoho:
+  mx.zoho.com priority 10
+  mx2.zoho.com priority 20
+  mx3.zoho.com priority 50
+
+Sender permission list (SPF) on needpedia.org:
+  v=spf1 include:mailgun.org include:zohomail.com ip4:18.223.241.10 ~all
+
+Sender permission list on www.needpedia.org:
+  v=spf1 include:mailgun.org ~all
+  (Mailgun is verified on www, not the root. NP-1 supplied this.)
+
+Message signing (DKIM), selector vcaccount, 2048-bit:
+  Name: vcaccount._domainkey
+  Verified in Zoho, signing toggled ON.
+
+Monitoring policy (DMARC):
+  Name: _dmarc
+  Value: v=DMARC1; p=none
+  Monitoring only. Cannot cause any mail to be rejected.
+
+End-to-end proof: a reply sent from VC@Needpedia.org to Tony's personal
+Gmail on 2026-09-22 showed SPF PASS and DKIM PASS in Gmail's "Show
+original" view. Inbound test mail arrived in Zoho and appeared on the
+public page.
+
+Note for later: DMARC has no reporting address, deliberately. Those
+reports arrive daily as machine-readable attachments and would bury
+real mail on a public page. If wanted later, send them elsewhere.
+
+
+-- THE THREE DESIGN FLAWS, ALL STILL TRUE --
+
+These were never the cause of the outage, but they are real and they
+are why the outage went unnoticed for five months.
+
+1. Mail older than 30 days is invisible, so the archive silently
+   shrinks every day.
+2. When the mailbox cannot be reached, the code catches the error,
+   logs it where nobody looks, and returns an empty list. The page
+   shows "no messages". Broken is indistinguishable from quiet. This
+   is confirmed in the source, not suspected.
+3. Nothing is stored anywhere. The page is only ever a window onto
+   Zoho. Delete is permanent and immediate.
+
+
+-- THE REBUILD: STATUS CHANGED AT PC-2 --
+
+PC-1 decided on "Option 1" - the mail host keeps receiving and
+sending, a small program copies every message into Needpedia's own
+storage, and the page plus Adele read only that copy.
+
+That decision still stands as a direction, but the urgency behind it
+was based on a wrong diagnosis. The system is not broken now. The case
+for rebuilding is the three design flaws above, not a crisis.
+
+This should be revisited fresh at PC-3 rather than inherited as
+momentum. Do not start building without Tony re-confirming.
+
+Build plan as drafted at PC-1, kept for reference. Note that the
+watcher section was written for Gmail and needs rewriting for Zoho:
+  Storage: a hosted Postgres database for message text and details,
+  plus Cloudflare R2 file storage for the untouched original message
+  and attachments. Keeping big files out of the database keeps it
+  small enough to stay free.
+  Rules: write the untouched original to file storage FIRST, before
+  parsing. Ignore repeats by matching each message's unique ID. Two
+  grades of delete - reversible hiding from the public page, and a
+  real erase for genuine privacy requests.
+  Watcher: must read both received and sent folders. Must ask "what
+  changed since last time" rather than re-reading everything, and must
+  fall back to a full sweep automatically if the checkpoint is too old.
+  Where it runs is unresolved: Nexus (free, stops when that machine is
+  down, catches up after), GitHub's free scheduler (every few minutes),
+  or paid Vercel at about $20/month.
+  Sending: keep sending through Zoho and write our own copy of each
+  sent message into the archive.
+
+
+-- DECISIONS MADE, DO NOT REOPEN WITHOUT TONY --
+
+PC-1: Option 1 over repair-only and over full independence.
+
+PC-2: Every message shows on the public page as soon as it arrives.
+No approval step. Paired with a one-click, reversible hide button for
+spam and for personal information people send without realizing the
+page is public.
+
+PC-2: The website is the only place VC@Needpedia.org gets read. Nobody
+opens the mailbox directly in an ordinary mail program. The mail host
+is just the engine.
+
+
+-- OPEN ITEMS --
+
+How the DNS records disappeared. Unanswered. Can recur.
+
+AdnanRailsCraft, the previous developer, deployed the July build and
+may still have access to the Vercel project settings. Not yet removed.
+
+Zoho plan expires 2026-12-09. Nothing breaks before then.
+
+Whether any volunteer can write glue code, which decides how much of
+any rebuild lands on Tony.
+
+Mailgun has the Needpedia app's account switched off after a credential
+was found exposed on GitHub. That is NP-1's work, not this thread's,
+but it means the site's account-confirmation emails are still dead.
+It did NOT cause the VC mailbox outage. Two separate failures that
+overlapped in time.
+
+
+-- THINGS ALREADY CHECKED, DO NOT REDO --
+
+The vc-email repo was scanned at PC-2 for committed credentials. Clean.
+Only placeholder values in .env.example. The exposed key Mailgun found
+is in the Needpedia repo, not this one.
+
+IMAP_USER in Vercel is VC@Needpedia.org, confirmed by reveal. The page
+is not reading anyone's personal mailbox.
+
+Signing in to the Zoho mailbox with the Vercel password works, tested
+directly with curl. Returned 23 messages. Credentials are valid.
+
+
+-- WORKING RULES FOR THIS THREAD --
+
+Cut 30 September 2026 at Tony's say-so: they repeated the botskill post
+(see the top of this file). The full old text is in ARCHIVE-PC.md.
+
+One rule this thread keeps that the botskill post lacks:
+Tone: measured. No drama. "That changes a few things" beats "this
+changes everything."
+
+
+-- PEOPLE --
+
+Tony Brasher, founder and president of Needpedia, owns every account
+involved here. Legal name Anthony Brasher.
+AdnanRailsCraft, previous developer, deployed the July build. May
+still have access to the Vercel settings.
+Murtaza, Needpedia's lead developer. Reachable but takes days.
+Needpedia's own site AI can also be asked questions.
+
+
+-- GLOSSARY, FOR ANY AI WRITING FOR TONY --
+
+Don't use these names without first saying what the thing does.
+  IMAP: the old way a program signs in to a mailbox and reads it.
+  SMTP: the standard way mail gets sent out.
+  MX record: the public note on a domain saying which server accepts
+    its mail. Missing this means mail is never delivered.
+  SPF: a public list of who is allowed to send mail using your domain
+    name. Receiving servers read it to judge whether mail is forged.
+  DKIM: a cryptographic signature on each outgoing message, checked
+    against a key published on your domain.
+  DMARC: instructions telling receiving servers what to do when a
+    message fails the SPF and DKIM checks.
+  Postgres: a database, meaning organized storage the website reads.
+  R2: cheap file storage for whole files and attachments.
+  Webhook: one program poking another the moment something happens.
+  dig: a terminal command that looks up public DNS records.
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-3 ==
+
+FOUND THIS SESSION (30 September 2026)
+- Zoho's folder for sent mail is named Sent. Read from Zoho's folder
+  list with curl. All folders: INBOX, Drafts, Templates, Snoozed, Sent,
+  Spam, Trash, Notification, Newsletter, Archive.
+- Zoho keeps every email. The 30-day window is only how far back the
+  page asks Zoho, not how long mail is kept. Nothing is lost by it.
+  Mail is really lost only two ways today: the page's admin delete
+  erases it from Zoho for good, and the Zoho plan lapsing on 2026-12-09.
+- The vc-email repo on GitHub shows one open pull request (a proposed
+  code change waiting for approval). Not looked at yet.
+- The AI web fetch tool was refused when opening folders of the
+  vc-email repo on GitHub. Until that is solved, code is read through
+  Tony's terminal.
+
+TONY'S PROBLEM LIST FOR THE PAGE
+From the Nexus thread's update of 28 September 2026:
+- Looking at sent emails shows the wrong thing: random old emails from
+  the inbox and outbox instead of what was sent.
+- Attachments do not work, in or out.
+- No rich formatting (bold, links and so on), in or out.
+- The chat button is redundant. The button labeled "Adele" already
+  does the job.
+- Tony needs to be able to delete emails once logged in.
+Tony, 30 September 2026, in his words: "ordinary email functions like
+receiving and sending attachments, bold italic and underline text, text
+color, and other basic things. It would be cool if there was a way for
+me to insert a logo and update/change it when I'm logged in. Just to
+help people know it's a Needpedia space."
+
+TONY'S DIRECTION (30 September 2026, his words)
+- "For now let's get the email system working right."
+- "I really do need to know the emails will always show up though,
+  even if we have to save them to my computer or something"
+- "If we could set it to save everything, then archive stuff older
+  than 6 months that works too. Especially if the old ones can still
+  be brought up, (just takes longer or something)."
+- "let's combine all ideas to make the best Public Coms system."
+- A thought, not a decision: put the whole email system on the Nexus,
+  so it moves with the Nexus when the Nexus goes to a proper server.
+This lines up with the PC-1 rebuild direction (a copier program saving
+every email into storage of our own, with the page reading that copy),
+plus his feature list and the consent step below.
+
+CONSENT STEP (from the 28 September 2026 update; NOT DECIDED)
+Tony's lean, "sender says yes": the first email from a new address is
+held privately; an automatic reply says the inbox is public and asks
+permission with a yes button; on yes it is published and that sender
+is never asked again. Alternatives he is open to: Tony approves each
+new sender's first email; or held until either the sender says yes or
+Tony approves. This would change the PC-2 decision that every email
+shows as soon as it arrives. Attachments must pass the same step.
+Open: the automatic reply's wording; what happens if the sender never
+answers; whether Tony can see held emails.
+
+OPEN DESIGN QUESTIONS, NOT DECIDED (30 September 2026)
+- Where the saved copy lives: Tony's computer (the Nexus), storage
+  online, or both.
+- Whether the whole page moves onto the Nexus.
+- Order of work: fixes the rebuild would replace (showing sent mail,
+  the 30-day window) versus only fixes that carry over (attachments,
+  formatting, delete, the extra chat button, the logo).
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-3, PART 2 ==
+
+DECIDED BY TONY (30 September 2026)
+- Order of work: fix everything on the current page now, including
+  showing sent mail and the 30-day window, even though the rebuild
+  would later replace those two. Tony's answer: "Yes".
+- New item for the list: a way to see the password while typing it at
+  login.
+- The working rules section above was cut (Tony: "yes").
+
+OPEN (30 September 2026)
+- Code pages: a Nexus web page per project linking each code file, so
+  an AI can open code without Tony running commands. Big projects get
+  one page per folder. Links point at exact saved versions on GitHub.
+  Untested: whether the AI fetch tool follows a link from a Nexus page
+  to a GitHub file. Not decided: whether PC builds a PC-only page as a
+  test first, or the Nexus thread builds it for every thread.
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-3, PART 3 (CLOSE) ==
+
+CODE READ THIS SESSION (30 September 2026)
+Version e8a9514, the same as the live site. Local copy made 30 Sep 2026
+at /home/clearcrow/PublicComs/vc-email-code.
+Read: src/services/emailService.ts, src/actions/emailActions.ts,
+src/app/sent/SentPageContent.tsx, src/app/api/emails/route.ts,
+src/app/api/emails/[id]/route.ts.
+Not read yet: src/app/inbox/EmailList.tsx, EmailItem.tsx,
+EmailDetailPageContent.tsx, src/app/inbox/[id]/page.tsx,
+src/app/api/emails/fetch/route.ts, src/lib/permissions.ts,
+src/auth/auth.ts. Then the compose, send, login and layout files.
+
+CORRECTION (30 September 2026)
+The PC-3 handoff said the page only opens INBOX and never reads the
+sent folder. Wrong. fetchEmailsFromIMAP opens whatever folder it is
+asked for, and the Sent page asks for "Sent", Zoho's real name for it.
+
+WHY THE SENT PAGE OPENS WRONG EMAILS (30 September 2026)
+Each email's id is only Zoho's number for it, and Zoho numbers each
+folder separately. Received #12 and sent #12 both get the id "12".
+getEmailById returns the first "12" in anything recently loaded, and
+when nothing is loaded it searches only the default folder, INBOX.
+Fix: make the id include the folder (for example Sent-12) and make
+every action use it. Whether the Sent list itself has a second
+problem: check EmailList.tsx and api/emails/fetch/route.ts.
+
+DANGER UNTIL FIXED (30 September 2026)
+deleteEmail, toggleStar and toggleReadStatus open "INBOX" whichever
+folder the email came from. Deleting sent #7 from the Sent page
+permanently erases received #7. Do not delete on the Sent page until
+fixed. Delete is a permanent erase (marked deleted, then purged), not
+Zoho's trash.
+
+OTHER FINDINGS (30 September 2026)
+- 30-day window: one line in fetchEmailsFromIMAP sets the start date
+  30 days back. Count cap: IMAP_FETCH_LIMIT, 500 in Vercel, 50 if
+  missing.
+- Delete is limited to the admin login in both email routes and in the
+  server action. Why Tony cannot delete when logged in: not known yet;
+  check permissions.ts and auth.ts.
+- The emails route takes any folder name from the web address, with
+  no login, so anyone can read Drafts, Spam or Trash. Matters once the
+  consent step exists: held emails must not be reachable this way.
+- After sending, the code saves its own copy into Sent. Zoho may also
+  save one. Check for doubles before changing anything.
+- Errors reaching Zoho still show as an empty list (known flaw 2).
+
+TONY'S DIRECTION, ADDED AT CLOSE (30 September 2026, his words)
+"the moment an email comes in, it gets saved to my computer. Then we
+don't have to deal with Zoho's bullshit, and I have a file with all the
+emails in it I can back up."
+Notes: a mail host such as Zoho still has to receive the mail. This is
+the PC-1 copier idea with Tony's computer as the storage. If his
+computer is off, mail waits in Zoho and is copied when it is back on.
+How the public page reads the saved copy is the open design question.
+
+REQUEST TOOL IDEA (Tony, 30 September 2026; sent to the Nexus thread)
+A program on the Nexus serving a reference sheet of real links, each
+one a request for a specific thing; opening a link gets that thing
+back on the same link. Tony's version posted the result at an address
+made of date, time and name; an AI cannot open an address it builds
+itself, so the reply comes back on the trigger link instead. Tony: "Of
+course we'll program the program to not reveal private info." Only a
+fixed list of public items; never a file path taken from a link.
+
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-4, PART 1 ==
+
+DECIDED BY TONY (30 September 2026, PC-4)
+- Delete moves an email to Zoho's Trash folder, so it is "recoverable in
+  Zoho if I delete by mistake". Not a permanent erase. The reversible
+  hide button decided at PC-2 is a separate thing.
+- Older mail, his words: "once the emails are saved to our own stuff we
+  can just let them display by however many fit on the page. Maybe 30
+  emails listed at a time. With an option to look back further."
+- Email chains, his words: "when there's email chains, they need to
+  display when I open an email. That's the kinda thing I mean by basic
+  email features."
+- Changes go straight to the live site, no test copy first. His answer:
+  "B, straight to live".
+- The handoff, his words: "The handoff prompt, is printed at the end of a
+  session, and I use it to start a new one. Period."
+
+FOUND (30 September 2026, PC-4). All of src/ was read at PC-4, version
+e8a9514.
+- Sent page: the list asks Zoho for the Sent folder correctly. The wrong
+  email appeared on clicking, because each email's id was only Zoho's
+  number for it, and Zoho numbers each folder separately.
+- The email list has no delete button. The code for it exists but was
+  never put on screen. The only delete is a small trash can at the top of
+  an opened email, shown to the admin login only.
+- Received attachments: read, but only file name and size are kept; the
+  file itself is thrown away and nothing is shown.
+- Compose is a plain text box. The send code accepts plain text only.
+- The extra chat button is "Chat with AI" at the bottom right
+  (src/components/ai/AIAssistant.tsx). The "Adele" button opens the same
+  window.
+- Adele's built-in instructions (src/lib/ai.ts) call her an assistant for
+  "Needpedia/Venture Capital" handling "deal flow". VC here means
+  Volunteer Coordination. To be corrected. Her window is titled
+  "VC Assistant".
+- Every page visit downloads up to IMAP_FETCH_LIMIT whole emails from the
+  last 30 days, attachments included.
+- Received formatting shown: bold, italic, underline, links, lists,
+  headings. Stripped: colors, tables, fonts, images.
+- Two logins exist: admin (ADMIN_EMAIL, or IMAP_USER if unset, typed
+  exactly, plus ADMIN_PASSWORD) and an optional read-only guest.
+- Zoho's Sent folder held 29 emails on 30 September 2026. Whether Zoho
+  also keeps its own copy of mail sent from the page: being checked.
+- Vercel only puts a new version live if it builds without errors; a
+  failed build leaves the current live site in place.
+
+PC AI'S PROPOSED ORDER OF WORK (PC-4; not a decision by Tony)
+1. Folder mix-up: ids carry the folder (INBOX-12, Sent-12), the page can
+   only read Inbox and Sent, delete moves to Trash.
+2. Delete buttons in the list plus select-several; 30 at a time with a
+   way to look further back.
+3. Remove the extra chat button; show-password at login; a logo Tony
+   uploads and changes when logged in; Adele's name and what VC means.
+4. Formatting and attachments in and out; email chains shown when an
+   email is opened.
+5. The consent step.
+
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-4, PART 2 ==
+
+CONSENT STEP, DECIDED BY TONY (30 September 2026, PC-4)
+This replaces the PC-2 decision that every email shows on the public page
+as soon as it arrives. Not built yet; planned as chunk 5.
+- His design, his words: "We could make the first email sent by someone
+  ONLY show for people who've logged in, then automatically add a note to
+  the response email / reply I create, which says 'Our community uses a
+  radically transparent communication system where all messages are
+  publicly visible online and our AI can tell you what everyone's
+  currently working on, (it can see task cards on Needpedia too). This
+  makes it an excellent resource for seeing what's going on with our
+  community, and coordination, but it requires people's consent. To
+  provide yours, click 'yes'. To opt out, simply reply to us at
+  NeedpediaVC@gmail.com"
+- Later emails from the same person before they click yes stay
+  logged-in-only. His answer: "yes."
+- His own replies, his words: "until the convo is public nothing in it
+  should be, my comments included."
+- If they never click yes, it stays private. His words: "Yes, consent is
+  priority."
+- Adele, his words: "We could make it so that Adele can't even SEE emails
+  that aren't supposed to be online yet." Plan: held emails are never
+  handed to Adele at all.
+- Note for whoever builds it: the Adele on this page sees only the emails
+  and up to 4 web pages linked in her instructions, not Needpedia task
+  cards. The note's task-card line is true here only if her instructions
+  link a page that lists them.
+- Still open: what the page reached by the yes link says. Attachments
+  follow the same rule (from the Nexus thread's update of 28 Sep 2026).
+
+CHUNK 1 IS LIVE (30 September 2026, PC-4)
+- Commit bd0e3a1 on main, deployed by Vercel, confirmed live: the live
+  page now refuses to show the Trash folder.
+- What it changed: every email's id carries its folder (INBOX-12,
+  Sent-12), so opening, star, mark-read, delete and Summarize hit the
+  right email; the page reads only Inbox and Sent; delete moves the email
+  to Zoho's Trash folder; "Back" on a sent email goes to the Sent list.
+- The DANGER from PC-3 (deleting sent #7 erased received #7) is fixed by
+  this.
+- Also changed one line in src/lib/permissions.test.ts ('USER' as any),
+  because the code check stopped on an old error in that practice-test
+  file. Not a PC-4 error.
+
+HOW CODE GOES LIVE NOW (30 September 2026)
+- Tony's computer is signed in to GitHub through GitHub's command-line
+  tool (gh), so pushes from ~/PublicComs/vc-email-code work. A push to
+  main goes live through Vercel within about 2 minutes. Old versions stay
+  in Vercel's Deployments list and can be put back with one click.
+- Node 22 and npm 10 are installed; the code copy has its building blocks
+  installed, so "npx tsc --noEmit" checks the code for errors before a
+  push.
+
+FOUND (30 September 2026, PC-4)
+- No double copies in Sent. Zoho saves its own copy of every email sent
+  from the page (marked "X-Mailer: VC Email System"). The page's own
+  save-a-copy step never worked. To be removed in chunk 2.
+- Un-starring probably fails: the code calls removeFlags, but the mail
+  library (imap-simple) names that command delFlags. Fix in chunk 2.
+- Open pull request #2 (June 2026, "Extend IMAP fetch window so older
+  emails aren't hidden from the inbox") is replaced by chunk 2's
+  30-at-a-time design. Closing it is Tony's call.
+- Security check, 30 Sep 2026: 13 serious known weaknesses in the building
+  blocks the live page runs, 3 of them critical: next, next-auth,
+  @auth/core. Being looked at.
+
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-4, PART 3 ==
+
+LIVE ON THE PAGE (30 September 2026, PC-4)
+- Chunk 1b, commit e5a258f: security updates. next 16.1.0 -> 16.3.8,
+  next-auth -> 4.24.15, unused @auth/core removed from the package list.
+  Vercel: "Deployment has completed".
+- Chunk 2, commit 742eb85, plus chunk 2b, commit d4848e1:
+  - Inbox and Sent list the newest 30. "Show 30 older" and "Show 30
+    newer" buttons change ?page= in the address, so a page number can be
+    typed into the address bar. Tony's design: "The UI says "Show 30
+    older" button but when I go back, the URL has a page number I can
+    edit." No more 30-day cutoff.
+  - Logged in as admin: tick box and trash can on every email, "Select
+    all on this page", "Delete selected". Deleted mail goes to Zoho's
+    Trash. Visitors see none of these and no star button.
+  - When Zoho cannot be reached, the page says so with a "Try again"
+    button instead of showing an empty list (design flaw 2 from PC-2 is
+    fixed).
+  - Refresh really fetches fresh mail. Un-starring fixed.
+  - The page no longer tries to save its own copy of sent mail.
+  - Summarize finds an email even when it is older than the first page.
+  - Mail libraries updated: nodemailer (latest 7.x), mailparser (latest
+    3.x).
+- Checked live after 2b: the page showed 29 of 29 in Inbox and 29 of 29
+  in Sent, matching Zoho's own counts. Tony: "The email site is looking
+  good, I can see everything now." He also confirmed sent emails open
+  correctly.
+
+FOUND (30 September 2026, PC-4)
+- Mail library quirk (imap-simple / node-imap): given email numbers as one
+  written list ("29,28,27"), it quietly keeps only the first number. Hand
+  them over one by one (["UID", ...uids]). This is why chunk 2 first
+  showed 1 email per page.
+- Vercel reports "Deployment has completed" a few seconds before the live
+  address switches over. Wait about 20 seconds before testing the live
+  page.
+- The login package (next-auth 4.24.15, the newest of version 4) still
+  carries @auth/core inside it, marked critical. That weakness is about
+  sign-in by emailed link, which this page does not use (it signs in with
+  a password). Only version 5, not finished yet, removes it. Left as is.
+- Remaining "high" items are in the mail-reading and mail-sending
+  libraries. Their risk comes from the mail server sending booby-trapped
+  replies, and the only server is Zoho. The mail-reading ones get
+  replaced when mail is saved to Tony's computer.
+
+STILL TO BUILD (PC AI's proposed order, 30 September 2026)
+- Chunk 3: remove the extra "Chat with AI" button; show-password at login;
+  a logo Tony uploads and changes when logged in; Adele's name and what VC
+  means in her built-in instructions.
+- Chunk 4: formatting and attachments in and out; email chains shown when
+  an email is opened.
+- Chunk 5: the consent step (see PART 2). Tony asked on 30 September 2026
+  whether it was time to test it; open questions put to him: build it
+  next or keep the order, what to do about the emails already public, and
+  whether the note goes on every email he sends to someone who has not
+  said yes.
+
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-4, PART 4 (CLOSE) ==
+
+CONSENT STEP: MORE DECISIONS BY TONY (30 September 2026)
+- Build it at PC-5. His words: "Build consent next session."
+- Emails already on the page stay public. Everyone who emailed before
+  consent goes live counts as having said yes. His words, about the 29
+  already there: "testers and devs, it's cool." Plan: every address in
+  Inbox and Sent at build time goes on the yes list.
+- The note goes on every email Tony sends to someone who has not said
+  yes, first emails included, not only replies. His answer: "yes."
+
+CONSENT STEP: HOW IT WAS DESCRIBED TO TONY (PC AI's plan, 30 Sep 2026;
+he did not object, details not decided)
+- A list of addresses that said yes, kept in the online store that already
+  holds Adele's instructions (Upstash).
+- Held = an email from an address not on the list, or an email Tony sent
+  to such an address. Visitors and Adele never receive held emails.
+  Logged in, Tony sees them with a "not public yet" tag.
+- When Tony sends to an address not on the list, the page adds his note
+  (PART 2) at the bottom with a personal yes link. Clicking it puts that
+  address on the list. The link should carry a secret code per address,
+  so nobody can say yes for someone else.
+- Visitors may see fewer than 30 emails on a page while some are held.
+  Goes away once mail is saved in our own storage.
+- Open for PC-5: what the page reached by the yes link says.
+
+STATE AT CLOSE OF PC-4 (30 September 2026)
+- Live: chunks 1, 1b, 2, 2b. Last commit d4848e1 on main. The code copy
+  at ~/PublicComs/vc-email-code is the same as GitHub main.
+- Tony's computer is signed in to GitHub through GitHub's command-line
+  tool (gh), so "git push origin main" from the code copy works and goes
+  live through Vercel.
+- This file's header: the stale "REPLACES ... Delete the old file"
+  paragraph was taken out at PC-4 close. The full edition before that is
+  in ARCHIVE-PC.md, tags pa-pc, pc-4, before-header-cleanup.
+- Sent to the Nexus thread on 30 Sep 2026 (its updates post): Tony's words
+  on trigger URLs, the code-reading tool, giant lines for clipboard steps
+  and questions, canvas, and Claude Code.
+- Still open, unchanged: how the DNS records disappeared; whether
+  AdnanRailsCraft still has Vercel access; Zoho plan expires 2026-12-09;
+  pull request #2 still open (replaced by chunk 2, Tony's call to close).
+
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-5, PART 1 ==
+
+CONSENT STEP IS LIVE (30 September 2026, PC-5)
+- Commit 6887097 on main, deployed by Vercel, tested live.
+- Decided by Tony: the yes link opens a page with his note and one Yes
+  button. One press, never asked again. His words: "I want it to simply
+  be a button they click once and never think about again." Opening the
+  page changes nothing; only pressing Yes counts, so the link checkers
+  in work email systems cannot say yes for someone.
+- Not built, by Tony's choice: a list he can change by hand. Someone who
+  agrees in words gets asked to press the button.
+- How it decides: an email is held if anyone on it (sender, receivers,
+  anyone copied), other than VC@Needpedia.org itself, has not said yes.
+- Visitors: held emails are left out of the list, and opening one, by
+  clicking or by typing its address, says "not found". The read-only
+  guest login counts as a visitor.
+- Adele and Summarize never receive held emails, even for the admin
+  login.
+- Admin login: held emails carry an amber "not public yet" tag in the
+  list and on the opened email.
+- Sending: every email to someone not on the list ends with Tony's note,
+  word for word, then a line "yes: " and their personal link. Several
+  such people on one email get one link each.
+- Starting yes list: everyone on any email that reached Zoho before
+  2026-10-01 02:45 world time (7:45 pm 30 September, Portland). Made
+  once, automatically, the first time the page was asked.
+- If the yes list cannot be read: the email list shows an error instead
+  of showing everything; an opened email counts as held; Adele gets no
+  emails; outgoing mail gets the note.
+- Where things are: the yes list is in Upstash, the store that also
+  holds Adele's instructions (key consent:yes; consent:seeded marks the
+  starting list as made). Code: src/lib/consent.ts,
+  src/app/consent/page.tsx, src/app/api/consent/route.ts.
+- The secret code in each yes link is made from the page's existing
+  login secret in Vercel (NEXTAUTH_SECRET). Changing that secret breaks
+  every yes link already sent.
+- Thank-you text on the yes page, written by the PC AI, Tony may change:
+  "Thank you. You said yes, and you will not be asked again." plus a
+  link to the public inbox.
+
+TESTED LIVE (30 September 2026, PC-5)
+- Right after going live, visitors saw 29 of 29 in Inbox and in Sent.
+- A fake yes link is refused.
+- Email to anthonydunn97202+consenttest@gmail.com: note and yes link at
+  the bottom, amber tag for Tony, Yes page worked, then public. Tony saw
+  the tag and the Yes page himself.
+- Email to anthonydunn97202+consenttest2@gmail.com, before yes: a visitor
+  opening it gets "not found" (404). Left held; Tony may press yes or
+  leave it.
+- Not tested: a held email arriving in Inbox. A Gmail reply comes from
+  the main address, already on the list. The same check decides
+  received and sent mail.
+
+FOUND (30 September 2026, PC-5)
+- Gmail ignores anything after a + before the @, so
+  name+anything@gmail.com lands in the normal inbox but counts as a new
+  person here. That is how to test consent without touching real
+  addresses.
+- The counts the check commands print are for one page of 30. With 31
+  in Sent, the oldest is on page 2.
+- Visitors may see fewer than 30 per page while some are held. Goes away
+  once mail is saved in our own storage.
+
+STILL TO BUILD (PC AI's proposed order, not decided by Tony)
+- Chunk 3: remove the extra "Chat with AI" button (the "Adele" button
+  stays); show-password at login; a logo Tony uploads and changes when
+  logged in; Adele's built-in instructions say "Venture Capital" (VC
+  means Volunteer Coordination).
+- Chunk 4: formatting and attachments, in and out (attachments follow
+  the consent rule); email chains shown when an email is opened.
+- Long-term: every email saved to Tony's computer the moment it arrives.
+
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-5, PART 2 ==
+
+CHUNK 3 IS LIVE (30 September 2026, PC-5)
+- Chunk 3a, commit e5a6d47:
+  - The floating "Chat with AI" button is gone. The blue "Adele" button
+    in the left menu opens her window.
+  - Her window is titled "Adele". Greeting, written by the PC AI, Tony may
+    change: "Hello! I'm Adele, Needpedia's Volunteer Coordination
+    assistant. How can I help you today?"
+  - Her built-in instructions (src/lib/ai.ts) now say she is Adele and
+    that VC means Volunteer Coordination. No more "Venture Capital" or
+    "deal flow".
+  - Login page: a "Show password" button under the password box. Tony
+    confirmed it works.
+- Chunk 3b, commit fbaa33e:
+  - Decided by Tony: the logo sits "Above where it says 'Adele'", at the
+    top of the left menu, for everyone. The login page keeps its envelope
+    icon.
+  - Tony uploads, changes or removes it in the "Logo" box at the top of
+    the Update KB page, logged in as admin. PNG, JPG, GIF, WEBP or SVG,
+    under 500 KB. Kept in Upstash (key: logo). Only the admin login can
+    change it. Tony uploaded one and it shows.
+- Live checks passed: no "Chat with AI" on the inbox page; "Show password"
+  on the login page; a visitor trying to change the logo is refused (403).
+
+SIDE EFFECT (30 September 2026)
+- Pages with no left menu have no way to open Adele now: the login page,
+  the yes page, and the compose and Update KB pages on a phone.
+
+FOUND, NOT FIXED (30 September 2026, PC-5)
+- The optional read-only guest login can open Update KB and change
+  Adele's instructions. The menu checks for a role named "GUEST", but the
+  guest login's role is "READ_ONLY", and the instructions route only
+  checks that someone is logged in. Whether the guest login is switched
+  on in Vercel (GUEST_EMAIL) is not known. Small fix, Tony's call.
+- No password was changed this session. The admin login still checks
+  against ADMIN_PASSWORD in Vercel. (Tony asked, 30 Sep 2026.)
+
+HOW IT WENT (30 September 2026)
+- The first push of chunk 3b was stopped by the code check
+  ("npx tsc --noEmit") over one line; nothing went live until it was
+  fixed. The check-then-push command works as a safety net.
+
+STILL TO BUILD (PC AI's proposed order, not decided by Tony)
+- Chunk 4: formatting and attachments, in and out (attachments follow
+  the consent rule); email chains shown when an email is opened.
+- Small: the guest login fix above.
+- Long-term: every email saved to Tony's computer the moment it arrives.
+
+
+== ADDED 30 SEPTEMBER 2026, SESSION PC-5, PART 3 (CLOSE) ==
+
+GUEST LOGIN FIX IS LIVE (30 September 2026, PC-5)
+- Commit ddcc13f on main. Only the admin login sees Compose and Update KB
+  in the left menu, reaches the Update KB page (anyone else is sent to the
+  Inbox), and can save Adele's instructions. The read-only guest login
+  still reads mail and still gets Logout.
+- Live checks passed: a visitor saving Adele's instructions is refused
+  (401); a visitor opening Update KB is sent away (307).
+- This closes the "FOUND, NOT FIXED" guest item in PART 2.
+
+STATE AT CLOSE OF PC-5 (30 September 2026)
+- Live: consent step (6887097), chunk 3a (e5a6d47), chunk 3b (fbaa33e),
+  guest fix (ddcc13f). The code copy at ~/PublicComs/vc-email-code is the
+  same as GitHub main.
+- The test email to anthonydunn97202+consenttest2@gmail.com (Sent-31) is
+  still held. Tony may press its yes link or leave it private.
+- Sent to the JOHN thread (cross-reference note): the consent step, and
+  that John already counts as yes.
+- Next, not decided by Tony: chunk 4 (formatting and attachments in and
+  out, email chains when an email is opened); long-term, every email
+  saved to Tony's computer.
+- Still open, unchanged: how the DNS records disappeared; whether
+  AdnanRailsCraft still has Vercel access; Zoho plan expires 2026-12-09;
+  pull request #2 still open (Tony's call to close); Tony's note says the
+  AI can see Needpedia task cards, which the Adele on this page cannot
+  unless her instructions link a page listing them.
+
+
+== ADDED 2 OCTOBER 2026, SESSION PC-6, PART 1 ==
+
+FOUND (2 October 2026, PC-6)
+- A new sender's two emails (2 October 2026) were missing from the
+  public page. A read-only look inside Zoho found them in the Inbox, so
+  mail delivery is fine. The consent step was holding them, as built:
+  the sender is new and has not said yes. Tony then saw them logged in
+  as admin. The sender is not named here, because this file is public
+  and they have not said yes.
+- Nothing has been sent from VC to that sender yet, so they have not
+  seen a yes link. Tony's first email to them from the page carries it.
+- Copies of mail sent to VC@Needpedia.org also arrive in Tony's
+  Needpedia Gmail inbox. Gmail shows them as "mailed-by: needpedia.org".
+  What passes them along was not checked.
+- A helper script on Tony's computer, ~/Downloads/thread-PC/find_mail.py,
+  lists every email since 30 September 2026 in every Zoho folder and
+  changes nothing.
+
+TONY'S DIRECTION (2 October 2026, PC-6)
+- Consent should need only the volunteer's yes, not a yes from everyone
+  on a reply-all. His words: "I only need consent from the volunteer."
+  Not built. Open, put to Tony: who counts as the volunteer (PC AI's
+  suggestion: the sender of a received email, the person in the "To"
+  line of an email Tony sends; people copied do not count), and whether
+  other people on a reply-all show on the public page as they are or
+  get blanked out.
+- Note for later, his words: "Let's make it so I don't have to keep
+  logging back in on my home computer."
+
+SENT TO OTHER THREADS (2 October 2026, PC-6)
+- JOHN (updates post): John's "In done with Task1" email and its link.
+- NP1 (updates post): its sessions are named NP7, NP8 and so on, not
+  "NP1: 7".
+
+
+== ADDED 2 OCTOBER 2026, SESSION PC-6, PART 2 ==
+
+CHUNK 4a IS LIVE (2 October 2026, PC-6)
+- Commit "PC-6 chunk 4a" on main. Tony tested it: "everything's there".
+- Compose has a toolbar: B, I, U, six color dots, Link (select words,
+  click Link, paste the address) and Unlink. Mail goes out formatted, with
+  a plain-text copy. The consent note still goes at the bottom.
+- Opened emails keep bold, italic, underline, colors and links. Every
+  other style rule is dropped, so an email cannot cover or restyle the
+  page. An email's content is cleaned and shown in the browser only; the
+  server never hands it out raw.
+
+DECIDED BY TONY (2 October 2026, PC-6)
+- Attachments, choice A: files sent from the page are capped at 4 MB in
+  total per email, because Vercel takes at most 4.5 MB per request. Bigger
+  files go as a Google Drive link. Received files open at any size (sent
+  to the reader in pieces). No extra file storage.
+- Conversations: when an email is opened, earlier messages in the chain
+  show above it, each in full with its date, from, to and subject line.
+  His words: "I just wanna see what people were saying in the emails, and
+  dates. And 'to' and 'from' info. And subject line".
+- Sender name: "Needpedia Volunteer Coordination", not "Volunteer
+  Coordination". Built in chunk 4b, in the code; the EMAIL_FROM_NAME
+  setting in Vercel no longer decides it.
+
+TONY'S REQUESTS (2 October 2026, PC-6)
+- Mail from VC shows no picture next to it in Gmail. Options put to him:
+  a free Google account on the VC address with the logo as its picture,
+  or the paid brand-logo route (BIMI), or later with the letterhead.
+- For later, his words: "At a later point I'd like to add official looking
+  stuff like a letterhead and org contact info."
+
+FOUND (2 October 2026, PC-6)
+- Before chunk 4b, dragging a file onto the Compose page made the browser
+  download it. Chunk 4b attaches dropped files instead.
+- The code copy has a stray untracked file named "main" in its top
+  folder. Harmless: push commands add only the files they name.
+
+
+== ADDED 2 OCTOBER 2026, SESSION PC-6, PART 3 ==
+
+CHUNK 4b IS LIVE (2 October 2026, PC-6)
+- Commit "PC-6 chunk 4b" on main. Tony tested it: "Attachments are working".
+- Compose: "Attach files" button, or drop files anywhere on the page.
+  Each file listed with its size and an X to remove it, plus a running
+  total "of 4 MB"; over 4 MB it turns red and will not send.
+- Opened emails list their files at the bottom. Pictures and PDFs open in
+  the browser; every other kind only downloads, so a stranger's file can
+  never run as part of the page. Files are sent to the reader in pieces,
+  so received files of any size open. Files on held emails are "not
+  found" for everyone but the admin login.
+- Download address: /api/emails/<email id>/attachments/<number>.
+  Code: src/app/api/emails/[id]/attachments/[index]/route.ts and
+  getAttachment in src/services/emailService.ts.
+- Sender name is now "Needpedia Volunteer Coordination", set in
+  src/app/api/emails/send/route.ts.
+
+DECIDED BY TONY (2 October 2026, PC-6)
+- Picture next to VC mail in Gmail: choice A, free. A Google account made
+  with the VC@Needpedia.org address (no new Gmail), with the Needpedia logo
+  as its profile picture. Tony sets it up himself in a browser. Gmail users
+  will often see it; not guaranteed; other mail programs will not.
+  Not chosen: the paid brand-logo route (BIMI).
+
+CHUNK 4c, BEING BUILT (2 October 2026, PC-6)
+- Opening an email shows the earlier messages of its conversation above
+  it, oldest first, each in full with subject, from, to, date and files.
+  The page scrolls to the opened email; scroll up to read back.
+- Earlier messages are found two ways: the hidden reply links mail
+  programs add (In-Reply-To and References), and the same subject
+  (ignoring Re:, Fwd:) with at least one person in common and an earlier
+  date. Both Inbox and Sent are searched.
+- The old text mail programs paste under replies is tucked behind "show
+  quoted text".
+- Visitors never see earlier messages that are not public yet.
+- Replies sent from the page now carry those hidden reply links, so Gmail
+  and other mail programs show them as one conversation too. Reply on a
+  sent email now goes to its recipient, not to VC itself.
+- Code: src/app/api/emails/[id]/thread/route.ts and
+  getEarlierInConversation in src/services/emailService.ts.
+
+
+== ADDED 2 OCTOBER 2026, SESSION PC-6, PART 4 (CLOSE) ==
+
+CHUNK 4c IS LIVE (2 October 2026, PC-6)
+- Commit 44b0949 on main, deployed by Vercel, the page answers 200.
+  Built as described in PART 3. Not yet tested by Tony on a real
+  conversation: open John's "In done with Task1" (or "Re: Done with
+  Milestone 6") as admin and look for earlier messages above it. The page
+  keeps its copy of each email for about a minute, so wait a little first.
+- All three jobs Tony asked for are live: formatting (6d82d78),
+  attachments (64759e6), conversations (44b0949).
+- Code copy at ~/PublicComs/vc-email-code is the same as GitHub main. It
+  also holds an untracked stray file named "main"; harmless, never pushed.
+
+GMAIL PICTURE (2 October 2026, PC-6)
+- Tony made a Google account that uses the VC@Needpedia.org address (not a
+  new Gmail address) and set the Needpedia logo as its profile picture. It
+  shows on Google's own pages. A test email sent before the picture was
+  set showed no picture in Gmail. Google can take hours to a day to pass a
+  new picture on, and mail already sent keeps what it had.
+- Not yet checked with a fresh email to another Gmail account. Tony: "this
+  pic's the least important thing". Do not chase it. The paid brand-logo
+  route (BIMI) is not chosen; revisit with the letterhead.
+- The Google account's password is held by Tony. Not written here.
+
+STILL OPEN (2 October 2026, PC-6)
+- Consent change, Tony's words: "I only need consent from the volunteer."
+  Not built. Two questions waiting for Tony: (1) who counts as the
+  volunteer (PC AI's suggestion: the sender of a received email, the
+  person in the To line of an email Tony sends; people copied do not
+  count); (2) whether other people on a reply-all show on the public page
+  as they are, or are blanked out.
+- Tony has not yet replied to the new sender whose emails were held (see
+  PART 1). His first reply from the page carries the note and yes link.
+- Note for later, Tony's words: "Let's make it so I don't have to keep
+  logging back in on my home computer."
+- Later, Tony's words: "official looking stuff like a letterhead and org
+  contact info."
+- Long-term, unchanged: every email saved to Tony's computer the moment it
+  arrives.
+- The botskill post (edition 10) still calls the Needpedia thread "NP-1"
+  and still says to use Claude Code, which Tony paused on 29 September
+  2026. Not changed; Tony's call.
+- Tony's rough cost math, put to him at close (assumptions, not a
+  measurement): everything he has built with AI, about 500 to 1,000
+  developer hours, about $40,000 to $150,000 at US freelance rates, 3 to 6
+  months for one developer; this session's three jobs 5 to 10 times faster
+  than a developer's quote.
+
+SENT TO OTHER THREADS THIS SESSION (2 October 2026, PC-6)
+- JOHN (updates post): John's "In done with Task1" email and link.
+- NP1 (updates post): sessions named NP7, NP8, and so on.

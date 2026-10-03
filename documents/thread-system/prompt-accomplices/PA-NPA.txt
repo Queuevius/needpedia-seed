@@ -1,0 +1,237 @@
+PROMPT ACCOMPLICE — THREAD NPA — NEEDPEDIA PHONE APP
+Permanent file. Appended to during sessions, never rewritten.
+
+THIS FILE IS PUBLICLY READABLE ON THE WEB. NOTHING SENSITIVE GOES IN
+IT. Sensitive material goes in the private handoff prompt instead.
+
+The universal rules for working with Tony live in one place and are
+not repeated here:
+https://nexus.needpedia.org/working-with-tony.txt
+
+Online at: https://nexus.needpedia.org/PA-NPA.txt
+Devlog:    https://nexus.needpedia.org/DEVLOG-NPA.md
+Handoffs:  private, in Tony's own folder for this thread.
+
+-----------------------------------------------------------------
+WHAT THIS THREAD IS
+-----------------------------------------------------------------
+
+The Needpedia phone app. Its job is to make a person's phone buzz
+when something happens on needpedia.org that they asked to hear
+about.
+
+Tony's aim for himself: a button in the app that only a top-level
+admin (master_admin) sees, leading to a page listing everything he
+is set to be alerted about, with a switch per item for off / alert /
+alert plus more.
+
+Tony's phone is a Cricket Outlast, an ordinary Android phone. He has
+given up on his PinePhone Pro.
+
+-----------------------------------------------------------------
+WHERE EVERYTHING RUNS
+-----------------------------------------------------------------
+
+The app itself runs on the phone. There is no server for the app.
+Changing it means putting a new version on the phone.
+
+needpedia.org runs on Amazon's servers (AWS). The alert-sending code
+lives there. Murtaza reviews and deploys anything that goes onto
+needpedia.org. Tony pays him.
+
+Google's free notification service carries an alert from that server
+to the phone. It is always running on an Android phone and wakes the
+app, so the app does not need to be open. The project on Google's
+side is named update-needpedia, project number 550163998966. Whose
+Google account owns that project is UNCONFIRMED.
+
+Vercel hosts Tony's separate public inbox page project. It is not
+part of the phone app.
+
+-----------------------------------------------------------------
+THE CODE
+-----------------------------------------------------------------
+
+https://github.com/Queuevius/Needpedia-phone-app
+
+Built with Flutter, a toolkit for making one app that runs on both
+Android and iPhone.
+
+-----------------------------------------------------------------
+CONFIRMED BY READING THE CODE, 26 SEPTEMBER 2026
+-----------------------------------------------------------------
+
+Five small code files. Newest change 23 October 2024.
+
+Branches main, master and fixes/fcm-notification all point at the
+same last change. There is no extra notification work in the third
+branch. Nothing by Mubasher exists anywhere in the project.
+
+The published app signs phones up with the PRACTICE copy of the site
+(staging.needpedia.org), for both login and phone registration. An
+app built from this code would never get alerts from the live site.
+
+After login the app shows the Needpedia name, the tagline, one
+YouTube video, and a menu whose only item is Logout. It does not
+check what kind of account you have.
+
+BUG: if an alert arrives while the app is open on screen, nothing
+appears. The code for that case sits in its own file and is never
+switched on.
+
+BUG: if an alert arrives while the app is closed, the code tries to
+open the browser immediately instead of waiting for a tap.
+
+BUG: logging out does not unregister the phone, so it keeps
+receiving that account's alerts.
+
+Needpedia sends phone alerts for three things, not two: a new
+private message, an edit to a tracked post, and the once-a-day
+summary. Each depends on that account's notification setting being
+instant or daily.
+
+Every alert is only a count, for example "You have 1 notifications
+about posts". No post name and no link. Alerts about specific things
+need new sending code on the site whichever direction the app goes.
+
+A master_admin rank is a plain yes/no switch on the account record,
+and nothing in the code strips it out of what login sends back. So
+the app is very likely already told, and simply never looks.
+
+-----------------------------------------------------------------
+STILL UNVERIFIED
+-----------------------------------------------------------------
+
+Whether the live server has the Google credentials file at
+config/credentials/google-services.json in its shared folder.
+
+Whether the live server has the setting FCM_URL filled in.
+
+Whether Tony's own account has any phone registered to it, and
+whether against the live site or the practice one.
+
+Who owns the update-needpedia project on Google's side.
+
+Whether Mubasher's newer work exists anywhere.
+
+-----------------------------------------------------------------
+LOOSE ENDS
+-----------------------------------------------------------------
+
+The three live-server checks above. Route in is the Amazon browser
+terminal; the steps to get in live in the Nexus thread's prompt
+accomplice.
+
+Confirm who owns the update-needpedia Google project, and move it to
+an account Tony controls if it is not already.
+
+Ask Mubasher where his newer work is, or confirm there is none.
+
+Whether Mubasher's Amazon login still works.
+
+Whether to tell Mubasher his code access was removed. Tony's call.
+
+The two bugs above, once a direction is chosen.
+
+-----------------------------------------------------------------
+OPEN DESIGN QUESTIONS — NONE DECIDED
+-----------------------------------------------------------------
+
+Where the master_admin page lives: inside the app as app screens, or
+as a web page the app loads. Tony leans toward a web page, probably
+on the Nexus, and is open to other places.
+
+Who sends the alerts: needpedia.org as now, or Tony's own Nexus
+server.
+
+What "alert plus more" means on the per-item switch.
+
+Which extra admin features come with it. Ideas raised, none chosen:
+alerts when a real person signs up or posts or talks to an
+assistant; activity numbers inside the app; reading assistant
+conversations from the phone; sending one announcement to everyone
+with the app; hiding a post or blocking an account from the phone.
+
+-----------------------------------------------------------------
+ADDED 27 SEPTEMBER 2026 — SESSION A1
+-----------------------------------------------------------------
+
+THIS THREAD'S POSTS ON THE NEXUS
+Standing facts (this file): https://nexus.needpedia.org/PA-NPA.txt
+Devlog:      https://nexus.needpedia.org/public/DEVLOG-NPA.md
+Updates in:  https://nexus.needpedia.org/public/UPDATES-NPA.md
+Archive:     https://nexus.needpedia.org/public/UPDATES-NPA-ARCHIVE.md
+Handoffs and the clearing tool: ~/PhoneApp_private/ (private)
+Clearing tool: ~/PhoneApp_private/archive-updates-NPA.sh
+
+CHECKED AGAINST THE LIVE DATABASE, 27 SEPTEMBER 2026
+
+The live site and the practice site have SEPARATE databases on the one
+server: needpedia_production and needpedia_staging. The collector
+reads needpedia_production.
+
+Phones ARE registered against the live database. Tony's account
+(anthonydunn97202@gmail.com) has registrations, the most recent dated
+2026-04-02. Murtaza's, Adnan's and needpedia@gmail.com also have them.
+
+THEREFORE: the app installed on those phones was NOT built from the
+code published on GitHub, because that code registers phones against
+the practice site and the two databases are separate. Newer app work
+exists somewhere off GitHub. Finding it is the top loose end.
+
+Registration codes are 142 characters for the 2026 entries and 163 for
+the 2024 entries. The app changed between those dates.
+
+FOUR accounts have the master_admin switch set to yes, not one:
+anthonydunn97202@gmail.com, murtazazarkhwan@gmail.com,
+adnankhan@needpedia.com, needpedia@gmail.com. Any admin-only page is
+visible to all four.
+
+THE GOOGLE NOTIFICATION PROJECT
+
+update-needpedia, project number 550163998966, is confirmed to be in
+an account Tony controls. Whoever holds that project can send
+notifications to every phone with the app, so this mattered.
+
+The file ~/Downloads/google-services.json is NOT a sending key and NOT
+that project. It is an Android app config file for a different project
+called volunteer-app-db445, number 788369318908. A sending key for
+update-needpedia still has to be created in Google's console.
+
+DECIDED BY TONY, 27 SEPTEMBER 2026
+
+VC email alerts reach his phone by sending straight through Google's
+notification service using the update-needpedia project he owns. No
+new address on needpedia.org, no lead-developer deploy, not ntfy.
+Thread NPA owns the phone side; the VC side belongs to the Public Coms
+thread.
+
+The master_admin page will be a web page the app displays rather than
+screens built into the app, so it can change without rebuilding the
+app. Where it is hosted is STILL OPEN: the Nexus, Vercel, or a corner
+of AWS.
+
+STILL TRUE AND WORTH REPEATING: any page showing Needpedia data has to
+be able to read that data and confirm the viewer really is a
+master_admin. The site does not hand that out today, so one read-only
+address on needpedia.org, reviewed and deployed by Murtaza, is
+unavoidable — once. After that the page and its switches change freely.
+
+-----------------------------------------------------------------
+ADDED 27 SEPTEMBER 2026 — THE CROSS-REFERENCE POSTS EXIST
+-----------------------------------------------------------------
+
+The Nexus thread built them the same day they were proposed. They hold
+history from other threads that may affect this one. No action is ever
+needed on an entry, and entries are never cleared. Anything needing a
+response goes in the updates post instead.
+
+This thread's, to read:
+https://nexus.needpedia.org/public/CROSSREF-NPA.md
+
+The Nexus thread's, to write into when NPA work affects the Nexus:
+https://nexus.needpedia.org/public/CROSSREF-NEXUS.md
+
+Note: the first entry in CROSSREF-NPA.md points at the old handoff
+name A1-handoff.txt. It is NPA1-handoff.txt now. Entries are never
+edited, so the correction lives in a newer entry instead.

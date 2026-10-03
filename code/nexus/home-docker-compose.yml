@@ -1,0 +1,26 @@
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    user: "0:0"
+    restart: always
+    volumes:
+      - /home/clearcrow/Needpedia_Nexus:/srv
+      - ./nexus.db:/database.db
+    command: ["--noauth", "--database=/database.db", "--root=/srv", "--port=8080", "--address=0.0.0.0"]
+    networks:
+      - nexus-net
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel
+    restart: always
+    command: tunnel --no-autoupdate run --token REPLACE_ME== --url http://filebrowser:8080
+    networks:
+      - nexus-net
+    depends_on:
+      - filebrowser
+
+networks:
+  nexus-net:
+    driver: bridge

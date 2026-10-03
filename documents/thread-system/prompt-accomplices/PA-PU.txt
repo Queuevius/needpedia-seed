@@ -1,0 +1,220 @@
+== PROMPT ACCOMPLICE - PU THREAD (PROJECT UNSTOPPABLE) - started 28 September 2026 ==
+Public: anyone can read this at https://nexus.needpedia.org/PA-PU.txt
+Nothing sensitive goes in it. Security findings, passwords, keys and
+server addresses go in this thread's handoff prompts, in
+/home/clearcrow/PU_private/
+The universal rules for working with Tony live in
+https://nexus.needpedia.org/working-with-tony.txt and only there. Read
+it first. This file holds only what is true of this project.
+Append to this file during a session; never rewrite it. Date every entry.
+Web fetch tools can hand back an old copy of this file. Add ?v= and the
+session name to the address (for example PA-PU.txt?v=PU2), or have Tony
+print it: cat ~/Needpedia_Nexus/PA-PU.txt
+
+
+WHAT THIS THREAD IS (28 Sep 2026)
+Project Unstoppable. Make Needpedia's public knowledge outlive any
+single server, company, country or funding source: kept alive by
+volunteers with little upkeep, without private things leaking and
+without fakes getting in. It started from a "blueprint" written by
+other AIs (main server, volunteer backup servers, home/Raspberry Pi
+copies, instant push of new posts, catch-up after outages, Docker
+setup, automatic switch-over of the web address). Treat the blueprint
+as ideas, not facts. Tony only wants things that work and that he can
+rely on.
+John (volunteer developer) and Murtaza (lead developer) can help, at
+very different speeds.
+
+
+TONY'S REQUIREMENTS (28 Sep 2026)
+- A decentralized backup structure, including ID numbers that work
+  across every server when posts are added or changed.
+- Catching up after being offline is necessary.
+- No echo loop (a copy bouncing between servers forever).
+- A "stop sending" switch that actually works, or at least a way to
+  shut off whatever it is supposed to stop.
+- No fake posts getting in.
+- Private posts stay private.
+- Rate limits. Background uploads should be quick, cheap and
+  convenient.
+
+
+WHAT NEEDPEDIA'S CODE ALREADY HAS (read by PU 1, 28 Sep 2026)
+Read from the main branch (master), newest commit 26563af, 11 Sep 2026,
+at https://github.com/Queuevius/Needpedia
+NOT CONFIRMED: whether this is what runs on needpedia.org. The lead
+developer deploys by hand; asked him 28 Sep 2026.
+
+1. Push to other servers ("webhooks", built by the lead developer
+   June-Aug 2025). After someone creates a NEW post, the site sends a
+   copy to every address on a list the master admin keeps. Each list
+   entry has an address, a password, an on/off switch and an end date.
+   The end date is typed in by hand; sending to that address stops
+   after it. A blank end date means that address never gets anything.
+   Code: app/models/post.rb (send_to_webhooks),
+   webhook_configurations table.
+   Sends only new posts. Not edits, deletions, comments, users, groups,
+   task cards or tokens.
+2. A receiving door for posts from other servers:
+   /api/v2/webhooks/posts
+   (app/controllers/api/v2/webhooks/posts_controller.rb). It accepts a
+   post carrying the right password and saves it as a new post. There
+   is ONE password shared by every partner server. A master admin page
+   has an on/off switch for receiving.
+3. A "stop sending" setting exists in storage (webhook_settings), but
+   nothing in the code reads it.
+4. Fediverse link (Mastodon-type sites, built Mar-May 2025). Outside
+   accounts can find, follow and be followed by Needpedia users, and
+   Needpedia users get a Fediverse feed. Sending Needpedia posts OUT to
+   followers is switched off in the code (two lines turned into notes
+   in post.rb). That outward sender already skips private posts and
+   uses the background worker, so turning it on is small, but it is
+   untested since May 2025 and needs the lead developer's review.
+5. A reading door: GET /api/v2/posts gives back every post in one
+   reply. No pages, no "since when".
+6. Docker packaging (Dockerfile, docker-compose.yml). Fresh builds
+   currently fail (see FROM OTHER THREADS).
+7. Useful foundations already there: deleted posts are hidden, not
+   erased (deleted_at); edit history is kept (post_versions table); a
+   background worker (Sidekiq) and a timer for scheduled jobs
+   (sidekiq-cron) are installed; the database is PostgreSQL.
+
+
+PROBLEMS FOUND IN IT (PU 1, 28 Sep 2026)
+- Echo loop. A received post is saved as a new post, which fires the
+  sender again. Two servers pointed at each other bounce every post
+  back and forth forever, making duplicates each time.
+- A dead backup slows the main site. Copies are sent while the person
+  waits for their post to save, with no time limit set.
+- ID numbers do not match between servers. A copy says "user #57,
+  subject #12"; on another server those numbers mean someone else or
+  nothing. Only works between exact database copies.
+- The stop-sending switch is not wired up (see 3 above).
+- The reading door hands out the whole site at once.
+- One shared password for every partner: you cannot cut off one bad
+  server without cutting off all of them.
+- SECURITY: severe problems were also found on 28 Sep 2026 and sent
+  privately to the lead developer. Details stay in the private
+  handoff. Do not describe them in any public file until they are
+  fixed.
+
+
+THE STAIRCASE PLAN (proposed by PU 1, 28 Sep 2026; Tony has NOT
+chosen how far up to go)
+Each step is useful on its own.
+Step 0. Close the security problems. Needed whatever else happens.
+Step 1. "Readable anywhere." A nightly copy of all public pages as an
+  offline file and plain web pages, hosted free anywhere, carried on a
+  USB stick, or served from a Raspberry Pi. Needs no change to
+  Needpedia's code. Nothing to hack or patch. Copies can be a day old
+  and nobody can post on them.
+Step 2. "Standby servers." Volunteers run the full site locked to
+  read-only, pulling down changes regularly. Needs worldwide IDs, a
+  "changes since" door, a read-only switch, a setup guide.
+Step 3. "Automatic switch-over." If needpedia.org stops answering,
+  visitors are sent to a standby. Cannot help if the domain name
+  itself is seized; backup addresses published in advance can.
+Step 4. "Many servers, everyone can post." Hardest: edit conflicts,
+  accounts across servers, spam, trust.
+People side: Step 1 needs volunteers who can click "upload". Steps 2-4
+need volunteers who keep servers patched for years. An abandoned,
+unpatched server is a risk to the network, not a backup.
+
+
+PROPOSED FIXES (PU 1 research, 28 Sep 2026; options, not decisions)
+- Worldwide IDs. Every post gets a long code made the moment it is
+  created (UUIDv7: any server can make one without asking anyone, no
+  clashes, sorts by time; built into PostgreSQL 18), plus a note of
+  which server it was born on. Links between posts travel as worldwide
+  IDs too. Fixes the ID problem and, with a "seen it already" check,
+  the echo loop.
+    TECHNICAL: backup receives post 0198c3f2-... from needpedia.org,
+    already has that ID, so it updates its copy instead of adding one,
+    and does not send it back.
+    WHAT PEOPLE SEE: Maria's water-filter guide exists once on every
+    server, and when she fixes a typo every copy gets the fix.
+- A "changes since" door, in pages, including edits and deletions
+  (possible because deletions and edit history are already recorded).
+- Sending moved to the background worker, with a short time limit and
+  automatic retries; the stop-sending switch wired up.
+- Signed messages instead of a plain password: the Standard Webhooks
+  specification (the sender signs message ID + time + body; the
+  receiver rejects mismatches and anything older than 5 minutes, so a
+  captured message cannot be replayed). One secret per partner server.
+  Optional public/private key version: a server can check a message is
+  genuine but cannot forge one.
+- One shared "is this shareable?" rule used by every outgoing path
+  (push, reading door, Fediverse, offline copies). Personal details
+  stripped.
+- Rate limits per server or per key, with rack-attack (a standard
+  add-on for Rails sites).
+
+
+TOOLS AND PRECEDENTS WORTH USING (PU 1, 28 Sep 2026)
+- Kiwix (free offline reader) and zimit (turns any website into one
+  offline file; runs in Docker). Kiwix Hotspot turns a Raspberry Pi
+  (3B+, 4, 5, 400, 500) into a wifi box serving about 20 devices with
+  no internet. That is the blueprint's local-network node and
+  emergency read-only mode, already built. Untested on Needpedia:
+  pages that load content after opening may not survive the copy.
+  https://github.com/openzim/zimit
+  https://get.kiwix.org/en/solutions/hotspots/
+- IPFS (file sharing where content is found by fingerprint, not web
+  address). Used for Turkish Wikipedia when Turkey blocked it (2017)
+  and for Myanmar (2021).
+  https://blog.ipfs.tech/2021-05-31-distributed-wikipedia-mirror-update/
+- Ibis, a federated wiki on the same protocol as Mastodon, with
+  conflict handling for simultaneous edits. Not a replacement; study
+  it for Step 4. https://github.com/Nutomic/ibis
+- A Tor address (.onion): free, no domain to buy or seize, very hard
+  to block. The Onion-Location setting makes Tor Browser offer it
+  automatically.
+- Cloudflare load balancing for switch-over, from about $5 a month.
+- PostgreSQL's built-in copying with filters ("logical replication"
+  with row filters) could feed standby servers only public rows. Needs
+  PostgreSQL 15 or newer; the project pins version 13, so it waits on
+  an upgrade. Only for operators Tony trusts personally.
+- A signed list of fallback addresses (onion, IPFS, backup domains)
+  inside every offline copy and on the Nexus, so people know where to
+  go before the main site vanishes.
+
+
+FROM OTHER THREADS (28 Sep 2026)
+- Needpedia's foundation is past its support dates (Debian 11,
+  PostgreSQL 13, Ruby 2.7.8, Node 12, Rails 6.0) and fresh Docker
+  builds fail. John's fix is on his branch, not yet in the main code:
+  https://github.com/eberechi10/Needpedia/tree/milestone6-testsite
+  Every backup server built from today's recipe inherits this, which
+  is one more reason to do Step 1 first.
+- John's test-site package (thread TS) is the closest existing thing
+  to running extra copies of Needpedia. https://nexus.needpedia.org/PA-TS.txt
+- Planned watchers for needpedia.org: a weekly build-from-scratch
+  check and a monthly support-date check. The same should apply to
+  every backup server.
+
+
+DECISIONS (Tony)
+- 28 Sep 2026: thread name PU, sessions PU 1, PU 2 and so on. Private
+  folder /home/clearcrow/PU_private/
+- 28 Sep 2026: next session (PU 2) designs a series of milestones John
+  can build with AI help ("vibe code") toward the optimized version of
+  this plan. John's own thread is consulted about his workflow.
+- 28 Sep 2026: the security findings go to the lead developer.
+- 29 Sep 2026: this prompt accomplice and the devlog made (session
+  PU 1, which ran 28-29 Sep 2026).
+
+
+OPEN QUESTIONS (28 Sep 2026)
+- How far up the staircase is the goal.
+- Is the webhook and Fediverse code live on needpedia.org, and which
+  PostgreSQL version runs there? Asked of the lead developer.
+- The Step 1 offline-copy pilot has not been run.
+
+
+THIS THREAD'S FILES
+  Prompt accomplice (this file): /home/clearcrow/Needpedia_Nexus/PA-PU.txt
+  Devlog:          https://nexus.needpedia.org/public/DEVLOG-PU.md
+  Updates:         https://nexus.needpedia.org/public/UPDATES-PU.md
+  Archive:         https://nexus.needpedia.org/public/ARCHIVE-PU.md
+  Cross-reference: https://nexus.needpedia.org/public/CROSSREF-PU.md
+  Private folder:  /home/clearcrow/PU_private/ (handoffs, anything sensitive)

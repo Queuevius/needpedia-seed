@@ -1,0 +1,199 @@
+== PROMPT ACCOMPLICE — TS THREAD (TEST SITES) — started 28 September 2026 ==
+Public: anyone can read this at https://nexus.needpedia.org/PA-TS.txt
+Nothing sensitive goes in it. Sensitive material goes in this thread's
+handoff prompts, in /home/clearcrow/TS_private/
+The universal rules for working with Tony live in
+https://nexus.needpedia.org/working-with-tony.txt and only there. Read
+it first. This file holds only what is true of this project.
+Append to this file during a session; never rewrite it. Date every entry.
+
+
+WHAT THIS THREAD IS (28 Sep 2026)
+John's self-hosted test-site package, and the improvements worth making
+to it. It turns one Linux machine into a small test server running
+several independent copies of Needpedia at once. Each copy has its own
+web address, its own database and its own cache. A copy sleeps when
+nobody is using it and wakes itself when somebody visits.
+
+Why it exists: volunteers need a place to show work in progress to
+Tony. GitHub Codespaces (GitHub's in-browser computer) was tried and
+rejected: a Codespace stops after 30 minutes of no use and its shared
+address dies with it, which is unworkable across an 8-hour time
+difference.
+
+
+WHERE IT IS (28 Sep 2026)
+Delivered by John on 26 September 2026 as his milestone 6, in the m6/
+folder of his branch:
+https://github.com/eberechi10/Needpedia/tree/milestone6-testsite
+Tony's instructions: m6/README-TONY.md in that folder.
+
+Three parts: a front door that reads the web address and sends the
+visitor to the right copy (Traefik); a doorman that starts and stops
+sleeping copies (Sablier, free and open source); and the Needpedia
+copies themselves. Also included: a per-copy setup file, a starter
+script, and a script that loads sample content.
+
+Status: not yet tested by Tony.
+
+
+DECISIONS (Tony, 27-28 September 2026)
+- Standalone. Volunteers show their work here. After Tony approves it,
+  they submit the code on GitHub for the lead developer's review. The
+  lead developer does not need to approve this package itself.
+- Nothing goes to the lead developer until the automatic part is built
+  and tested: a volunteer pushes work, and a copy appears at its own
+  address on its own, with nobody typing anything. Tony wants John to
+  build that part too.
+- Thread name TS. Its public posts use the name TS.
+
+
+KNOWN ROUGH EDGES (Tony asked John to fix these, 27 Sep 2026)
+- The example settings file hard-codes one local port, so a second copy
+  collides on it.
+- If the site starts before its database is ready, the database setup
+  is skipped. The instructions give a manual restart as the workaround
+  rather than a fix.
+- The commit with John's Debian fix also re-indents a lot of Dockerfile
+  lines that did not need touching. Tony asked John to strip that out.
+
+
+WHAT IT CAN'T DO YET (the list Tony brought, 28 Sep 2026)
+- A copy per branch, appearing on its own when someone pushes work.
+- Encrypted connections (https). Right now people would type passwords
+  in the clear. This must be fixed before it faces the open internet.
+- Sending email. Password resets and confirmations go nowhere.
+- Any access control. Anyone with the address can walk in.
+- Extras wanted later: the world map, a cheap AI with a spending limit,
+  video.
+- Cleaning up. Old copies pile up and eat disk until someone removes
+  them.
+- A plain limit on how many copies can run at once. Each copy is a
+  full site plus its own database.
+
+
+OPEN DESIGN QUESTION: WHICH MACHINE (Tony's call, not decided)
+The existing server was at 77% of a 15 gigabyte disk running production
+and staging, so this probably needs its own machine. Three ways:
+- A second small AWS machine alongside the existing one. Same account,
+  same bill, kept apart from the live site.
+- Tony's own hardware. No monthly cost, but it runs on his electricity
+  and internet, and it is down when his power is.
+- Squeezed onto the existing server. Cheapest, and the worst idea: a
+  runaway test copy could take the live site down with it.
+
+
+IDEAS TO WEIGH (not decided, 28 Sep 2026)
+- An AI reviewer for submitted code changes: CodeRabbit, free for
+  public projects. It reads each submitted change and posts comments on
+  it on GitHub. It would give the lead developer changes that have
+  already had one read, and give volunteers feedback before Tony looks.
+  Switching it on for the main project is Tony's and the lead
+  developer's decision. Tony also mentioned a feature showing which
+  changes depend on which; that could not be confirmed as CodeRabbit's
+  and may belong to a different tool.
+- Name ideas for it, or for a home-made version: Hopper, Porch,
+  Checkpoint, Second Look, Waystation, Bridge. (Not "Doorman": that is
+  already the nickname for the part that wakes and sleeps copies.)
+
+
+RELATED ELSEWHERE (28 Sep 2026)
+- Needpedia's Docker build fails for anyone building fresh, because
+  Debian 11 lost support on 31 Aug 2026. John's archive fix is on the
+  same branch, and the test copies carry it in their own recipe.
+- Once this runs, anything on the Nexus telling volunteers how to show
+  their work, including the dev onboarding botskill, needs updating.
+  Carried by the Nexus thread.
+- Project Unstoppable (thread PU) may look at this package as a
+  starting point for running extra copies of Needpedia.
+- John's AI studio conversations on the Nexus (the Ubuntu2 studio) can
+  be opened by Tony and asked questions about what John built.
+- This thread's public posts:
+  https://nexus.needpedia.org/public/UPDATES-TS.md
+  https://nexus.needpedia.org/public/UPDATES-TS-ARCHIVE.md
+  https://nexus.needpedia.org/public/CROSSREF-TS.md
+
+
+----- ADDED BY THE JOHN THREAD, SESSION JOHN 3, 30 September 2026 -----
+The JOHN thread designs improvements to the test sites while John works,
+and adds what it learns here as it goes.
+
+ARCHIVE ADDRESS (30 Sep 2026)
+This thread's archive is now
+https://nexus.needpedia.org/public/ARCHIVE-TS.md
+The UPDATES-TS-ARCHIVE.md address listed above is retired.
+
+TESTED BY TONY ON HIS DESKTOP, 28 SEPTEMBER 2026
+Full write-up:
+https://github.com/Queuevius/Needpedia/wiki/Needpedia-Test-Site-Package
+- Passed: the build (with John's Debian fix); sleeping and waking (the
+  waiting page with the retro loading line is the doorman's, not
+  Needpedia's; 15-minute idle timeout); two copies side by side with
+  separate databases; staying on the copy's own address after login.
+- Failed: on first start the site came up before its database was ready
+  and skipped creating its tables. Fixed by hand.
+- Not triggered but real: the example settings file hard-coded one
+  local port.
+- Not tested: https, email, access control, automatic copy creation,
+  cleanup of old copies.
+
+UPDATE, 30 SEPTEMBER 2026
+- John reports he fixed the database startup problem and the port
+  setting, and submitted the build fix to the main project on its own:
+  https://github.com/Queuevius/Needpedia/pull/195
+  (one file, 9 lines, not reviewed yet).
+- Tony re-tests John's updated package on his desktop in the JOHN
+  thread's next session. Milestone 6 is not done until Tony has run the
+  finished code himself.
+- John: any machine running this needs that fix merged and at least
+  4 GB of memory.
+
+DECIDED BY TONY, 30 SEPTEMBER 2026
+- WHICH MACHINE: Tony's own desktop for now, because it is fast and
+  cheap. A move to a server comes later.
+- A SPARE COPY ALWAYS WAITING: when copies are made automatically, one
+  copy is already set up, awake and ready. When a volunteer takes it, it
+  becomes theirs, and the system sets up a new spare for the next
+  person. Tony wants the spare fully awake (instant to use) if the
+  machine can afford the memory.
+
+STILL OPEN (30 Sep 2026)
+- How much memory one awake copy really uses. Measure on Tony's desktop
+  before deciding how many spares it can hold.
+- How long a copy belongs to a volunteer, and what happens to it when
+  they stop using it. Cleanup was never tested.
+
+
+----- ADDED BY THE JOHN THREAD, SESSION JOHN 4, 30 September 2026 -----
+
+MILESTONE 6 PASSED ON TONY'S DESKTOP (30 Sep 2026)
+- Build from scratch passed. Two brand-new copies (copy3, copy4) set up
+  their own databases on first start with no hand fix, took different
+  free ports, and both loaded through the front door. Details in
+  https://nexus.needpedia.org/PA-JOHN.txt
+- How to build: cd ~/m6-test && docker build -t needpedia-m6:latest .
+  ("docker compose ... build" builds nothing; the copies use that
+  ready-built image.)
+- The front door was restarted on 30 Sep so it keeps its downloaded
+  add-on in a saved spot (frontdoor_plugins).
+
+MEMORY, MEASURED (30 Sep 2026)
+One awake copy uses about 490 MB at idle: site 403 MB, database 70 MB,
+cache 17 MB. Tony's desktop had about 19 GB free, so it has room for a
+spare copy kept awake. Real use will push the number up.
+
+WHERE THE CODE IS (30 Sep 2026)
+Only in John's GitHub account (eberechi10/Needpedia, branch
+milestone6-testsite) and in ~/m6-test on Tony's desktop. Not in a
+repository Tony owns yet. Fix soon.
+
+STILL TRUE (30 Sep 2026)
+Not online: the copies can only be reached from Tony's desktop. No
+https, no lock on the door.
+
+DECIDED (Tony, 30 Sep 2026)
+John's longer-term focus is this package, starting with automatic
+copies with a spare always waiting.
+
+NOT CHECKED
+Whether the doorman puts copy3 and copy4 to sleep after 15 minutes.

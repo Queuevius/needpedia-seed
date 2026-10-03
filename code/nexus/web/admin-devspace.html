@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus Dev Space</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #eee; font-family: monospace; display: flex; flex-direction: column; height: 100vh; }
+  #topbar { background: #16213e; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #0f3460; flex-shrink: 0; }
+  #topbar h1 { font-size: 1rem; color: #e94560; letter-spacing: 2px; }
+  #topbar a { color: #aaa; text-decoration: none; font-size: 0.85rem; }
+  #topbar a:hover { color: #e94560; }
+  #terminal-wrap { flex: 1; }
+  #terminal-wrap iframe { width: 100%; height: 100%; border: none; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>NEXUS DEV SPACE</h1>
+  <a href="/gallery.html">&larr; Back to gallery</a>
+</div>
+
+<div id="terminal-wrap">
+  <iframe id="term-frame" src="/terminal/"></iframe>
+</div>
+
+</body>
+</html>

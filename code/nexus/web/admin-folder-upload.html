@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uploaded Files — Needpedia Nexus</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+  #topbar { background: #1a1d27; border-bottom: 1px solid #2e3148; padding: 12px 20px; display: flex; align-items: center; gap: 16px; }
+  #topbar h1 { font-size: 1.1rem; color: #a78bfa; font-weight: 600; }
+  #topbar a { color: #6b7280; text-decoration: none; font-size: 0.85rem; }
+  #topbar a:hover { color: #a78bfa; }
+  #main { display: flex; flex: 1; overflow: hidden; }
+  #left { width: 55%; border-right: 1px solid #2e3148; display: flex; flex-direction: column; padding: 20px; gap: 16px; overflow-y: auto; }
+  #right { flex: 1; display: flex; flex-direction: column; padding: 20px; gap: 12px; overflow-y: auto; }
+  #drop-zone {
+    border: 2px dashed #4c5280;
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #13162080;
+  }
+  #drop-zone.drag-over { border-color: #a78bfa; background: #1e1b4b80; }
+  #drop-zone.has-files { border-color: #10b981; background: #06201580; }
+  #drop-zone svg { margin-bottom: 12px; opacity: 0.5; }
+  #drop-zone p { color: #9ca3af; font-size: 0.95rem; }
+  #drop-zone p.big { font-size: 1.1rem; color: #d1d5db; margin-bottom: 8px; }
+  #file-input { display: none; }
+  #path-row { display: flex; gap: 8px; align-items: center; }
+  #path-row label { font-size: 0.8rem; color: #6b7280; white-space: nowrap; }
+  #target-path { flex: 1; background: #1a1d27; border: 1px solid #2e3148; border-radius: 6px; padding: 8px 12px; color: #e0e0e0; font-size: 0.85rem; font-family: monospace; }
+  #upload-btn {
+    background: #7c3aed; color: white; border: none; border-radius: 8px;
+    padding: 12px 24px; font-size: 1rem; cursor: pointer; transition: background 0.2s;
+  }
+  #upload-btn:hover { background: #6d28d9; }
+  #upload-btn:disabled { background: #374151; color: #6b7280; cursor: not-allowed; }
+  #progress-wrap { display: none; }
+  #progress-bar-bg { background: #1a1d27; border-radius: 99px; height: 8px; overflow: hidden; }
+  #progress-bar { height: 100%; background: #7c3aed; width: 0%; transition: width 0.3s; border-radius: 99px; }
+  #progress-label { font-size: 0.8rem; color: #6b7280; margin-top: 6px; }
+  #result-box { background: #1a1d27; border-radius: 8px; padding: 14px; font-size: 0.82rem; font-family: monospace; max-height: 220px; overflow-y: auto; display: none; border: 1px solid #2e3148; }
+  #result-box.ok { border-color: #10b981; }
+  #result-box.err { border-color: #ef4444; }
+  #result-box p { margin-bottom: 4px; }
+  .file-list-item { color: #9ca3af; padding: 1px 0; }
+  #file-count { font-size: 0.8rem; color: #6b7280; }
+
+  /* File browser */
+  #browser-header { display: flex; align-items: center; gap: 8px; }
+  #browser-header h2 { font-size: 0.95rem; color: #a78bfa; font-weight: 600; flex: 1; }
+  #refresh-btn { background: none; border: 1px solid #2e3148; color: #9ca3af; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer; }
+  #refresh-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+  #breadcrumb { font-size: 0.78rem; color: #6b7280; font-family: monospace; word-break: break-all; }
+  #up-btn { background: none; border: 1px solid #2e3148; color: #9ca3af; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer; display: none; }
+  #up-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+  #file-tree { flex: 1; overflow-y: auto; background: #13162080; border-radius: 8px; border: 1px solid #2e3148; }
+  .tree-row {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+    border-bottom: 1px solid #1e2035; cursor: pointer; transition: background 0.15s;
+    font-size: 0.85rem;
+  }
+  .tree-row:hover { background: #1e2240; }
+  .tree-row .icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+  .tree-row .name { flex: 1; color: #d1d5db; font-family: monospace; }
+  .tree-row.dir .name { color: #a78bfa; }
+  .tree-row .meta { font-size: 0.72rem; color: #4b5563; white-space: nowrap; }
+  .tree-row .dl-btn {
+    background: none; border: 1px solid #2e3148; color: #6b7280;
+    border-radius: 4px; padding: 2px 8px; font-size: 0.72rem; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .tree-row .dl-btn:hover { border-color: #10b981; color: #10b981; }
+  .tree-row .del-btn {
+    background: none; border: 1px solid #2e3148; color: #6b7280;
+    border-radius: 4px; padding: 2px 6px; font-size: 0.72rem; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .tree-row .del-btn:hover { border-color: #ef4444; }
+  #browser-empty { padding: 32px; text-align: center; color: #4b5563; font-size: 0.85rem; }
+  #auth-error { background: #1f0a0a; border: 1px solid #ef4444; border-radius: 8px; padding: 16px; color: #fca5a5; font-size: 0.9rem; display: none; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="/gallery.html">← Gallery</a>
+  <h1>📁 Uploaded Files</h1>
+  <span id="auth-status" style="font-size:0.8rem;color:#6b7280;margin-left:auto;"></span>
+</div>
+
+<div id="auth-error">Not logged in as admin. <a href="/gallery.html" style="color:#f87171;">Return to gallery</a> and enter edit mode first.</div>
+
+<div id="main">
+  <!-- LEFT: Upload panel -->
+  <div id="left">
+    <div id="drop-zone" id="drop-zone">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5">
+        <path d="M3 15v4a2 2 0 002 2h14a2 2 0 002-2v-4M7 10l5-5 5 5M12 5v10"/>
+      </svg>
+      <p class="big">Drop a folder here</p>
+      <p>or click to select a folder</p>
+      <input type="file" id="file-input" webkitdirectory multiple>
+    </div>
+
+    <div id="file-count"></div>
+
+    <div id="path-row">
+      <label>Save to:</label>
+      <input type="text" id="target-path" value="/home/clearcrow/Needpedia_Nexus/master_uploads">
+    </div>
+
+    <button id="upload-btn" disabled>Upload</button>
+
+    <div id="progress-wrap">
+      <div id="progress-bar-bg"><div id="progress-bar"></div></div>
+      <div id="progress-label">Preparing…</div>
+    </div>
+
+    <div id="result-box"></div>
+  </div>
+
+  <!-- RIGHT: File browser -->
+  <div id="right">
+    <div id="browser-header">
+      <h2>📂 Browse</h2>
+      <button id="up-btn">↑ Up</button>
+      <button id="refresh-btn">Refresh</button>
+    </div>
+    <div id="breadcrumb">/home/clearcrow/Needpedia_Nexus/master_uploads</div>
+    <div id="file-tree"><div id="browser-empty">Loading…</div></div>
+  </div>
+</div>
+
+<script>
+const TOKEN_KEY = 'np_admin_token';
+const token = sessionStorage.getItem(TOKEN_KEY);
+let currentPath = '/home/clearcrow/Needpedia_Nexus/master_uploads';
+let stagedFiles = [];
+
+// Auth check
+if (!token) {
+  document.getElementById('auth-error').style.display = 'block';
+  document.getElementById('main').style.display = 'none';
+} else {
+  document.getElementById('auth-status').textContent = 'admin';
+  initBrowser();
+}
+
+// ── Drop zone ──
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const uploadBtn = document.getElementById('upload-btn');
+const fileCount = document.getElementById('file-count');
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  handleDroppedItems(e.dataTransfer.items);
+});
+
+fileInput.addEventListener('change', () => {
+  stagedFiles = Array.from(fileInput.files).map(f => ({ file: f, path: f.webkitRelativePath || f.name }));
+  updateStaged();
+});
+
+async function handleDroppedItems(items) {
+  stagedFiles = [];
+  const promises = [];
+  for (const item of items) {
+    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+    if (entry) promises.push(walkEntry(entry, ''));
+  }
+  await Promise.all(promises);
+  updateStaged();
+}
+
+function walkEntry(entry, prefix) {
+  return new Promise(resolve => {
+    if (entry.isFile) {
+      entry.file(f => {
+        stagedFiles.push({ file: f, path: prefix + entry.name });
+        resolve();
+      });
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      const readAll = (acc) => {
+        reader.readEntries(entries => {
+          if (!entries.length) {
+            Promise.all(acc.map(e => walkEntry(e, prefix + entry.name + '/'))).then(resolve);
+          } else {
+            readAll(acc.concat(Array.from(entries)));
+          }
+        });
+      };
+      readAll([]);
+    } else { resolve(); }
+  });
+}
+
+function updateStaged() {
+  if (stagedFiles.length === 0) {
+    dropZone.classList.remove('has-files');
+    fileCount.textContent = '';
+    uploadBtn.disabled = true;
+    return;
+  }
+  dropZone.classList.add('has-files');
+  fileCount.textContent = `${stagedFiles.length} file${stagedFiles.length !== 1 ? 's' : ''} staged`;
+  uploadBtn.disabled = false;
+}
+
+// ── Upload ──
+uploadBtn.addEventListener('click', async () => {
+  if (!stagedFiles.length) return;
+  const targetPath = document.getElementById('target-path').value.trim();
+  uploadBtn.disabled = true;
+
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressBar  = document.getElementById('progress-bar');
+  const progressLabel = document.getElementById('progress-label');
+  const resultBox    = document.getElementById('result-box');
+
+  progressWrap.style.display = 'block';
+  resultBox.style.display    = 'none';
+  progressBar.style.width    = '5%';
+  progressLabel.textContent  = 'Zipping files…';
+
+  try {
+    const zip = new JSZip();
+    for (const { file, path } of stagedFiles) {
+      zip.file(path, file);
+    }
+    progressBar.style.width   = '30%';
+    progressLabel.textContent = 'Compressing…';
+
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      meta => {
+        const pct = 30 + Math.round(meta.percent * 0.4);
+        progressBar.style.width = pct + '%';
+        progressLabel.textContent = `Compressing… ${Math.round(meta.percent)}%`;
+      }
+    );
+
+    progressBar.style.width   = '72%';
+    progressLabel.textContent = 'Uploading…';
+
+    const url = `/folder-upload?path=${encodeURIComponent(targetPath)}`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'X-Admin-Token': token, 'Content-Type': 'application/zip' },
+      body: blob
+    });
+
+    progressBar.style.width   = '95%';
+    const data = await resp.json();
+    progressBar.style.width   = '100%';
+
+    resultBox.style.display = 'block';
+    if (data.ok) {
+      resultBox.className      = 'ok';
+      progressLabel.textContent = `Done — ${data.count} file${data.count !== 1 ? 's' : ''} uploaded to ${data.target}`;
+      resultBox.innerHTML = `<p style="color:#10b981;margin-bottom:8px;">✓ ${data.count} file${data.count !== 1 ? 's' : ''} uploaded to ${data.target}</p>` +
+        data.files.map(f => `<div class="file-list-item">${f}</div>`).join('');
+      stagedFiles = [];
+      updateStaged();
+      browse(currentPath);
+    } else {
+      resultBox.className = 'err';
+      progressLabel.textContent = 'Upload failed';
+      resultBox.innerHTML = `<p style="color:#ef4444;">✗ ${data.error || 'Unknown error'}</p>`;
+    }
+  } catch (err) {
+    resultBox.style.display = 'block';
+    resultBox.className     = 'err';
+    progressLabel.textContent = 'Upload failed';
+    resultBox.innerHTML = `<p style="color:#ef4444;">✗ ${err.message}</p>`;
+  }
+  uploadBtn.disabled = false;
+});
+
+// ── File browser ──
+function initBrowser() {
+  browse(currentPath);
+  document.getElementById('refresh-btn').addEventListener('click', () => browse(currentPath));
+  document.getElementById('up-btn').addEventListener('click', () => {
+    const parent = currentPath.replace(/\/[^/]+$/, '') || '/home/clearcrow';
+    browse(parent);
+  });
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+  return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+}
+
+async function browse(path) {
+  currentPath = path;
+  document.getElementById('breadcrumb').textContent = path;
+  document.getElementById('up-btn').style.display =
+    (path !== '/home/clearcrow/Needpedia_Nexus/master_uploads') ? 'block' : 'none';
+  const tree = document.getElementById('file-tree');
+  tree.innerHTML = '<div id="browser-empty">Loading…</div>';
+
+  try {
+    const resp = await fetch(`/admin-browse?path=${encodeURIComponent(path)}`, {
+      headers: { 'X-Admin-Token': token }
+    });
+    const data = await resp.json();
+    if (data.error) {
+      tree.innerHTML = `<div id="browser-empty" style="color:#ef4444">${data.error}</div>`;
+      return;
+    }
+    if (!data.entries.length) {
+      tree.innerHTML = '<div id="browser-empty">Empty folder</div>';
+      return;
+    }
+    tree.innerHTML = data.entries.map(e => `
+      <div class="tree-row ${e.type}" data-path="${e.path}" data-type="${e.type}">
+        <span class="icon">${e.type === 'dir' ? '📁' : '📄'}</span>
+        <span class="name">${e.name}</span>
+        <span class="meta">${e.type === 'file' ? formatSize(e.size) : ''}</span>
+        ${e.type === 'file' ? `<button class="dl-btn" data-path="${e.path}" data-name="${e.name}">↓</button>` : ''}
+        <button class="del-btn" data-path="${e.path}" data-name="${e.name}" data-type="${e.type}">🗑</button>
+      </div>
+    `).join('');
+
+    tree.querySelectorAll('.tree-row').forEach(row => {
+      row.addEventListener('click', e => {
+        if (e.target.classList.contains('dl-btn')) return;
+        if (row.dataset.type === 'dir') browse(row.dataset.path);
+        else if (row.dataset.type === 'file') viewFile(row.dataset.path, row.querySelector('.name').textContent);
+      });
+    });
+    tree.querySelectorAll('.dl-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        downloadFile(btn.dataset.path, btn.dataset.name);
+      });
+    });
+    tree.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        deleteItem(btn.dataset.path, btn.dataset.name, btn.dataset.type);
+      });
+    });
+  } catch (err) {
+    tree.innerHTML = `<div id="browser-empty" style="color:#ef4444">${err.message}</div>`;
+  }
+}
+
+function viewFile(path, name) {
+  const ext = name.split('.').pop().toLowerCase();
+  const viewable = ['png','jpg','jpeg','gif','webp','svg','pdf','txt','md','html'];
+  fetch(`/admin-file?path=${encodeURIComponent(path)}`, { headers: { 'X-Admin-Token': token } })
+    .then(r => r.blob())
+    .then(blob => {
+      const burl = URL.createObjectURL(blob);
+      if (viewable.includes(ext)) {
+        window.open(burl, '_blank');
+      } else {
+        const a = document.createElement('a');
+        a.href = burl;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      setTimeout(() => URL.revokeObjectURL(burl), 10000);
+    });
+}
+
+function deleteItem(path, name, type) {
+  const warn = type === 'dir'
+    ? `Delete folder "${name}" and ALL its contents? This cannot be undone.`
+    : `Delete "${name}"? This cannot be undone.`;
+  if (!confirm(warn)) return;
+  fetch('/admin-delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ path })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) browse(currentPath);
+    else alert('Delete failed: ' + (data.error || 'unknown error'));
+  })
+  .catch(err => alert('Delete failed: ' + err.message));
+}
+
+function downloadFile(path, name) {
+  const url = `/admin-file?path=${encodeURIComponent(path)}`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.setAttribute('download', name);
+  a.setAttribute('x-admin-token', token);
+  // fetch then blob-URL to carry token header
+  fetch(url, { headers: { 'X-Admin-Token': token } })
+    .then(r => r.blob())
+    .then(blob => {
+      const burl = URL.createObjectURL(blob);
+      a.href = burl;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(burl), 5000);
+    });
+}
+</script>
+</body>
+</html>

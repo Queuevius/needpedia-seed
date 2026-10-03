@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Needpedia Nexus</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --border2: #3a3a3a;
+    --text: #e8e8e8;
+    --muted: #888;
+    --accent: #c8ff00;
+    --accent-dim: rgba(200,255,0,0.12);
+    --font-sans: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .breadcrumb span { color: var(--border2); }
+
+  .breadcrumb a {
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .breadcrumb a:hover { color: var(--text); }
+  .breadcrumb .current { color: var(--text); }
+
+
+  /* ── Search bar ── */
+  .search-wrap {
+    display: none;
+    align-items: center;
+    margin-left: auto;
+    padding-left: 1.5rem;
+    flex-shrink: 0;
+  }
+  .search-wrap.visible { display: flex; }
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 0.35rem 0.65rem;
+    width: 160px;
+    max-width: 40vw;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+  header.hide-header { transform: translateY(-100%); transition: transform 0.25s ease; }
+  header { transition: transform 0.25s ease; }
+  /* ── Main ── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .item-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--border2);
+  }
+
+  /* ── Folder tiles ── */
+  .folder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+  }
+
+  .folder-tile {
+    background: var(--surface);
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    color: var(--text);
+    font-family: var(--font-sans);
+    transition: background 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .folder-tile:hover { background: var(--surface2); }
+
+  .folder-icon {
+    font-size: 28px;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+  }
+
+  .folder-name {
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .folder-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── File grid ── */
+  .file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+  }
+
+  .file-card {
+    background: var(--surface);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .file-card:hover { background: var(--surface2); }
+
+  .file-card:hover .file-overlay { opacity: 1; }
+
+  .file-thumb {
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .file-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .file-thumb-icon {
+    font-size: 36px;
+    color: var(--border2);
+    line-height: 1;
+  }
+
+  .file-info {
+    padding: 0.6rem 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .file-name {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-size {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .file-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(200,255,0,0.06);
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: none;
+  }
+
+  /* ── List view (articles/audio) ── */
+  .file-list {
+    border: 1px solid var(--border);
+  }
+
+  .file-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+    background: var(--surface);
+  }
+
+  .file-row:last-child { border-bottom: none; }
+  .file-row:hover { background: var(--surface2); }
+
+  .file-row-icon { font-size: 20px; color: var(--muted); flex-shrink: 0; }
+
+  .file-row-name {
+    flex: 1;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .file-row-size {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .copy-link {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.12s;
+    flex-shrink: 0;
+  }
+
+  .copy-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .copy-link.copied {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── Loading / error states ── */
+  .state-msg {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    padding: 3rem 0;
+    text-align: center;
+  }
+
+  /* ── Lightbox ── */
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    z-index: 1000;
+    flex-direction: column;
+  }
+
+  #lightbox.open { display: flex; }
+
+  .lb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .lb-filename {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60vw;
+  }
+
+  .lb-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .lb-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    transition: all 0.12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .lb-btn:hover {
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  .lb-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0 0 0.5rem;
+    transition: color 0.12s;
+  }
+
+  .lb-close:hover { color: var(--text); }
+
+  .lb-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .lb-body img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .lb-body video {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+  }
+
+  .lb-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff;
+  }
+
+  .lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 22px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .lb-nav:hover { background: var(--surface2); color: var(--text); }
+  .lb-nav.prev { left: 0.5rem; }
+  .lb-nav.next { right: 0.5rem; }
+  .lb-nav.hidden { display: none; }
+
+  .lb-footer {
+    padding: 0.6rem 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: var(--accent);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 20px;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 2000;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    header { padding: 1rem; }
+    main { padding: 1rem; }
+    .folder-grid { grid-template-columns: 1fr 1fr; }
+    .file-grid { grid-template-columns: 1fr 1fr; }
+    .lb-header { padding: 0.75rem 1rem; }
+    .lb-body { padding: 0.5rem; }
+  }
+
+  .edit-mode-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-family: var(--font-mono); font-size: 11px; padding: 4px 10px; cursor: pointer; letter-spacing: 0.05em; transition: all 0.12s; margin-left: 1rem; }
+  .edit-mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .edit-mode-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .drag-handle { cursor: grab; color: var(--muted); font-size: 16px; padding: 0 6px 0 0; user-select: none; flex-shrink: 0; }
+  .dragging { opacity: 0.4; }
+  .drag-over { outline: 2px solid var(--accent); }
+  .save-order-btn { display: none; margin: 1rem 0 0 0; background: var(--accent); color: #000; border: none; font-family: var(--font-mono); font-size: 12px; padding: 8px 20px; cursor: pointer; letter-spacing: 0.05em; }
+  .save-order-btn:hover { opacity: 0.85; }
+  .save-order-btn.visible { display: inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo" id="home-link">NEEDPEDIA NEXUS</span>
+  <button class="edit-mode-btn" id="edit-mode-btn" title="Toggle edit mode">&#9998; edit</button>
+  <nav class="breadcrumb" id="breadcrumb" aria-label="breadcrumb"></nav>
+  <div class="search-wrap" id="search-wrap"><input class="search-input" id="search-input" type="search" placeholder="search articles…" aria-label="Search articles"></div>
+</header>
+
+<main id="main"></main>
+
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="File viewer">
+  <div class="lb-header">
+    <span class="lb-filename" id="lb-filename"></span>
+    <div class="lb-actions">
+      <button class="lb-btn" id="lb-copy-btn" title="Copy link">&#128279; link</button>
+      <a class="lb-btn" id="lb-youtube" href="#" target="_blank" rel="noopener" style="display:none;">&#9654; youtube</a>
+      <a class="lb-btn" id="lb-download" href="#" download>&#11015; save</a>
+      <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+    </div>
+  </div>
+  <div class="lb-body" id="lb-body">
+    <button class="lb-nav prev hidden" id="lb-prev" aria-label="Previous">&#8249;</button>
+    <div id="lb-content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+    <button class="lb-nav next hidden" id="lb-next" aria-label="Next">&#8250;</button>
+  </div>
+  <div class="lb-footer" id="lb-footer"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const FOLDERS = [
+  { name: 'Images',   icon: '🖼', hint: 'photos & graphics' },
+  { name: 'Videos',   icon: '🎬', hint: 'video files' },
+  { name: 'Audio',    icon: '🎵', hint: 'audio files' },
+  { name: 'Mixed Media', icon: '🎨', hint: 'mixed media files' },
+  { name: 'articles', icon: '📄', hint: 'articles' },
+];
+
+const EXT = {
+  image: ['jpg','jpeg','png','gif','webp','svg','avif','bmp','tiff'],
+  video: ['mp4','webm','mov','avi','mkv','ogv','m4v'],
+  audio: ['mp3','ogg','flac','wav','aac','m4a','opus'],
+  pdf:   ['pdf'],
+  html:  ['html','htm'],
+  doc:   ['doc','docx','txt','md','csv','xls','xlsx','ppt','pptx'],
+};
+
+function extOf(name) {
+  return (name.split('.').pop() || '').toLowerCase();
+}
+
+function typeOf(name) {
+  const e = extOf(name);
+  for (const [t, exts] of Object.entries(EXT)) {
+    if (exts.includes(e)) return t;
+  }
+  return 'other';
+}
+
+function iconFor(name) {
+  const t = typeOf(name);
+  if (t === 'image') return '🖼';
+  if (t === 'video') return '🎬';
+  if (t === 'audio') return '🎵';
+  if (t === 'pdf')   return '📋';
+  if (t === 'html')  return '📰';
+  if (t === 'doc')   return '📝';
+  return '📎';
+}
+
+function fmtSize(bytes) {
+  if (!bytes || bytes < 0) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ── Nginx directory listing parser ──
+async function fetchDir(path) {
+  let base = path.endsWith('/') ? path : path + '/';
+  if (!base.startsWith('/')) base = '/' + base;
+  const ask = base.split('/').map(encodeURIComponent).join('/');
+  const res = await fetch(ask + '_list.txt?_=' + Date.now());
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  const items = [];
+  for (const raw of text.split('\n')) {
+    const href = raw.trim();
+    if (!href.startsWith(base)) continue;
+    const isDir = href.endsWith('/');
+    const name = href.slice(base.length).replace(/\/$/, '');
+    if (!name || name.includes('/')) continue;
+    if (items.some(x => x.name === name)) continue;
+    items.push({ name: name, href: href, isDir: isDir, size: 0 });
+  }
+  return items;
+}
+
+// ── State ──
+let currentFolder = null;
+let currentFiles  = [];
+let lbIndex       = -1;
+let lbFiles       = [];
+
+// ── Routing ──
+function getHash() {
+  const h = decodeURIComponent(location.hash.replace('#', ''));
+  return h || '';
+}
+
+function setHash(val) {
+  location.hash = val ? val.split('/').map(encodeURIComponent).join('/') : '';
+}
+
+function route() {
+  const h = getHash();
+  if (!h) {
+    showHome();
+    return;
+  }
+  // Check if it looks like a file path (has an extension)
+  const parts = h.split('/').filter(Boolean);
+  const last = parts[parts.length - 1] || '';
+  const hasExt = last.includes('.');
+  if (parts.length >= 2 && hasExt) {
+    const folder = parts.slice(0, parts.length - 1).join('/');
+    const file = parts[parts.length - 1];
+    showFolderThenFile(folder, file);
+  } else if (parts.length >= 1) {
+    showFolder(parts.join('/'));
+  } else {
+    showHome();
+  }
+}
+
+// ── Views ──
+function showHome() {
+  currentFolder = null;
+  updateBreadcrumb([]);
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="state-msg">Loading&hellip;</div>';
+
+  // Load folder counts in parallel
+  const promises = FOLDERS.map(f =>
+    fetchDir('/' + f.name + '/').then(items => ({...f, count: items.length})).catch(() => ({...f, count: null}))
+  );
+
+  Promise.all(promises).then(folders => {
+    folders = folders.concat([{ name: 'Project Seed', icon: '\u{1F331}', hint: 'start your own Needpedia', link: 'seed/index.html' }]);
+    const vol = sessionStorage.getItem('np_volunteer');
+    if (vol && !editMode) {
+      folders = folders.concat([
+        { name: 'AI Text Studio',  icon: '\u{1F916}', hint: 'volunteer writing assistant', studio: 'volunteer-text-studio.html' },
+        { name: 'AI Image Studio', icon: '\u{1F3A8}', hint: 'volunteer image generator',  studio: 'volunteer-image-studio.html' }
+      ]);
+    }
+    if (editMode) {
+      folders = folders.concat([
+        { name: 'Dev Log',      icon: '\u{1F4CB}', hint: 'project dev log',         adminLink: 'admin-devlog.html' },
+        { name: 'Dev Space',    icon: '\u{1F6E0}', hint: 'terminal & tools', adminLink: 'admin-devspace.html' },
+        { name: 'Admin Chat',   icon: '\u{1F4AC}', hint: 'multi-model, saved convos', adminStudio: 'admin-chat.html' },
+        { name: 'Image Studio', icon: '\u{1F3A8}', hint: 'AI image generator',      adminStudio: 'volunteer-image-studio.html' },
+        { name: 'Uploaded Files', icon: '\u{1F4C1}', hint: 'folder upload & file browser', adminLink: 'admin-folder-upload.html' },
+        { name: 'Activity',     icon: '\u{1F4C8}', hint: 'needpedia.org live activity',  adminLink: 'activity-monitor.html' },
+      ]);
+    }
+    main.innerHTML = '';
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+    hdr.innerHTML = '<span class="section-title">Collections</span>';
+    main.appendChild(hdr);
+
+    const grid = document.createElement('div');
+    grid.className = 'folder-grid';
+    folders.forEach(f => {
+      const tile = document.createElement('button');
+      tile.className = 'folder-tile';
+      tile.innerHTML = `
+        <div class="folder-icon">${f.icon}</div>
+        <div class="folder-name">${f.name}</div>
+        <div class="folder-meta">${f.count !== null ? f.count + ' items · ' : ''}${f.hint}</div>
+      `;
+      tile.addEventListener('click', () => {
+        if (f.link) {
+          window.location.href = '/' + f.link;
+        } else if (f.adminLink !== undefined) {
+          if (f.adminLink) window.location.href = '/' + f.adminLink;
+          else window.location.href = 'admin-devspace.html';
+        } else if (f.adminStudio) {
+          window.location.href = '/' + f.adminStudio + '?user=admin';
+        } else if (f.studio) {
+          const u = sessionStorage.getItem('np_volunteer');
+          window.location.href = '/' + f.studio + '?user=' + u;
+        } else {
+          setHash(f.name);
+        }
+      });
+      grid.appendChild(tile);
+    });
+    main.appendChild(grid);
+  });
+}
+
+async function showFolder(folderName) {
+  try { folderName = decodeURIComponent(folderName); } catch(e) {}
+  currentFolder = folderName;
+  updateSearch(folderName);
+  updateBreadcrumb([folderName]);
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="state-msg">Loading&hellip;</div>';
+
+  let items;
+  try {
+    items = await fetchDir('/' + folderName + '/');
+  } catch(e) {
+    main.innerHTML = `<div class="state-msg">Could not load /${folderName}/</div>`;
+    return;
+  }
+
+  const isArticleFolder = folderName === 'articles' || folderName.startsWith('articles/');
+  const thumbNames = new Set(items.filter(i => i.name.endsWith('.thumb.jpg')).map(i => i.name));
+  const dirs = items.filter(i => i.isDir);
+  const files = items.filter(i => !i.isDir
+    && !i.name.endsWith('.thumb.jpg')
+    && !i.name.endsWith('_order.json')
+    && !(isArticleFolder && typeOf(i.name) === 'image'));
+  const savedOrder = await loadOrder(folderName);
+  const orderedFiles = applyOrder(files, savedOrder);
+  currentFiles = orderedFiles;
+  lbFiles = orderedFiles;
+
+  main.innerHTML = '';
+  const hdr = document.createElement('div');
+  hdr.className = 'section-header';
+  hdr.innerHTML = `<span class="item-count">${files.length} files</span>`;
+  main.appendChild(hdr);
+
+
+  // Render subfolders
+  if (dirs.length > 0) {
+    const subList = document.createElement('div');
+    subList.className = 'file-list';
+    subList.style.marginBottom = '1px';
+    dirs.forEach(dir => {
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.setAttribute('role', 'button');
+      row.setAttribute('tabindex', '0');
+      row.innerHTML = '<span class="file-row-icon">📁</span><span class="file-row-name">' + dir.name + '</span>';
+      row.addEventListener('click', () => {
+        const subPath = folderName + '/' + dir.name;
+        setHash(subPath);
+      });
+      row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') row.click(); });
+      subList.appendChild(row);
+    });
+    main.appendChild(subList);
+  }
+
+  if (orderedFiles.length === 0) {
+    main.innerHTML += '<div class="state-msg">No files found.</div>';
+    return;
+  }
+
+  const isVisual = ['Images','Videos'].includes(folderName);
+
+  if (isVisual) {
+    const grid = document.createElement('div');
+    grid.className = 'file-grid';
+    orderedFiles.forEach((file, idx) => {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      card.dataset.filename = file.name;
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.title = file.name;
+
+      const thumb = document.createElement('div');
+      thumb.className = 'file-thumb';
+
+      if (typeOf(file.name) === 'image') {
+        const img = document.createElement('img');
+        img.src = file.href;
+        img.alt = file.name;
+        img.loading = 'lazy';
+        thumb.appendChild(img);
+      } else if (typeOf(file.name) === 'video') {
+        const thumbName = file.name.replace(/\.[^.]+$/, '.thumb.jpg');
+        if (thumbNames.has(thumbName)) {
+          const img = document.createElement('img');
+          img.src = '/' + folderName + '/' + encodeURIComponent(thumbName);
+          img.alt = file.name;
+          img.loading = 'lazy';
+          thumb.appendChild(img);
+        } else {
+          thumb.innerHTML = `<span class="file-thumb-icon">🎬</span>`;
+        }
+      } else {
+        thumb.innerHTML = `<span class="file-thumb-icon">${iconFor(file.name)}</span>`;
+      }
+
+      const info = document.createElement('div');
+      info.className = 'file-info';
+      info.innerHTML = `
+        <div class="file-name">${file.name}</div>
+        ${file.size ? `<div class="file-size">${fmtSize(file.size)}</div>` : ''}
+      `;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'file-overlay';
+
+      card.appendChild(thumb);
+      card.appendChild(info);
+      card.appendChild(overlay);
+
+      card.addEventListener('click', () => openLightbox(idx, folderName));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openLightbox(idx, folderName); });
+
+      grid.appendChild(card);
+    });
+    main.appendChild(grid);
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'save-order-btn';
+    saveBtn.textContent = 'save order';
+    main.appendChild(saveBtn);
+    if (editMode) {
+      saveBtn.classList.add('visible');
+      grid.querySelectorAll('.file-card').forEach(card => makeDraggable(card));
+      saveBtn.addEventListener('click', () => saveOrder(folderName, grid));
+    }
+  } else {
+    const list = document.createElement('div');
+    list.className = 'file-list';
+    orderedFiles.forEach((file, idx) => {
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.dataset.filename = file.name;
+      row.setAttribute('role', 'button');
+      row.setAttribute('tabindex', '0');
+      row.innerHTML = `
+        <span class="file-row-icon" aria-hidden="true">${iconFor(file.name)}</span>
+        <span class="file-row-name">${file.name}</span>
+        ${file.size ? `<span class="file-row-size">${fmtSize(file.size)}</span>` : ''}
+      `;
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-link';
+      copyBtn.textContent = 'link';
+      copyBtn.title = 'Copy direct link';
+      copyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const url = location.origin + '/' + encodeURIComponent(folderName + '/' + file.name);
+        navigator.clipboard.writeText(url).then(() => {
+          copyBtn.textContent = 'copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(() => { copyBtn.textContent = 'link'; copyBtn.classList.remove('copied'); }, 1500);
+        });
+      });
+      row.appendChild(copyBtn);
+      row.addEventListener('click', () => openLightbox(idx, folderName));
+      row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openLightbox(idx, folderName); });
+      list.appendChild(row);
+    });
+    main.appendChild(list);
+    const saveBtn2 = document.createElement('button');
+    saveBtn2.className = 'save-order-btn';
+    saveBtn2.textContent = 'save order';
+    main.appendChild(saveBtn2);
+    if (editMode) {
+      saveBtn2.classList.add('visible');
+      list.querySelectorAll('.file-row').forEach(row => {
+        const handle = document.createElement('span');
+        handle.className = 'drag-handle';
+        handle.textContent = '\u2807';
+        row.insertBefore(handle, row.firstChild);
+        makeDraggable(row);
+      });
+      saveBtn2.addEventListener('click', () => saveOrder(folderName, list));
+    }
+  }
+}
+
+async function showFolderThenFile(folderName, fileName) {
+  await showFolder(folderName);
+  const idx = lbFiles.findIndex(f => f.name === fileName);
+  if (idx !== -1) openLightbox(idx, folderName, false);
+}
+
+// ── Lightbox ──
+function openLightbox(idx, folderName, updateHash = true) {
+  lbIndex = idx;
+  const file = lbFiles[idx];
+  if (!file) return;
+
+  if (updateHash) {
+    setHash(folderName + '/' + file.name);
+  }
+
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('open');
+
+  renderLbContent(file, idx, folderName);
+  document.addEventListener('keydown', lbKeyHandler);
+}
+
+function renderLbContent(file, idx, folderName) {
+  document.getElementById('lb-filename').textContent = file.name;
+  document.getElementById('lb-youtube').style.display = 'none';
+
+  const dl = document.getElementById('lb-download');
+  dl.href = file.href;
+  dl.download = file.name;
+
+  const copyBtn = document.getElementById('lb-copy-btn');
+  copyBtn.onclick = () => {
+    const url = location.origin + '/' + encodeURIComponent((folderName || currentFolder) + '/' + file.name);
+    navigator.clipboard.writeText(url).then(() => toast('Link copied'));
+  };
+
+  const content = document.getElementById('lb-content');
+  content.innerHTML = '';
+
+  const t = typeOf(file.name);
+
+  if (t === 'image') {
+    const img = document.createElement('img');
+    img.src = file.href;
+    img.alt = file.name;
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = 'calc(100vh - 120px)';
+    img.style.objectFit = 'contain';
+    content.appendChild(img);
+  } else if (t === 'video') {
+    const youtubeLinks = {
+      'Raw Video V1.mp4': 'https://www.youtube.com/watch?v=OWwCKelYahk',
+      'Raw Video V2.mp4': 'https://www.youtube.com/watch?v=Emx7BQ1l33k',
+      'needpedia.mp4': 'https://www.youtube.com/watch?v=FMrzDkfelNw',
+      'needpedia 3.mp4': 'https://www.youtube.com/watch?v=8bVjfK05G2Q',
+      'needpedia 4.mp4': 'https://www.youtube.com/watch?v=EYf4caf2LzI',
+      '02 Needpedia Anim-4-6 BG White.mp4': 'https://youtu.be/Gn0elXX5RxA',
+      'BNN Marketting Needpedia Youtube video.mp4': 'https://youtu.be/Us4Oil_IfhQ',
+      'To QuestionGlass by UniqueAnimator (3).mp4': 'https://youtu.be/x6Nl9ZEe5CY',
+      'Final Draft New Homepage Video - White Background.mp4': 'https://www.youtube.com/watch?v=jeze6UEVydY'
+    };
+    const vid = document.createElement('video');
+    vid.src = file.href;
+    vid.controls = true;
+    vid.autoplay = false;
+    vid.style.maxWidth = '100%';
+    vid.style.maxHeight = 'calc(100vh - 120px)';
+    content.appendChild(vid);
+    const ytUrl = youtubeLinks[file.name];
+    const ytBtn = document.getElementById('lb-youtube');
+    if (ytUrl) {
+      ytBtn.href = ytUrl;
+      ytBtn.style.display = '';
+    } else {
+      ytBtn.style.display = 'none';
+      ytBtn.href = '#';
+    }
+  } else if (t === 'audio') {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'text-align:center; padding:2rem;';
+    wrap.innerHTML = `<div style="font-size:64px;margin-bottom:1.5rem;">🎵</div>
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-bottom:1.5rem;">${file.name}</div>`;
+    const aud = document.createElement('audio');
+    aud.src = file.href;
+    aud.controls = true;
+    aud.style.width = '100%';
+    aud.style.maxWidth = '400px';
+    wrap.appendChild(aud);
+    content.appendChild(wrap);
+  } else if (t === 'pdf') {
+    const iframe = document.createElement('iframe');
+    iframe.src = file.href;
+    iframe.title = file.name;
+    iframe.style.width = '100%';
+    iframe.style.height = 'calc(100vh - 120px)';
+    iframe.style.border = 'none';
+    content.appendChild(iframe);
+  } else if (t === 'html') {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'width:100%;height:calc(100vh - 120px);overflow-y:auto;background:#fff;color:#000;padding:2rem 3rem;box-sizing:border-box;';
+    wrap.id = 'article-content';
+    const searchBar = document.createElement('div');
+    searchBar.style.cssText = 'position:sticky;top:0;background:#fff;padding:0.5rem 0 0.75rem;display:flex;gap:0.5rem;align-items:center;border-bottom:1px solid #ddd;margin-bottom:1rem;z-index:10;transition:transform 0.25s ease;';
+    searchBar.innerHTML = '<input id="article-search" type="search" placeholder="Find in article..." style="flex:1;padding:0.35rem 0.65rem;font-size:13px;border:1px solid #ccc;border-radius:4px;outline:none;" /><span id="article-search-count" style="font-size:12px;color:#888;white-space:nowrap;"></span>';
+    wrap.appendChild(searchBar);
+    const articleBody = document.createElement('div');
+    articleBody.id = 'article-body';
+    articleBody.style.cssText = 'font-family:Georgia,serif;font-size:18px;line-height:1.85;max-width:820px;margin:0 auto;padding-bottom:4rem;';
+    wrap.appendChild(articleBody);
+    content.appendChild(wrap);
+    let lastScrollTop = 0;
+    wrap.addEventListener('scroll', function() {
+      const st = wrap.scrollTop;
+      if (st > lastScrollTop && st > 60) {
+        searchBar.style.transform = 'translateY(-110%)';
+      } else {
+        searchBar.style.transform = 'translateY(0)';
+      }
+      lastScrollTop = st;
+    }, { passive: true });
+    fetch(file.href).then(r => r.text()).then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      doc.querySelectorAll('script').forEach(s => s.remove());
+      articleBody.innerHTML = doc.body ? doc.body.innerHTML : html;
+      const folderPath = file.href.substring(0, file.href.lastIndexOf('/') + 1);
+      articleBody.querySelectorAll('img').forEach(img => {
+        const src = img.getAttribute('src');
+        if (src && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
+          img.src = folderPath + src;
+        }
+      });
+      const input = document.getElementById('article-search');
+      const counter = document.getElementById('article-search-count');
+      if (input) input.addEventListener('input', function() {
+        const q = this.value.trim();
+        articleBody.querySelectorAll('mark.find-hl').forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
+        articleBody.normalize();
+        if (!q) { counter.textContent = ''; return; }
+        const walker = document.createTreeWalker(articleBody, NodeFilter.SHOW_TEXT);
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        let count = 0;
+        nodes.forEach(node => {
+          const idx = node.textContent.toLowerCase().indexOf(q.toLowerCase());
+          if (idx === -1) return;
+          const mark = document.createElement('mark');
+          mark.className = 'find-hl';
+          mark.style.background = '#ffe066';
+          mark.style.color = '#000';
+          const after = node.splitText(idx);
+          after.splitText(q.length);
+          mark.textContent = after.textContent;
+          after.replaceWith(mark);
+          if (count === 0) mark.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          count++;
+        });
+        counter.textContent = count ? count + ' found' : 'not found';
+      });
+    });
+  } else {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'text-align:center;padding:2rem;';
+    wrap.innerHTML = `
+      <div style="font-size:56px;margin-bottom:1rem;">📎</div>
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-bottom:1.5rem;">${file.name}</div>
+      <a class="lb-btn" href="${file.href}" download="${file.name}">&#11015; Download file</a>
+    `;
+    content.appendChild(wrap);
+  }
+
+  const prev = document.getElementById('lb-prev');
+  const next = document.getElementById('lb-next');
+  const footer = document.getElementById('lb-footer');
+
+  prev.classList.toggle('hidden', idx <= 0);
+  next.classList.toggle('hidden', idx >= lbFiles.length - 1);
+  footer.textContent = `${idx + 1} / ${lbFiles.length}`;
+
+  prev.onclick = () => { lbIndex--; renderLbContent(lbFiles[lbIndex], lbIndex, folderName); setHash((folderName || currentFolder) + '/' + lbFiles[lbIndex].name); };
+  next.onclick = () => { lbIndex++; renderLbContent(lbFiles[lbIndex], lbIndex, folderName); setHash((folderName || currentFolder) + '/' + lbFiles[lbIndex].name); };
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  lb.classList.remove('open');
+  document.getElementById('lb-content').innerHTML = '';
+  document.removeEventListener('keydown', lbKeyHandler);
+  if (currentFolder) {
+    setHash(currentFolder);
+  } else {
+    setHash('');
+  }
+}
+
+function lbKeyHandler(e) {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft' && lbIndex > 0) { document.getElementById('lb-prev').click(); }
+  if (e.key === 'ArrowRight' && lbIndex < lbFiles.length - 1) { document.getElementById('lb-next').click(); }
+}
+
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lightbox').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeLightbox();
+});
+
+// ── Breadcrumb ──
+function updateBreadcrumb(parts) {
+  const el = document.getElementById('breadcrumb');
+  if (parts.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+  let html = '';
+  parts.forEach((p, i) => {
+    html += ' <span>/</span> ';
+    html += `<span class="current">${p}</span>`;
+  });
+  el.innerHTML = html;
+
+}
+
+document.getElementById('home-link').addEventListener('click', () => setHash(''));
+
+// ── Init ──
+window.addEventListener('hashchange', () => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) {
+    route();
+  }
+});
+route();
+
+// ── Hide header on scroll down, show on scroll up ──
+(function() {
+  let lastY = 0;
+  window.addEventListener('scroll', function() {
+    const y = window.scrollY;
+    const header = document.querySelector('header');
+    if (y > lastY && y > 60) {
+      header.classList.add('hide-header');
+    } else {
+      header.classList.remove('hide-header');
+    }
+    lastY = y;
+  }, { passive: true });
+})();
+// ── Article search ──
+function updateSearch(folderName) {
+  const wrap = document.getElementById('search-wrap');
+  const input = document.getElementById('search-input');
+  if (/articles/i.test(folderName)) {
+    wrap.classList.add('visible');
+  } else {
+    wrap.classList.remove('visible');
+    input.value = '';
+  }
+}
+document.getElementById('search-input').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  document.querySelectorAll('.file-row').forEach(row => {
+    const name = row.querySelector('.file-row-name');
+    if (!name) return;
+    row.style.display = (!q || name.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+});
+
+
+let editMode = false;
+let editPassword = null;
+const ORDER_SERVER = '';
+
+document.getElementById('edit-mode-btn').addEventListener('click', function() {
+  if (!editMode) {
+    const pw = prompt('Password:');
+    if (!pw) return;
+    // Check if volunteer password (Ubuntu1-Ubuntu10)
+    const volMatch = pw.match(/^Ubuntu(\d+)$/i);
+    if (volMatch) {
+      const num = parseInt(volMatch[1]);
+      if (num >= 1 && num <= 10) {
+        const username = 'volunteer' + num;
+        fetch('/volunteer-auth', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({username: username, password: pw})
+        }).then(r => {
+          if (r.ok) {
+            sessionStorage.setItem('np_volunteer', username);
+            toast('Studio unlocked');
+            showHome();
+          } else { toast('Wrong password'); }
+        }).catch(() => toast('Could not reach server'));
+        return;
+      }
+    }
+    // Otherwise try edit mode
+    fetch(ORDER_SERVER + '/save-order', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({password: pw, folder: '__check__', order: []})
+    }).then(r => {
+      if (r.ok) {
+        editPassword = pw;
+        fetch('/admin-auth', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({password: pw})
+        }).then(ar => ar.json()).then(ad => {
+          if (ad.success && ad.token) sessionStorage.setItem('np_admin_token', ad.token);
+        }).catch(() => {});
+        editMode = true;
+        document.getElementById('edit-mode-btn').classList.add('active');
+        document.getElementById('edit-mode-btn').textContent = 'done editing';
+        toast('Edit mode on');
+        route();
+      } else { toast('Wrong password'); }
+    }).catch(() => toast('Could not reach order server'));
+  } else {
+    editMode = false;
+    editPassword = null;
+    document.getElementById('edit-mode-btn').classList.remove('active');
+    document.getElementById('edit-mode-btn').innerHTML = '&#9998; edit';
+    route();
+  }
+});
+
+let dragSrc = null;
+function makeDraggable(el) {
+  el.setAttribute('draggable', 'true');
+  el.addEventListener('dragstart', e => { dragSrc = el; el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+  el.addEventListener('dragend', () => { el.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(e => e.classList.remove('drag-over')); });
+  el.addEventListener('dragover', e => { e.preventDefault(); if (dragSrc && dragSrc !== el) el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault(); el.classList.remove('drag-over');
+    if (!dragSrc || dragSrc === el) return;
+    const parent = el.parentNode;
+    const kids = [...parent.children];
+    const si = kids.indexOf(dragSrc), ti = kids.indexOf(el);
+    if (si < ti) parent.insertBefore(dragSrc, el.nextSibling);
+    else parent.insertBefore(dragSrc, el);
+  });
+}
+
+function saveOrder(folderPath, container) {
+  const order = [...container.children].map(el => el.dataset.filename).filter(Boolean);
+  fetch(ORDER_SERVER + '/save-order', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({password: editPassword, folder: folderPath, order: order})
+  }).then(r => r.json()).then(d => { if (d.ok) toast('Order saved'); else toast('Save failed'); })
+  .catch(() => toast('Could not reach order server'));
+}
+
+async function loadOrder(folderPath) {
+  try {
+    const r = await fetch('/' + folderPath + '/_order.json?_=' + Date.now());
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+function applyOrder(items, order) {
+  if (!order || !order.length) return items;
+  const map = new Map(items.map(i => [i.name, i]));
+  const sorted = [];
+  for (const name of order) { if (map.has(name)) { sorted.push(map.get(name)); map.delete(name); } }
+  for (const v of map.values()) sorted.push(v);
+  return sorted;
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-TRIAL 1 OF THE NEEDPEDIA PROJECT SEED. Incomplete on purpose:
+TRIAL 2 OF THE NEEDPEDIA PROJECT SEED. Incomplete on purpose:
 this copy tests how far someone gets with what exists so far.
 Read MISSING.txt for what isn't in here yet.
 

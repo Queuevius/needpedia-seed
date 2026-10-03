@@ -1,0 +1,74 @@
+The Thread System
+AI helpers that remember, share notes, and stay organized
+By Anthony (Tony) Brasher, founder of Needpedia.org  |  Anthonydunn97202@gmail.com
+The problem it solves
+AI assistants like ChatGPT, Claude and Gemini are powerful, but each conversation starts from scratch. When a chat ends, the AI forgets what you decided, what you already tried, and how you like things done. On any project that lasts more than a day, you end up repeating yourself, and important details quietly fall through the cracks.
+The thread system fixes that by keeping the AI's memory in plain written notes that live outside the AI. Any AI, from any company, can read those notes and pick up exactly where the last one left off.
+The idea in one paragraph
+Each area of work gets its own "thread": a series of AI conversations about one thing, such as a job search, a subject they want to learn, or a system they have to use online. Every thread keeps a short set of documents that act as its memory. At the end of each conversation, the AI writes a note for the next one called a “handoff prompt”. At the start of the next conversation, you give the AI the handoff prompt from the end of the last session, and it starts the beginning of a new one. 
+
+To help the AI in threads see information faster you can post articles online, it’s surprisingly easy to do, the only hard part was working around the fact AI system ‘cache’ info they find at URLs, so if you update something, the AI might not see it unless you alter the URL first. With powerful AI that’s merely another design challenge, one that’s already been solved with a few tricks below.
+
+One of the most important things to post is how you want AI to work with you, the thread system user. I created a custom “botskill post” for my own ideal workflow, you’re welcome to check mine out it has some very handy details, and will probably only continue to grow. The user instruction page tells every AI how to work with the person it is helping, and that includes notes about the thread system and reference sheets to various posts AI could potentially use, (your “botskill posts”. I have articles for my nonprofit posted too in case there’s anything a human might also want to see, but there’s a ton of things you want AI to do and you can add it all in posts that are each short enough that they don’t eat up your AIs tokens, or trigger context rot, while still having as much information posted as you want. You just have to break everything down into short relevant posts. Nothing depends on anyone remembering anything.
+The pieces, in plain words
+Thread. One ongoing area of work, carried across many AI conversations (called sessions). I currently run about a dozen: my job search, Needpedia's website, a phone app, a volunteer program, and more.
+Handoff prompt. A short note written at the end of each session, to start the next one: It tells the AI how threads work, what session it’s in, and where resources are, (including the post about the user and their ideal workflow). The handoff prompt never goes online so it technically can hold some private information. But again, after enough sessions, information can get lost so the use of private files is also encouraged.
+Prompt accomplice. This is where each thread stores public information. its rules, decisions, findings and loose ends. It is only ever added to, never erased, so nothing gets lost, (unless you need to take a moment to clean up old junk, you can always tell AI to do housekeeping or change workflows). It holds nothing private, so it can sit on a public web page any AI can read, which makes everything run much faster. 
+Botskill posts. These are posts for AI specifically.
+Updates and cross-reference pages. How threads pass messages to each other. If the website thread changes something the job search thread depends on, it leaves a dated note there. By giving you instructions via terminal.
+For things like job searches, a “Search log”. A record of every search an AI has already run, so the next session does not repeat it. Entries older than three weeks move to an archive automatically as the old search might turn up new results.
+Archive. Where old material goes, so the working pages stay short and quick to read, while nothing is ever thrown away. Storing text takes extremely little memory so an unbelievably long work history can be saved in just a fraction of a GB.
+Private files. Anything sensitive stays on my own computer, never online. The AI gives you terminal commands to access them.
+What it looks like in practice
+Here is one real session from my job search, shown two ways: what happens behind the scenes, and what a user actually experiences.
+
+Keeping private information private
+Many organizations, including WorkSource, handle information that must stay private: names, health details, disabilities, finances. The thread system is built around a simple split.
+Public notes hold only general things: procedures, decisions, how-to guides, lists of resources. Anyone can read them, and that is the point.
+Private information stays on the organization's own computers. The AI never reaches into those computers. Instead it hands the staff member a short typed instruction (a "terminal command") that displays a file on their own screen. The staff member then decides what, if anything, to share with the AI.
+A note on AI accounts and data
+When a program or website uses an AI directly, it connects with an "API key": a password-like code that lets software talk to an AI company's service, with the usage billed to whoever owns the key. Anything sent that way passes through that company's computers.
+Some services, such as OpenRouter, act as a middleman that connects to many AI companies through one key. That is convenient, but every request passes through the middleman's own servers too. Even when you choose servers in a region with strong privacy laws, the middleman still handles the data, so it is not truly private.
+For genuinely sensitive information there are two safer routes. The first is to run an AI on the organization's own servers, using freely available "open" AI models, so the information never leaves the building. The second is to use a major AI provider under a signed health-privacy agreement (in the US, a Business Associate Agreement, or BAA). Either choice is worth reviewing with the organization's IT and legal staff.
+What threads could look like at WorkSource
+These are starting ideas. The people doing the work would know best which threads would help most.
+Job seeker coaching. A thread per client, with private details kept on WorkSource's own systems. Each coaching session picks up where the last ended: goals, applications sent, follow-up dates, interview practice.
+Online systems help. A botskill post for each website or tool staff and clients use, with step-by-step guides an AI can walk anyone through, adjusted to how that person learns.
+Onboarding new staff. A thread that carries the training plan, common questions and local know-how, so new hires get consistent answers from day one.
+Recruiting and employer outreach. Threads tracking employer contacts, open positions, and which outreach efforts worked, so nothing depends on one person's memory.
+Training scholarships and paperwork. Checklists and deadlines for each funding program, with the AI flagging what is missing before anything is submitted.
+Workshops and outreach campaigns. Plans, materials and results kept in one place, so each campaign builds on the last one.
+Because the notes are shared across threads, a lesson learned in one area, such as a better way to explain a form, spreads to every thread at once. And a lesson learned by one staff member can go online for all others, possibly becoming useful without most staff members even knowing it exists. Anytime staff ‘learn to use’ something, that note can be incorporated into workflows without ending up with giant boring manuals no one will actually read. It literally just comes up whenever necessary and no one has to learn another little thing. And when one staff member leaves, all that information about how to use systems and do things stays.
+A note on education
+
+Where this is headed: the "bot council"
+The next step I call the ‘bot council’, it’s basically just a setup where the AIs running threads each get their own place online where they can message each other. Instead of update posts AI check when you start threads up, the AI can literally just IM each other, theoretically enabling even faster workflows. -If configured properly, (do it wrong and you’ll be waiting on 3 AIs to think every time you type something. The ideal setup is having one AI you’re talking to at a time with other AI being pinged when something relevant comes up. The AI you’re using for one thread can already lookup the resources available to others, so unless you’re working on multiple extremely complicated things at once, the AI you’re talking to can serve as the point person/contact while updates and other feedback are ported to relevant AIs if you wanna do something that affects them.
+See it for yourself
+All of these are plain-text pages anyone can open:
+The botskill post: how any AI is told to work with me
+https://nexus.needpedia.org/working-with-tony.txt
+A real prompt accomplice: my job search notebook
+https://nexus.needpedia.org/PA-JOBS.txt
+Jobs to apply for, and loose ends
+https://nexus.needpedia.org/jobsearch/to-apply.txt
+The search log
+https://nexus.needpedia.org/jobsearch/searchlog.txt
+Needpedia, the nonprofit platform this grew out of
+https://needpedia.org
+I'd be glad to walk through any of it, or help set up a first thread. Thank you for the work you do for others.
+
+
+
+
+
+
+
+*Notes on getting around caching (this is the "few tricks below" I promised above)
+AI tools save a copy of a web page the first time they open it, and for a while they hand back that saved copy instead of looking again. That keeps things fast, but if you just updated a post, the AI may read yesterday's version and never know. Four tricks get around it:
+The host says "don't keep a copy." The computer serving the posts attaches a short note to every page telling anything that opens it to check back for the newest version each time. Many tools respect it, though not all.
+A fresh tag on the address. Adding a question mark and something new to the end of an address (for example …/working-with-tony.txt?s=JOBS5) makes it look like a brand new page to the AI's tool, so it fetches it fresh. The page itself doesn't change. At the start of each session, a small script prints the botskill post's address with a new tag, so every session begins on the newest version.
+One address per post, always the newest edition. Before a post is updated, the old edition is copied into the thread's archive. Then the new one goes up at the same address, so links saved everywhere never break or go stale.
+The backup plan. If an AI still sees an old copy, or can't open web pages at all, the user prints the page in the terminal with one typed line and pastes it into the chat.
+
+*Also note that:
+The computer hosting botskills and other stuff for you, can also run ‘tool programs’ for AIs and users that might help. We're still in the early days of developing the thread system. But with the ability for AIs to trigger events simply by visiting a super specific URL, (which is already possible with existing tools), we could theoretically create "tools" that respond to those triggers by processing information and posting it on a predictable URL that the AIs can also read. That enables AI to trigger tools and take action without any new API keys at all. I just haven't had time to set it up yet.

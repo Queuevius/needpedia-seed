@@ -1,0 +1,40 @@
+# Needpedia Nexus
+
+Public document collection for Needpedia, an open-source nonprofit civic
+collaboration platform (needpedia.org). Everything listed here is a plain
+public page and may be fetched directly.
+
+Rebuilt 2026-09-29
+
+## Start here
+https://nexus.needpedia.org/start.html
+  Front door: what Needpedia is, how to get involved, contact addresses.
+
+## Collections
+https://nexus.needpedia.org/articles/index.html
+  Long-form articles, core facts, glossary, use cases, episodes (13 documents).
+https://nexus.needpedia.org/articles/index.txt
+  Same listing, plain text.
+
+https://nexus.needpedia.org/botskills/index.html
+  Behaviour guides for the Needpedia AI assistants (14 documents).
+https://nexus.needpedia.org/botskills/index.txt
+  Same listing, plain text.
+
+## Working with Tony, and the thread system
+https://nexus.needpedia.org/working-with-tony.html
+  How any AI works with Tony Brasher, Needpedia's founder, and where every
+  project thread keeps its prompt accomplice and its public updates posts.
+
+## Nonprofit records (public by intent)
+https://nexus.needpedia.org/Articles/Nonprofit%20Documents%20for%20Needpedia/
+  Articles of incorporation, bylaws, board members, conflict-of-interest policy.
+
+## Elsewhere
+https://www.needpedia.org  - the live platform
+https://github.com/Queuevius/Needpedia/wiki  - developer wiki
+
+## Contact
+Info@Needpedia.org - general
+Needpedia@gmail.com - general
+VC@Needpedia.org - volunteer coordination

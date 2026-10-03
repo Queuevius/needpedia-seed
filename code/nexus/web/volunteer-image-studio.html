@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Needpedia · AI Image Studio</title>
+<style>
+  :root {
+    --bg:       #0d0d0d;
+    --surface:  #1a1a1a;
+    --surface2: #242424;
+    --surface3: #2e2e2e;
+    --accent:   #4f8ef7;
+    --accent2:  #7c3aed;
+    --text:     #e8e8e8;
+    --muted:    #888;
+    --border:   #333;
+    --danger:   #e05252;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── Top bar ── */
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.2rem; height: 52px; display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+  .topbar a { color: var(--muted); text-decoration: none; font-size: .85rem; }
+  .topbar a:hover { color: var(--text); }
+  .topbar .sep { color: var(--border); }
+  .topbar .title { font-weight: 600; font-size: 1rem; color: var(--text); }
+  .topbar .user-badge { margin-left: auto; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: .25rem .85rem; font-size: .8rem; color: var(--muted); }
+
+  /* ── Login overlay ── */
+  #login-screen { position: fixed; inset: 0; background: var(--bg); display: none; align-items: center; justify-content: center; z-index: 100; }
+  .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 1rem; }
+  .login-box h2 { font-size: 1.2rem; text-align: center; }
+  .login-box p { font-size: .85rem; color: var(--muted); text-align: center; }
+  .login-box input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .7rem 1rem; color: var(--text); font-size: .95rem; width: 100%; }
+  .login-box input:focus { outline: none; border-color: var(--accent); }
+  .login-box button { background: var(--accent2); color: #fff; border: none; border-radius: 8px; padding: .75rem; font-size: .95rem; cursor: pointer; font-weight: 600; }
+  .login-box button:hover { opacity: .9; }
+  .login-error { color: var(--danger); font-size: .85rem; text-align: center; min-height: 1.2em; }
+
+  /* ── Main layout ── */
+  .studio { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── Sidebar ── */
+  .sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+  .sidebar-header { padding: .9rem 1rem; border-bottom: 1px solid var(--border); }
+  .sidebar-header span { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .history-list { padding: .5rem; display: flex; flex-direction: column; gap: .5rem; }
+  .history-thumb { border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid var(--border); }
+  .history-thumb img { width: 100%; display: block; }
+  .history-thumb .h-prompt { font-size: .72rem; color: var(--muted); padding: .4rem .6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--surface2); }
+  .history-empty { padding: 1rem; font-size: .8rem; color: var(--muted); text-align: center; }
+  .new-chat-btn { background: var(--accent2); color: #fff; border: none; border-radius: 6px; padding: .3rem .7rem; font-size: .8rem; cursor: pointer; }
+  .new-chat-btn:hover { opacity: .9; }
+
+  /* ── Main panel ── */
+  .main-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── Model selector ── */
+  .model-bar { padding: .6rem 1.2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; background: var(--surface); flex-shrink: 0; flex-wrap: wrap; }
+  .model-bar label { font-size: .8rem; color: var(--muted); }
+  .model-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: .3rem .8rem; font-size: .8rem; cursor: pointer; }
+  .model-btn.active { border-color: var(--accent2); color: var(--accent2); background: var(--surface3); }
+  .model-btn:hover:not(.active) { border-color: var(--muted); }
+
+  /* ── Output area ── */
+  .output-area { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 1rem; }
+  .output-img { max-width: 100%; max-height: 60vh; border-radius: 12px; border: 1px solid var(--border); display: block; }
+  .output-text { font-size: .85rem; color: var(--muted); max-width: 600px; text-align: center; white-space: pre-wrap; }
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--muted); gap: .5rem; }
+  .empty-state .icon { font-size: 2.5rem; }
+  .empty-state p { font-size: .9rem; }
+  .generating { color: var(--muted); font-style: italic; font-size: .9rem; }
+
+  /* ── Input bar ── */
+  .input-bar { padding: 1rem 1.2rem; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; display: flex; gap: .75rem; align-items: flex-end; }
+  .input-bar textarea { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: .75rem 1rem; font-size: .9rem; resize: none; min-height: 44px; max-height: 120px; line-height: 1.5; font-family: inherit; }
+  .input-bar textarea:focus { outline: none; border-color: var(--accent2); }
+  .gen-btn { background: var(--accent2); color: #fff; border: none; border-radius: 10px; padding: 0 1.2rem; height: 44px; font-size: .9rem; cursor: pointer; font-weight: 600; white-space: nowrap; }
+  .gen-btn:hover { opacity: .9; }
+  .gen-btn:disabled { opacity: .4; cursor: default; }
+</style>
+</head>
+<body>
+
+<!-- Login screen -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>🎨 AI Image Studio</h2>
+    <p>Needpedia Volunteer Access</p>
+    <input type="text" id="login-user" placeholder="Username" autocomplete="username">
+    <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password">
+    <button onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-err"></div>
+  </div>
+</div>
+
+<!-- Top bar -->
+<div class="topbar">
+  <a href="/">← Nexus</a>
+  <span class="sep">·</span>
+  <span class="title">AI Image Studio</span>
+  <span class="user-badge" id="user-badge">not signed in</span>
+  <button id="logout-btn" onclick="logoutStudio()" style="margin-left:.5rem; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:.25rem .85rem; font-size:.8rem; color:var(--muted); cursor:pointer;">Logout</button>
+</div>
+
+<!-- Studio -->
+<div class="studio" id="studio" style="display:none">
+  <div class="sidebar">
+    <div class="sidebar-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>History</span>
+      <button class="new-chat-btn" onclick="newSession()">+ New</button>
+    </div>
+    <div class="history-list" id="history-list">
+      <div class="history-empty">No images yet</div>
+    </div>
+  </div>
+  <div class="main-panel">
+    <div class="model-bar">
+      <label>Model:</label>
+      <button class="model-btn active" data-model="google/gemini-3-pro-image-preview" onclick="setModel(this)">Nano Banana Pro (Google)</button>
+      <button class="model-btn" data-model="openai/gpt-5.4-image-2" onclick="setModel(this)">GPT Image 2 (OpenAI)</button>
+      <button class="model-btn" data-model="black-forest-labs/flux.2-pro" onclick="setModel(this)">FLUX.2 Pro</button>
+    </div>
+    <div class="output-area" id="output-area">
+      <div class="empty-state" id="empty-state">
+        <div class="icon">🎨</div>
+        <p>Enter a prompt and generate an image</p>
+      </div>
+    </div>
+    <div class="input-bar">
+      <textarea id="prompt-input" placeholder="Describe the image you want to generate…" rows="1"></textarea>
+      <button class="gen-btn" id="gen-btn" onclick="generateImage()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const OR_KEY = 'REPLACE_ME';
+
+let currentUser   = null;
+let selectedModel = 'google/gemini-3-pro-image-preview';
+let imageHistory  = [];
+let currentSessionId = null;
+
+function newSessionId() {
+  return 'imgsess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+// ── Login ──
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-err');
+  err.textContent = '';
+  if (!username || !password) { err.textContent = 'Enter username and password.'; return; }
+  try {
+    const r = await fetch('/volunteer-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    if (r.ok) {
+      currentUser = username;
+      sessionStorage.setItem('np_volunteer', username);
+      showStudio();
+    } else {
+      err.textContent = 'Invalid credentials.';
+    }
+  } catch(e) {
+    err.textContent = 'Could not reach server.';
+  }
+}
+
+function logoutStudio() {
+  sessionStorage.removeItem('np_volunteer');
+  window.location.href = '/';
+}
+
+function showStudio() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('studio').style.display = 'flex';
+  const m = (currentUser || '').match(/(\d+)/);
+  document.getElementById('user-badge').textContent = m ? ('Volunteer Studio ' + m[1]) : currentUser;
+  currentSessionId = newSessionId();
+  const saved = sessionStorage.getItem('np_imghistory_' + currentUser);
+  if (saved) { imageHistory = JSON.parse(saved); renderHistory(); }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const urlUser = params.get('user');
+  if (urlUser) { sessionStorage.setItem('np_volunteer', urlUser); currentUser = urlUser; showStudio(); }
+  else {
+    const saved = sessionStorage.getItem('np_volunteer');
+    if (saved) { currentUser = saved; showStudio(); }
+    else { document.getElementById('login-screen').style.display = 'flex'; }
+  }
+  const ta = document.getElementById('prompt-input');
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  });
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generateImage(); }
+  });
+});
+
+// ── Model ──
+function setModel(btn) {
+  document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedModel = btn.dataset.model;
+}
+
+// ── New session ──
+function newSession() {
+  currentSessionId = newSessionId();
+  const area = document.getElementById('output-area');
+  area.innerHTML = '<div class="empty-state" id="empty-state"><div class="icon">🎨</div><p>Enter a prompt and generate an image</p></div>';
+  document.getElementById('prompt-input').value = '';
+  document.getElementById('prompt-input').style.height = 'auto';
+}
+
+// ── Generate ──
+async function generateImage() {
+  const prompt = document.getElementById('prompt-input').value.trim();
+  if (!prompt || !currentUser) return;
+
+  const btn = document.getElementById('gen-btn');
+  const area = document.getElementById('output-area');
+  btn.disabled = true;
+  area.innerHTML = '<p class="generating">Generating image…</p>';
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + OR_KEY,
+        'HTTP-Referer': 'https://nexus.needpedia.org',
+        'X-Title': 'Needpedia Volunteer Image Studio'
+      },
+      body: JSON.stringify({
+        model: selectedModel,
+        messages: [{ role: 'user', content: prompt }],
+        modalities: selectedModel.startsWith('black-forest-labs/') ? ['image'] : ['image', 'text']
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    const data = await r.json();
+    console.log('OR raw:', JSON.stringify(data));
+    if (data.error) {
+      document.getElementById('output-area').innerHTML =
+        '<pre style="white-space:pre-wrap;color:#c00">DEBUG ERROR:\n' +
+        JSON.stringify(data.error, null, 2) + '</pre>';
+      document.getElementById('gen-btn').disabled = false;
+      return;
+    }
+    const choice = data.choices?.[0];
+    const content = choice?.message?.content;
+    const images  = choice?.message?.images;
+
+    let imgUrl  = null;
+    let caption = null;
+
+    if (Array.isArray(images) && images.length) {
+      imgUrl = images[0]?.image_url?.url || images[0]?.url || null;
+    }
+
+    if (Array.isArray(content)) {
+      for (const part of content) {
+        if (!imgUrl && part.type === 'image_url') imgUrl = part.image_url?.url;
+        if (part.type === 'text') caption = part.text;
+      }
+    } else if (typeof content === 'string') {
+      caption = content;
+    }
+
+    area.innerHTML = '';
+    if (imgUrl) {
+      const img = document.createElement('img');
+      img.src = imgUrl;
+      img.className = 'output-img';
+      area.appendChild(img);
+      imageHistory.unshift({ prompt, imgUrl, model: selectedModel });
+      try {
+        sessionStorage.setItem('np_imghistory_' + currentUser, JSON.stringify(imageHistory.slice(0, 50)));
+      } catch (e) {
+        // Storage full: trim oldest entries until it fits.
+        let n = imageHistory.length;
+        while (n > 1) {
+          n--;
+          try {
+            sessionStorage.setItem('np_imghistory_' + currentUser, JSON.stringify(imageHistory.slice(0, n)));
+            break;
+          } catch (e2) { /* keep trimming */ }
+        }
+      }
+      renderHistory();
+      await logEntry({ type: 'image', model: selectedModel, prompt, imgUrl });
+      await saveImage(prompt, imgUrl);
+    }
+    if (caption) {
+      const p = document.createElement('p');
+      p.className = 'output-text';
+      p.textContent = caption;
+      area.appendChild(p);
+    }
+    if (!imgUrl && !caption) {
+      area.innerHTML = '<p class="output-text">No image returned. The model may not support image generation via this endpoint.</p>';
+    }
+  } catch(e) {
+    area.innerHTML = '<p class="output-text">Error: ' + e.message + '</p>';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── History ──
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!imageHistory.length) { list.innerHTML = '<div class="history-empty">No images yet</div>'; return; }
+  list.innerHTML = imageHistory.map(h => `
+    <div class="history-thumb" onclick="showHistoryItem('${escAttr(h.imgUrl)}', '${escAttr(h.prompt)}')">
+      <img src="${escAttr(h.imgUrl)}" alt="">
+      <div class="h-prompt">${escHtml(h.prompt)}</div>
+    </div>
+  `).join('');
+}
+
+function showHistoryItem(imgUrl, prompt) {
+  const area = document.getElementById('output-area');
+  area.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = imgUrl;
+  img.className = 'output-img';
+  area.appendChild(img);
+  const p = document.createElement('p');
+  p.className = 'output-text';
+  p.textContent = prompt;
+  area.appendChild(p);
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+async function saveImage(prompt, img_url) {
+  if (!currentSessionId) return;
+  try {
+    await fetch('/save-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username:   currentUser,
+        session_id: currentSessionId,
+        model:      selectedModel,
+        prompt:     prompt,
+        img_url:    img_url
+      })
+    });
+  } catch(e) {}
+}
+
+async function logEntry(entry) {
+  try {
+    await fetch('/volunteer-log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser, entry })
+    });
+  } catch(e) {}
+}
+</script>
+</body>
+</html>

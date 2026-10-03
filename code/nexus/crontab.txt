@@ -1,0 +1,3 @@
+# The scheduled jobs on Tony's computer, 2 October 2026.
+*/5 * * * * /home/clearcrow/Nexus_private/activity_monitor.sh >> /home/clearcrow/Nexus_private/activity_monitor.log 2>&1
+*/5 * * * * /usr/bin/python3 /home/clearcrow/Threads_private/make_tony_page.py >/dev/null 2>>/home/clearcrow/Threads_private/make_tony_page.log

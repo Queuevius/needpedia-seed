@@ -1,0 +1,734 @@
+== PROMPT ACCOMPLICE — NEXUS THREAD — 2026-09-21 ==
+Publicly readable: nothing sensitive goes in here (corrected 29 Sep 2026).
+The universal rules for working with Tony live in
+https://nexus.needpedia.org/working-with-tony.txt
+The NP-1 thread has its own folder and its own accomplice.
+Do not read or write across threads.
+
+MACHINE FACTS
+- Production server: 18.223.241.10, AWS EC2. Live site, practice
+  site and database all on one box. Disk 77% of 15GB in September.
+- Tony's desktop key (~/.ssh/id_ed25519, Oct 2025) is REFUSED by
+  that server as both deploy and ubuntu. Do not retry it. Way in:
+  AWS console > EC2 > Instances > tick instance > Connect >
+  EC2 Instance Connect > Connect. Browser terminal, no key.
+- Collector: ~/Nexus_private/activity_monitor.sh
+  Output: ~/Nexus_private/data/activity.json
+  Runs every 5 minutes. Old schedule saved at ~/crontab.bak-N40.
+  Backup: activity_monitor.sh.bak-N40
+- Activity page: ~/Needpedia_Nexus/activity-monitor.html
+  Backups: .bak-N40 (before rows), .bak-N40b (before rewrite)
+- Reading the live database from the desktop needs no login prompt.
+  Pattern used throughout N40:
+  source <(grep -E '^(DB_HOST|DB_USER|DB_NAME|PGPASSWORD|export PG)'
+  ~/Nexus_private/activity_monitor.sh) && psql -h "$DB_HOST"
+  -U "$DB_USER" -d "$DB_NAME" -Atc "YOUR QUESTION"
+- Claude Code is installed on Tony's machine and unused. Good fit
+  for reading the repo and editing Nexus files directly instead of
+  through paste boxes. Not a fit for design conversations.
+
+WHAT THE LIVE DATABASE HOLDS
+- chat_threads and chat_messages: every assistant conversation,
+  full question text, since Nov 2025. Confirmed on the live site.
+- Conversation labels are "Needpedia Assistant", "Needpedia
+  Greeter", "VC Email Assistant" - NOT Lotte, Florence, Adele.
+  Mapping unconfirmed; asked in the lead-dev email.
+- login_attempts holds failures only, by design. Never try to count
+  successful logins from the database. Independently re-verified by
+  NP-1 against commit 26563af.
+- Reader account has SELECT only. Its password sits in plaintext in
+  the collector script and is one of the five overdue rotations.
+
+THE DEPLOY LANDMINE (unresolved, blocking)
+config/deploy.rb sets deploy_to to /home/deploy/needpedia_staging
+with the production line commented out; production.rb and
+staging.rb both name 18.223.241.10. A production deploy could land
+in the practice folder. Two read-only checks written and waiting
+for the AWS browser terminal:
+  sudo grep -rnE "server_name|root |passenger_app_env"
+    /etc/nginx/sites-enabled/ /etc/nginx/conf.d/ 2>/dev/null
+  ls -la /home/deploy/ && for d in /home/deploy/*/current; do
+    echo "== $d"; cat "$d/REVISION" 2>/dev/null; done
+REVISION gives the deployed code version, comparable against GitHub
+to list every change a deploy would bring. Email sent to the lead
+developer 2026-09-08. No reply as of 2026-09-14. He is in Pakistan
+and takes days; batch anything else he is needed for.
+
+PHONE APP: moved to thread NPA (first called A). Its prompt accomplice:
+https://nexus.needpedia.org/PA-NPA.txt (corrected 29 Sep 2026)
+
+NEXT BUILD (Tony's stated want)
+Phone alert whenever something happens that is NOT background
+machine traffic, with a link to the activity page. The collector
+already holds every number every five minutes, so it can compare
+against the last run and send when a non-strange signal moves.
+Two delivery routes, undecided, ASK BEFORE CHOOSING:
+  - Through Google to the existing Needpedia app. Needs the key
+    file and the phone's registered address.
+  - Through ntfy, a free open service with its own app. About
+    twenty minutes, no Google. Not the Needpedia app.
+
+WORK HANDED OVER BY NP-1 (2026-09-14 brief)
+- Publish Capabilities 1.1 and Repo Map 1.0 on the Nexus: a home,
+  a tile, entries in the articles index and llms.txt.
+- Fix three glossary errors at
+  nexus.needpedia.org/articles/glossary.html
+    IDEA POST says "one or more problem posts" - it is exactly one.
+    OBJECTIVE says followers are notified on completion - no
+      completion state exists anywhere, so it cannot fire.
+    /IMPACT is written singular - the working path is /impacts.
+- Count mismatch: llms.txt claims 13 articles, the articles index
+  lists 4. Botskills count of 13 checks out. Index stamped
+  2026-07-03, llms.txt says rebuilt 2026-08-08. FIND OUT WHY BEFORE
+  CHANGING THE DIGIT - if a script generates these, the mismatch
+  means the script is stale or broken and correcting the number
+  hides it.
+- Build the bug-reporter URL on the Nexus. Report rides in the
+  part of the address after the question mark so an AI with no
+  email, account or form can file by fetching a link, and the same
+  link works when a person clicks it. Rate limit from day one.
+- Point the five-minute collector at that URL's hit count once it
+  exists.
+- NP-1 wants back: how the Nexus file layout works and where a new
+  article goes; whether llms.txt and the articles index are written
+  by hand or generated; which botskills overlap with capabilities
+  (taxonomy navigation, dev onboarding); anything in Tony's "about
+  Needpedia" folder describing what people DO with features.
+
+STILL OPEN FROM N40
+- AI disclosure text: the site already passes a first-visit flag to
+  the assistant, and each assistant's instruction sheet is editable
+  at master_admin/ai_prompts (versioned; a new version deactivates
+  the old). Tony is writing the wording himself.
+- The big "Last Action" line links to the recent posts list, not
+  the specific item, because the collector records what happened
+  and not which record. Collecting the id would fix it.
+- Sparklines - one tiny graph per row beside its numbers - proposed
+  as a better fit than one shared graph. Not started.
+- Strict overlap-to-white in the graph (rather than the additive
+  light effect shipped) is real overlap math, own session.
+
+ADDED 2026-09-21 — FOR THE MISSION: UPDATE NEEDPEDIA'S AI
+
+REFERENCE DOCUMENTS (what the AIs should agree with)
+  https://raw.githubusercontent.com/wiki/Queuevius/Needpedia/Needpedia-Capabilities.md
+  https://raw.githubusercontent.com/wiki/Queuevius/Needpedia/Needpedia-Repo-Map.md
+  https://nexus.needpedia.org/articles/glossary.html
+  https://nexus.needpedia.org/articles/core-facts.html
+  https://nexus.needpedia.org/botskills/
+  https://nexus.needpedia.org/start.html
+  https://nexus.needpedia.org/llms.txt
+Capabilities wins on what the software does. The glossary wins
+on what words mean.
+
+DISAGREEMENTS ALREADY KNOWN — CHECK THESE FIRST
+  - Glossary says an idea attaches to "one or more" problems.
+    It is exactly one.
+  - Glossary says followers are notified when an objective is
+    completed. Objectives have no completed state, so this
+    cannot happen.
+  - Glossary writes /impact. The working address is /impacts.
+  - llms.txt says the articles collection holds 13 documents;
+    the articles index lists 4. Find out whether a script makes
+    these files before changing the number — a stale script is
+    a different problem from a typo.
+  - The dev onboarding botskill may still say deploys are frozen
+    waiting on the lead developer. He has answered and is
+    deploying himself; volunteers still never deploy.
+    https://nexus.needpedia.org/botskills/dev-onboarding.html
+    It and the Repo Map should point at each other rather than
+    repeat each other.
+  - The site records assistant conversations under the labels
+    "Needpedia Assistant", "Needpedia Greeter" and "VC Email
+    Assistant", not Florence, Lotte and Adele. Which is which is
+    unconfirmed.
+  - Project Unstoppable, the server-to-server backup network, is
+    NOT in Capabilities. Tony asked the lead developer on
+    2026-09-21 whether it was ever built. Until he answers, no
+    AI may describe it as existing.
+  - Successful logins are not recorded anywhere. Any AI that
+    offers to look up someone's login history is wrong.
+
+STARTER QUESTIONS TO PUT TO EACH AI — a starting set, not a
+decision. Tony may add or cut.
+  - How many kinds of token are there, and what are they?
+  - Can an idea be attached to more than one problem?
+  - What happens when someone completes an objective?
+  - Where do I see someone's impacts?
+  - Can I make a task card without a group?
+  - How do the time bank and task cards connect?
+  - Is there a way to vote on ideas?
+  - What is Project Unstoppable?
+  - How do I report a bug?
+  - Can volunteers deploy code?
+Right answers per Capabilities: three tokens (note, question,
+debate); exactly one problem; nothing, there is no completed
+state; /impacts; no, groups only; they don't, separate systems;
+ratings 0-5 plus Lol ARE the voting; not confirmed to exist;
+info@needpedia.org; no, never.
+
+OPEN QUESTIONS ABOUT WHERE EACH AI'S KNOWLEDGE LIVES
+  - Florence and Lotte: master_admin/ai_prompts on the live
+    site. Confirmed.
+  - Adele works in the volunteer email app, which is a separate
+    project. Whether her instructions also live in that admin
+    page, or somewhere in the email app, is not known. Find out
+    before editing.
+  - The Nexus studios: no shared knowledge exists yet. Designing
+    it is part of this mission.
+
+A FIRST-VISIT DISCLOSURE BELONGS IN THIS WORK
+The site already tells the assistant when a person has never
+talked to it before. Tony wants that first reply to say
+conversations are recorded. Tony is writing the wording. Adding
+it is one edit per assistant on the admin page.
+
+FROM THE JOHN ONBOARDING THREAD — CODE-PICTURE TOOLS
+Free websites that read a public code project and show it as a
+picture or a wiki. John tested these in September 2026.
+  GitDiagram — works. A clickable box-and-arrow map of the code.
+    Helped John; Tony found it useless to a non-programmer. Best
+    for developers and for giving an AI context.
+    https://gitdiagram.com/Queuevius/Needpedia
+  DeepWiki — not set up. Says "Repository Not Indexed", probably
+    a one-time switch. Tony: reads like a wiki you'd fact-check
+    for a year.
+    https://deepwiki.com/Queuevius/Needpedia
+  Google Code Wiki — Needpedia not in its catalog. Wait.
+    https://codewiki.google
+  Gource View — works. Plays the project's whole history as an
+    animated growing tree with contributors flying around.
+    Fullscreen video mode, title card, music, closing
+    leaderboard, phone-shaped video. Looked plainer on John's
+    screen than expected, cause unknown.
+    https://schlunsen.github.io/gource-view/?repo=Queuevius/Needpedia
+  CodeCharta — untested. The project as a 3D city, files as
+    buildings. Built for non-coders. Needs one setup step on a
+    real computer.
+    https://codecharta.com/
+Tony's split: code maps are for developers and AI; eye candy is
+for pitches, crowdfunding, videos and volunteer morale.
+
+JOHN'S NEXT MILESTONE is being chosen. Likely: finishing the
+check of whether Needpedia runs on GitHub's free in-browser
+computer, or a read-only look at how posts keep edit history, as
+groundwork for letting Adele safely edit and delete task cards.
+== ADDED AT N41 CLOSE, 2026-09-21 ==
+(N41's handoff was mislabeled from a numbering slip; the session was N41. This file is correctly named for N42.)
+
+N41 DONE — volunteer studio no longer times out on long or research-heavy questions.
+- Cause: the web server gave up after ~1 minute waiting for the back-end program (a 504 timeout in its log); the studio then showed a jumbled "not valid JSON" error.
+- Fix: answers now arrive word by word as the AI writes them, so the connection never goes quiet long enough to be cut. The studio shows a plain-English message if something fails.
+- Also: the back-end program now handles requests side by side instead of one at a time, so one long answer no longer freezes everyone else.
+- Backups of the changed files: ~/Nexus_private/*.bak-N41. The two helper scripts that made the changes are also there (patch_server_N41.py, patch_studio_N41.py).
+
+CARRIED:
+- Admin chat still has the old ~1-minute limit. Same fix applies; not done yet.
+- Studio doors still unlocked (studio pages have no password). Now three sessions old.
+- Mission "Update Needpedia's AI" (make Florence, Lotte, Adele and the Nexus volunteer studios say the same true things) was not started at N41. The method and the two open design questions are in the N41 handoff and still stand: ask before fixing; compare against Needpedia Capabilities 1.1 and the glossary; fix at the source; then update each AI's instructions. Design questions: paste the documents in whole vs. a short list of where they live; where that knowledge lives on the Nexus so one edit updates every studio.
+- Phone alerts and the bug-report link: designed, waiting on Tony's choices.
+
+WORKING RULES LEARNED AT N41:
+- Code edits: never ask Tony to edit by hand. Short changes = one precise terminal command. Long changes = a helper script opened in gedit, saved in ~/Nexus_private/, then run with one short command. Long pasted terminal blocks break his terminal.
+- Helper scripts should stop without changing anything if they can't find the exact spot or if the change is already in.
+- Backups of any file holding keys go in ~/Nexus_private/, never in the public web folder.
+- Claude can reach anything on Tony's computer by giving him commands to run. Ask precise, narrow questions to save tokens.
+== SYSTEM CHANGE — 23 September 2026 ==
+
+Prompt accomplices now live at ONE permanent filename per thread.
+This thread's accomplice is:
+  /home/clearcrow/Nexus_private/PA-NEXUS.txt
+
+The old dated files stay where they are as history. Nothing appends
+to them anymore. Do not create a new dated accomplice.
+Reference sheets and any document pointing at an accomplice should
+point at the permanent filename above, never at a dated one.
+
+Append new rules, decisions and findings to this file AS THEY COME UP
+mid-session, not only at the end. If Tony has to say something twice
+across sessions, it wasn't captured properly.
+
+== WORKING RULES — added 23 September 2026 ==
+
+- Never give commands that move, rename or delete Tony's existing
+  files. Adding new files is fine. Other things already point at
+  current locations. If a file's location is needed, give him a
+  terminal command to find it rather than assuming.
+- Content Tony needs to keep comes as a downloadable file plus the
+  command that puts it in place — not as a block of text in chat for
+  him to save by hand.
+- Put steps in the order he will do them: downloads first, then the
+  terminal command that acts on them. Never a command above the thing
+  it operates on.
+- When a file on his computer is needed, give the terminal command to
+  open or copy it so he can paste it back.
+- State the exact thing to use every time. Never refer back to an
+  earlier value or choice ("the one you picked"). He is following
+  steps, not tracking context. When he asks to restart, restart from
+  step 1.
+- Claude can reach anything on Tony's computer through commands Tony
+  runs, including the private folder. Ask precise, narrow questions.
+
+== ADDED 23 September 2026, N41 close ==
+
+ACCOMPLICES ARE PUBLIC. All prompt accomplices live in the public
+web folder so any AI can fetch them by address instead of Tony
+pasting them. This one is at:
+  https://nexus.needpedia.org/PA-NEXUS.txt
+Nothing sensitive goes in here. Sensitive items live in the
+handoff prompt, in a section marked to stay stable. A thread that
+truly needs sensitive material on disk gets its own private
+folder, reachable only by Tony running terminal commands.
+
+Two copies of this file currently exist on Tony's computer: the
+public one in ~/Needpedia_Nexus/ and the original in
+~/Nexus_private/. Until Tony says which is the real one, append
+to one and copy it over the other so they stay identical.
+
+SESSION SHAPE. Every session opens with a pasted handoff prompt
+and closes with a fresh handoff prompt for the next session. Tony
+should be able to open any old session and find the handoff at
+the top and the next one at the bottom.
+
+Conversation transcripts are not published. If saved at all, they
+are saved privately where only Tony reaches them by running
+terminal commands.
+
+FINDINGS FROM N41 — checked against the live site, not assumed:
+
+- The "working with Tony" botskill post does not exist yet. There
+  are 13 botskills and none is about how to work with him. No
+  thread has written itself in there.
+- llms.txt is the file that tells any AI what is on the Nexus and
+  where to fetch it. It was last rebuilt 2026-08-08 and lists
+  only the front door, articles and botskills. It does not
+  mention the accomplices, the devlogs, the context file, or the
+  thread system. It is the natural home for the thread index.
+- Plain text and .md files are served fine; several were fetched
+  directly.
+- The Nexus home page cannot be read by an AI, because it is
+  assembled by scripts after loading. Give AIs direct file
+  addresses, not the home page.
+- An AI can only open a web address that has been pasted into the
+  conversation or that appeared in something it already fetched.
+  It cannot guess an address. So Tony pastes addresses, or they
+  get listed in llms.txt.
+
+OPEN QUESTIONS FOR TONY — do not decide these:
+  a. Does each thread write its own section into the "working
+     with Tony" botskill post, or does one thread write the whole
+     post from blocks the others hand to Tony?
+  b. Same for llms.txt: one thread owns it, or every thread edits
+     its own line?
+  c. Which copy of this accomplice is the real one?
+
+CARRIED, NEW: find out where the capture tool and the volunteer
+studio save conversations. If either writes into the public web
+folder, it contradicts the rule above.
+
+== ADDED AT N42, 24 September 2026 — THE PUBLIC FOLDER ==
+
+WHAT CHANGED
+The Nexus now has a public folder for .md files:
+  on Tony's computer: ~/Needpedia_Nexus/public/
+  on the web:         https://nexus.needpedia.org/public/NAME.md
+Any .md file placed directly in that folder can be read by anyone
+on the internet, straight away, with no settings change and no
+restart. This is the way to publish devlogs, prompt accomplices
+and other thread documents from now on.
+
+WHAT STAYS BLOCKED, EVEN INSIDE THE PUBLIC FOLDER
+- Any file with "handoff" anywhere in its name (any capitals).
+  Handoff prompts carry the sensitive section; a handoff put in
+  this folder by mistake still cannot be read.
+- Anything in a subfolder of the public folder.
+- Every other kind of file: scripts, settings, backups and so on.
+Everywhere else on the Nexus, .md files are still blocked unless
+named one by one in the settings file (CAPABILITIES.md,
+nexus-context.md, needpedia-context.md, DEVLOG.md).
+
+HOW IT WORKS (for the next AI)
+The web server's settings file is ~/Needpedia_Nexus/nginx-default.conf.
+Rules are checked top to bottom; the first match wins. The public
+folder rule sits just above the "# DENYBLOCK" line, so it wins
+before the blanket .md block. Old settings saved at
+~/Nexus_private/nginx-default.conf.bak-N42. The helper script that
+made the change is ~/Nexus_private/patch_nginx_N42.py.
+Tested from outside after the restart: a normal .md file in the
+folder was served; a file named handoff-test.md was refused (404).
+
+CORRECTION TO AN EARLIER FINDING
+N41 wrote "Plain text and .md files are served fine." That was only
+true for the four .md files named in the settings file. Every other
+.md file on the Nexus was blocked. The public folder fixes this.
+
+AN AI STILL CANNOT FIND THESE FILES ON ITS OWN
+An AI can only open an address that was pasted to it or that
+appeared in something it already read. Files in the public folder
+need to be listed somewhere an AI reads (llms.txt, or a thread's
+handoff) to be found. This ties into open question b (who edits
+llms.txt).
+- N42: DEVLOG-BHS.md now lives in the public folder (https://nexus.needpedia.org/public/DEVLOG-BHS.md). The copies in ~/BHS_private/ and ~/Needpedia_Nexus/ are history. BHS thread told via note.
+- N42 check: CAPABILITIES.md, DEVLOG.md and nexus-context.md all serve (200) from outside. setup-b-handoff.md is refused on purpose (handoff name) and stays private unless Tony says otherwise. No other file type is blocked by accident. Claude's web fetch tool showed a stale DEVLOG and a false 404 - verify with curl from Tony's machine before believing it. BHS-1 proposed two additions to working-with-tony.txt (a BROWSER label for the address bar; web addresses on a plain line, never in a copy box). Tony parked them.
+- N43: the web fetch tool showed a PA-NEXUS.txt missing the whole N42 section (stale copy again). Read this file with sed or cat on Tony machine instead.
+- N43 (26 Sep 2026): working-with-tony.txt replaced with the thread-system version (download dated 26 Sep 19:34). Previous version saved at ~/Nexus_private/working-with-tony.txt.bak-N43.
+- N43 rule: messages meant for another thread get their own label too, e.g. FOR THE THREAD-SYSTEM CHAT (not the terminal). An unlabeled message box got pasted into the terminal at N43.
+- DECIDED at A2 by Tony: Nexus activity alerts go straight through Google phone-notification service (Firebase Cloud Messaging) using Google project update-needpedia (project number 550163998966), confirmed in an account Tony controls. No new address on needpedia.org, no lead-developer deploy. ntfy route not chosen. Still needed: a sending key (service-account key) from that Google project, and Tony phone registration code from the devices table on the live database. Thread A owns the app side; the Nexus builds the sender.
+- FROM NPA NOTE 2026-09-27 (https://nexus.needpedia.org/public/NOTE-TO-NEXUS-2026-09-27.md): the phone app thread is named NPA, not A. No sending key exists yet for Google project update-needpedia; the google-services.json in Downloads is a different project (volunteer-app-db445) and is not a sending key. Phone registration codes are in the devices table of needpedia_production (live and practice sites have separate databases). Four accounts have master_admin. The site phone alerts are counts only, no post name or link. NPA asks the Nexus view on tags plus a map file, and on per-thread cross-reference posts.
+- RULE 2026-09-27 CROSSREF: every thread has a public cross-reference post at ~/Needpedia_Nexus/public/CROSSREF-THREADNAME.md (this thread: CROSSREF-NEXUS.md, web address https://nexus.needpedia.org/public/CROSSREF-NEXUS.md). History only: dated entries, written by the thread that did something affecting another thread, never cleared, no action needed. Anything needing a response goes in that thread updates post instead. At each session close, add entries to the cross-reference post of every thread this session affected.
+- RULE 2026-09-27 THREAD MESSAGES (Tony chose both): a short message for another thread chat goes in a box labeled for that chat, and every line starts with # so that pasting it into the terminal by mistake does nothing. A long message comes as a downloadable file instead, plus a command that opens it in gedit for copying. Reason: at N43 labeled message boxes got pasted into the terminal twice.
+
+== ADDED AT N44, 28 September 2026, PART 1 ==
+
+LOOSE ENDS ADDED AT N44
+- Two watchers wanted for needpedia.org. Why: the project's Docker
+  build broke when Debian 11 lost support on 31 Aug 2026, and nobody
+  noticed for about a month.
+    1. A weekly build test. GitHub's own computers build Needpedia
+       from scratch once a week and record pass or fail. Two catches:
+       GitHub emails a failure only to whoever last edited the job's
+       file (if John sets it up, John gets the email, not Tony), and
+       GitHub switches these timed jobs off after 60 days with no
+       activity in the project. Something else should check it is
+       still running.
+    2. A support-date check. Once a month, compare the project's
+       pinned versions (Debian 11, Ruby 2.7.8, Node 12, PostgreSQL 13,
+       Rails 6.0) against the public list at endoflife.date and warn
+       before support ends. This would have warned in June.
+  Nexus side (carried from N44, for a later session): the five-minute
+  collector reads the weekly build result and notices if the build
+  test stopped running. The result shows on the activity page and,
+  once the phone sender is built, goes to Tony's phone.
+- Admin chat is down (Tony, 28 Sep 2026). Not checked yet. This is
+  separate from the old one-minute time limit.
+- Tony wants a public AI knowledge base on the Nexus: pages any AI can
+  be pointed at so it starts out knowing Needpedia instead of blank.
+  The volunteer studios are the first users. Same job as the mission
+  "Update Needpedia's AI". Open design question: whole documents, or a
+  short list of where they live. Research the John thread cited says
+  short, human-written pointers work better for AI tools.
+
+DECISIONS AT N44
+- Every thread gets three public posts in ~/Needpedia_Nexus/public/:
+  UPDATES-NAME.md (unread news and requests), UPDATES-NAME-ARCHIVE.md
+  (already read) and CROSSREF-NAME.md (history, no action needed).
+  Names: NEXUS, NP1, PC, JOHN, BHS, JOBS, TS. NPA already had its own.
+- One shared script runs these posts for every thread:
+  ~/Threads_private/threads.py
+  Jobs: setup, show, update, note, clear. Each is one short command.
+  NPA's own clearing script (~/PhoneApp_private/archive-updates-NPA.sh)
+  stays as it is; both use the same marker line, so either works on
+  NPA's posts.
+- Job search gets a prompt accomplice. Open for that thread: its list
+  of jobs tried may grow very large, so where that list lives is its
+  own question.
+- The thread posts are referenced from the working-with-tony post, and
+  listed anywhere else they are useful.
+- New thread TS (test sites) for John's self-hosted test-site package.
+  It is standalone: volunteers show their edits there; after Tony
+  approves, they submit the code on GitHub for the lead developer's
+  review. Nothing goes to the lead developer until the automatic
+  copy-per-push part is built and tested.
+- Public inbox consent: Tony's lean is "sender says yes" (first email
+  held privately, automatic reply asks permission, yes publishes it,
+  never asked again). The Public Coms thread builds it.
+- For thread TS to weigh: an AI reviewer for submitted code changes
+  (CodeRabbit, free for public projects). Name ideas for it or a
+  home-made version: Hopper, Porch, Checkpoint, Second Look,
+  Waystation, Bridge.
+
+FINDINGS AT N44
+- The web fetch tool showed a stale PA-NEXUS.txt for the third time
+  (phone sections still present). On disk, both copies had them cut.
+  Always check this file on Tony's machine.
+- working-with-tony.txt is online, but only three prompt accomplices
+  link to it. llms.txt, the botskills list and the home page do not.
+- This thread's handoff pointed at the phone app's handoff as
+  A1-handoff.txt. The current one is NPA2-handoff.txt.
+
+== ADDED AT N44, 28 September 2026, PART 2 ==
+
+DONE AT N44 (after part 1)
+- The updates system is live. Every thread has three public posts in
+  ~/Needpedia_Nexus/public/, made and run by
+  ~/Threads_private/threads.py (jobs: setup, show, update, note, clear).
+  Threads: NEXUS, NP1, NPA, PC, JOHN, TS, PU, BHS, JOBS.
+- Updates sent 28 Sep 2026: PC (inbox problems and the consent idea;
+  the first real use), then PU, NP1, JOHN, NPA, BHS and JOBS. All
+  confirmed on the web.
+- working-with-tony.txt reworked twice (N44, N44b), plus a one-line fix
+  (N44c) for the TS prompt accomplice. Thread list rechecked against
+  Tony's disk; updates section rewritten around the shared tool; four
+  new sections at the end: use the other AIs, finish talking first,
+  where the Nexus lives and how things go live, ask for the terminal
+  output. Backups in ~/Nexus_private/: working-with-tony.txt.bak-N44,
+  .bak-N44b, .bak-N44c.
+- The post is now listed in the botskills list and in llms.txt.
+  regen_index.py has a short EXTRAS list for documents that live
+  outside its folders; add a line there to list another one. Old
+  script: ~/Nexus_private/regen_index.py.bak-N44. The lists as they
+  were before the rebuild: ~/Nexus_private/indexes-bak-N44.tar.gz.
+- New thread TS (test sites): prompt accomplice
+  ~/Needpedia_Nexus/PA-TS.txt, first handoff ~/TS_private/TS1-handoff.txt.
+- New thread PU (Project Unstoppable), started by Tony in its own chat;
+  private folder ~/PU_private/. Its prompt accomplice is its own job.
+
+FINDINGS AT N44 (after part 1)
+- llms.txt, articles-index.txt and the articles and botskills lists
+  are all written by regen_index.py, run by hand. Nothing had run it
+  since 8 Aug 2026. rebuild-index.sh only forwards to it.
+  watch-articles.sh runs in the background and reruns it only when a
+  Word or LibreOffice document is dropped into articles/. Hand edits
+  to any of those lists get wiped by the next run: change the script
+  instead.
+- The old count mismatch (llms.txt said 13 articles, the list showed 4)
+  is gone: the page and the folder both had 13 before the rebuild.
+- BHS has three copies of its prompt accomplice; public/PA-BHS.md is
+  the newest (26 Sep). The BHS thread was told through its updates
+  post.
+
+LOOSE ENDS ADDED (after part 1)
+- Once TS is running, update anything on the Nexus that tells
+  volunteers how to show their work, including the dev onboarding
+  botskill.
+- Tony's idea, not decided: Google alerts and news-watching drones for
+  his city, the world and key topics, feeding his phone notifications.
+- The N44 handoff said web addresses go on a plain line, never in a
+  copy box. The working-with-tony post says a box labeled BROWSER. The
+  post was followed. Tony has not ruled on it.
+- Still unanswered: cut the "private, never publish" line at the top of
+  this file? Asked once at N44.
+
+== ADDED AT N44, 28 September 2026, PART 3 ==
+
+DECISIONS (Tony, 28 Sep 2026)
+- Devlogs are public unless a thread's own prompt accomplice says
+  otherwise. Security is the main concern: nothing in a devlog that
+  would help someone get in. Settles the conflict with a 23 Sep
+  correction that called devlogs private.
+- The working-with-tony post keeps one fixed web address; its edition
+  name goes on the first line of its header (now EDITION N44d). Every
+  change gets a new edition name, a saved old edition, and a
+  cross-reference note to every thread naming the new edition. A
+  thread that sees an older edition than its handoff or its
+  cross-reference post names has a stale copy and reads it from disk.
+- Keep old editions of every document: before replacing or rewriting
+  one, save the old edition in the thread's private folder, named for
+  the session.
+
+FINDING
+- The TS thread's web fetch returned an old copy of the post on 28 Sep,
+  though Tony's curl got the new one through the same address. So the
+  stale copies come from the AI fetch tool keeping its own old copy,
+  not from the Nexus or its front door.
+
+DONE
+- Post edition N44d in place; old edition at
+  ~/Nexus_private/working-with-tony.txt.bak-N44c2 (the one-line TS
+  fix, .bak-N44c, came before it).
+- N45 handoff and TS1 handoff replaced with version 2; version 1 of
+  each kept as .bak-v1 next to it.
+
+== ADDED AT N44, 28 September 2026, PART 4 ==
+
+FINDING
+- The PU chat's AI could not use its public posts: its web copy of
+  working-with-tony.txt was stale (no edition line), so PU's own post
+  addresses never appeared where its AI could open them, and it fell
+  back to asking Tony to print them from disk. The files are online:
+  Tony's curl got current copies through the same addresses.
+- Not yet known: whether the old copies come from Cloudflare or from the
+  AI fetch tool itself. Diagnosis and candidate fixes are in the entry
+  sent to UPDATES-NEXUS.md on 28 Sep 2026.
+
+DECISION (Tony, 28 Sep 2026)
+- N45's objective: make the thread system work from the web, so a thread
+  only needs to be told "check for updates", perhaps with one address.
+  Every thread has public material; the setup must make it readable.
+- After the fix, PU gets told to check its updates.
+
+== ADDED AT N45, 29 September 2026 ==
+
+FINDINGS
+- Where stale copies came from: on 29 Sep 2026 the copies on Tony's
+  disk and on the web had identical fingerprints for
+  working-with-tony.txt, PA-NEXUS.txt and nexus-context.md, and
+  Cloudflare reported DYNAMIC (it stores no copy). The old copies came
+  from the AI web fetch tool itself. The same address with a tag
+  (?v=N45) came back current while the plain address came back old.
+- After the no-cache change below, the plain address of the
+  working-with-tony post came back current in this thread's own fetch.
+- The web server container's name is hash-prefixed:
+  4a20f81f5677_nginx-server (as of N45). Found by image name with
+  sudo docker ps.
+
+HOW THE NEXUS IS BUILT (moved here from nexus-context.md at N45, which
+was retired; brought up to date where known)
+- Four containers: the Cloudflare tunnel, the web server (nginx), the
+  Python back end (order-server), and the browser terminal (ttyd).
+- Two separate admin locks that can drift apart: a web-server password
+  popup guarding the terminal tile, and an in-page password prompt
+  checked by the back end. A password change must touch both.
+- The web server's settings file, nginx-default.conf, blocks scripts,
+  settings files, dotfiles and .md files by default. A few named .md
+  files are allowed, and .md files directly inside public/ are served,
+  except names containing "handoff". A settings change needs the web
+  server container restarted; the password file does not.
+- Two separate AI keys by design: the admin one and the spend-capped
+  volunteer studio one. Since N39 both live in the back end, not on
+  served pages. A revoked studio key shows as "[No response]" on every
+  model.
+- The home tile list is hand-written in gallery.html. A new back-end
+  feature needs two edits: a handler in order-server.py and a matching
+  route in nginx-default.conf.
+- Admin chat and the volunteer text studio offer several models through
+  one AI router account, limited by an account-level list of allowed
+  providers.
+
+DONE AT N45
+- The Nexus sends "check back every time" (Cache-Control: no-cache)
+  with every .md and .txt file: one line in four places in
+  nginx-default.conf, container restarted, confirmed with curl.
+- The updates tool, edition N45b: one archive file per thread,
+  public/ARCHIVE-NAME.md, holding everything archived, each piece under
+  one dated, tagged line. Tags are required on every update and note.
+  Past 30 entries, a cross-reference post's oldest 20 move into the
+  archive. New job: archive NAME SOURCE FILE TAGS. Old
+  UPDATES-NAME-ARCHIVE.md files copied into the new archives and
+  pointed at them.
+- The botskill post is EDITION 7 (editions are now counted; 1 to 6 are
+  in full in public/ARCHIVE-TONYPOST.md).
+- This file: line 2 now says it is public; the old "thread A" pointer
+  now says NPA. Its copy from before these changes is in ARCHIVE-NEXUS.
+- nexus-context.md retired: full contents in ARCHIVE-NEXUS (tag
+  nexus-context); the file is now a short note pointing here.
+
+DECISIONS BY TONY AT N45
+- Keep it simple: one permanent address per post, always holding the
+  current edition. Old editions are archived first.
+- One archive file per thread for everything archived, tags required,
+  searchable with grep by tag or date. Private backups stay private, and
+  the public archive gets a reference entry naming them.
+- The botskill post's editions get a plain counter, not session names.
+- Useful information goes into the botskill post or wherever it belongs;
+  nexus-context.md retired.
+- Every line of any box not meant for the terminal starts with #,
+  including boxes meant for this chat.
+- Rejected as too complicated: a link-printing job, and having the web
+  server rewrite addresses with fresh codes.
+
+LOOSE ENDS ADDED AT N45
+- Tony wants a new thread for the thread system itself. The thread
+  system and all its content move into their own region of the Nexus,
+  so the Nexus can focus on volunteer work. Name not chosen.
+- Later, "the bot council system": several chatbots on the Nexus, one's
+  output feeding another's input, each able to choose which AI to talk
+  to, switched on only while Tony is working. For the new thread.
+- Carried from nexus-context.md (dated N36 to N41, not rechecked):
+    - Email project: back up three near-full mail accounts to a home
+      drive, then a count-first cleanup script, then a private mail tile.
+    - CAPABILITIES.md is stale (last updated around session 17).
+    - No context file exists for needpedia.org itself.
+    - Mail app: an unmerged fix for date-range filtering, and a logging
+      feature whose token may be unset and failing silently.
+- Carried from the botskill post's KNOWN GAPS section (dated 23 Sep
+  2026, cut at edition 7, not rechecked):
+    - Glossary errors: an idea attaches to exactly one problem;
+      objectives have no completed state; the address is /impacts.
+    - Successful logins are not recorded anywhere on needpedia.org.
+    - needpedia.org cannot send account confirmations or password
+      resets: its mail service disabled the account after a key was
+      exposed in the public repo. Recovery: rotate the key, clean the
+      repo, ask for reinstatement.
+    - The volunteer studio pages have no password.
+    - Not confirmed by Tony as wording: whether a keepsake document
+      comes as a download plus a command, or via gedit.
+
+== ADDED AT N45 CLOSE, 29 September 2026 ==
+- CORRECTION to the N45 finding above: the AI web fetch tool does NOT
+  reliably obey "check back every time". An hour after edition 7 of the
+  botskill post went live, this thread's fetch tool still returned
+  edition 6 (N44d) at the plain address, while Tony's curl showed
+  edition 7. The earlier fresh fetch was luck, not the setting. Plain
+  addresses can come back old for an unknown time. Tagged addresses
+  (?v= plus something new) come back fresh.
+- From N46 on, this thread's handoffs put ?v= and the next session's
+  name on every Nexus address. Tony has not ruled whether every thread
+  should; the botskill post says "may".
+- Tony's rule, 29 Sep 2026: no canvas or side panels (artifacts,
+  documents in a panel, widgets, charts). In the botskill post from
+  edition 8.
+- The N45 objective (the thread system working from the web) is done
+  as far as the Nexus can take it: the check-your-updates instruction
+  is at the top of the botskill post, archives and tags are in place,
+  and tagged addresses or disk reads get around stale fetch copies.
+- The PU chat still needs to be told to check its updates; its update
+  from N44 is waiting.
+- Handoffs now get a reference entry in ARCHIVE-NEXUS.md at close:
+  N45-handoff.txt and N46-handoff.txt, both in ~/Nexus_private/.
+
+== ADDED AT N46, 29 September 2026 ==
+
+FINDINGS
+- Why bots acted blind: Claude's web fetch tool opens only addresses
+  pasted into the chat, or real links on a web page it has opened. An
+  address written inside a plain text file is refused, even after that
+  file was fetched. Tested N46: llms.txt and the PC posts were refused;
+  llms.txt opened once it appeared as a link on the botskills web page.
+  The N41 note that an AI can open an address "that appeared in
+  something it already fetched" was wrong for plain text files.
+- Web search does not find Nexus files, so it is no way around this.
+
+DONE AT N46
+- ~/Threads_private/make_tony_page.py turns working-with-tony.txt into
+  https://nexus.needpedia.org/working-with-tony.html: every address a
+  real link, every Nexus link tagged ?v= with a fingerprint of that
+  file, which changes only when the file changes (idea from another
+  AI). The page's link to itself stays untagged so the page settles.
+  Runs every 5 minutes from Tony's schedule, rewrites only on change,
+  errors go to ~/Threads_private/make_tony_page.log. Prints the page's
+  current address to paste.
+  Backups: ~/Threads_private/make_tony_page.py.bak-N46 (before the
+  self-link fix), ~/Nexus_private/crontab.bak-N46.
+- regen_index.py now puts the web page in the botskills list and in
+  llms.txt. Old script: ~/Nexus_private/regen_index.py.bak-N46. Old
+  lists: ~/Nexus_private/indexes-bak-N46.tar.gz.
+- Botskill post EDITION 9 (web page version) and EDITION 10 (from/to/
+  date rule, handoffs live in the chats, private-archive rule, BHS
+  retired). Editions 8, 9 and 10-before-fix archived in
+  ARCHIVE-TONYPOST.md. Private copies: ~/Nexus_private/
+  working-with-tony.txt.bak-N46 (ed. 8), .bak-N46-ed9, .bak-N46-ed10.
+- BHS retired. 13 files packed into
+  ~/Threads_private/retired/BHS-2026-09-29.tar.gz, originals deleted,
+  resident roster deleted (not packed), ~/BHS_private removed. Note
+  sent to the JOBS and NEXUS cross-reference posts.
+- One update to the 7 other threads about editions 9 and 10.
+- A message for the old job-search chat, telling it it is thread JOBS.
+
+DECISIONS BY TONY AT N46
+- The botskill post is the one place online that must reach
+  everything else.
+- Nothing may depend on Tony noticing anything. An AI giving him a
+  terminal command is fine. So the AI gives the make_tony_page.py
+  command at session start, on "check your updates", and when writing
+  a handoff.
+- Every update and note says who it is from, who it is to, and the
+  date.
+- Handoffs are never saved or archived; they live in the chats. That
+  is why they can hold private information.
+- Archiving private material: private folder for the copy, plus a note
+  in the cross-reference posts of related threads. Never contents.
+- BHS is history; archived in case it holds useful workflow material.
+
+LOOSE ENDS ADDED AT N46
+- The BHS pack holds three old BHS handoffs, which may name residents.
+  Tony has not said whether to take them out.
+- Whether Tony pasted the JOBS message into the old job-search chat.
+- Other documents hold addresses as plain text too (prompt
+  accomplices, updates posts, llms.txt). Bots reach them through the
+  page, but links inside them are still dead ends. Not decided whether
+  they get web page versions too.
+- The botskills list links the page with no tag, so a bot arriving
+  that way may get an older copy.
+- Tony asked why chat boxes get # on every line (N45 rule). Not ruled
+  whether an address-only box is exempt.

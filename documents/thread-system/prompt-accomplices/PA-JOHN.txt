@@ -1,0 +1,833 @@
+PROMPT ACCOMPLICE — JOHN ONBOARDING THREAD
+Permanent filename. Never dated. Appended to, not rewritten.
+Started 28 September 2026.
+Public: anyone can read this at https://nexus.needpedia.org/PA-JOHN.txt
+Nothing sensitive goes in it. Sensitive material rides in the handoff prompt.
+The universal rules for working with Tony live in the botskill post and
+only there: https://nexus.needpedia.org/working-with-tony.html
+Read it first. This file holds only what is true of this project.
+(Block added 30 Sep 2026, session John 4.)
+
+This document holds the standing facts, working rules and loose ends for
+the thread that onboards volunteer developers to Needpedia, starting
+with John. It is public and holds nothing sensitive. Anything sensitive
+rides in the handoff prompt instead.
+
+
+===========================================================
+WHAT THIS THREAD IS FOR
+===========================================================
+
+Onboarding volunteer developers to Needpedia, and building the pipeline
+that lets future volunteers arrive, contribute and see their work.
+
+Sibling threads, all carried between by Tony himself:
+  NP-1   — needpedia.org itself: features, documentation, GitHub presence
+  Nexus  — nexus.needpedia.org: files, botskills, articles, AI studios
+  NPA    — the phone notification app
+  Public Coms — the public vc@needpedia.org inbox and Adele
+
+
+===========================================================
+WHERE DOCUMENTATION GOES
+===========================================================
+
+DEFAULT: John's work is documented on the Needpedia GitHub wiki, because
+he works on Needpedia. Not on the Nexus, not only on Tony's computer.
+
+  https://github.com/Queuevius/Needpedia/wiki
+
+Why: the wiki is Tony's, nobody reviews it, it publishes in two minutes
+by pasting in a browser, and any AI can fetch any page as plain text at
+an address of the form:
+
+  https://raw.githubusercontent.com/wiki/Queuevius/Needpedia/<Page-Name>.md
+
+Existing pages that matter:
+  Needpedia-Capabilities.md      every feature, what it does, whether it works
+  Needpedia-Repo-Map.md          where each feature lives in the code
+  Needpedia-Test-Site-Package.md the multi-copy test server (added 28 Sep 2026)
+
+Ignore the wiki page called "Main Document". It was written in January
+2023 and is missing roughly half the codebase.
+
+HOW TO PUBLISH: paste into the browser at
+https://github.com/Queuevius/Needpedia/wiki/_new — no token needed.
+Pushing by command line needs a classic GitHub token with the repo box
+ticked, because the wiki counts as a separate project from the code. Not
+worth the setup for a single page.
+
+EXCEPTIONS WILL COME. Work that is not about Needpedia's own codebase
+may belong elsewhere. Decide case by case; ask Tony. The default stands
+until he says otherwise.
+
+WHAT NEEDS REVIEW AND WHAT DOES NOT:
+  Needs the lead developer:  any change to code in the repository.
+  Does not:                  the GitHub wiki, the Nexus, all other docs.
+                             Tony owns the repository and everything else.
+
+
+===========================================================
+WHO JOHN IS
+===========================================================
+
+Eberechukwunemerem John Sunday. GitHub: eberechi10. Onitsha, Anambra
+State, Nigeria. 8 hours ahead of Portland, Oregon.
+
+- Technical. Has used GitHub since 2020, does technical work through AI.
+  Not a beginner.
+- Owns no computer and no phone. Rents. Windows machines by the week,
+  cheap. Linux machines by the day, much more expensive. Docker forces
+  him onto the expensive one, which shapes what tasks cost him.
+- Has a Wise USD account.
+- Wants remote work from the US or Europe. A public open-source
+  contribution with his name on it is worth real money to him beyond the
+  pay.
+- Video editing skills are weak. Voice work is the better fit.
+- Best habit: reports exact error messages. Reinforce it.
+- Stays up until 1-3 AM his time, which is 5-7 PM Tony's. That is the
+  live window when one is needed.
+- Has expressed interest in leadership within Needpedia over time.
+
+
+===========================================================
+COMMUNICATION
+===========================================================
+
+EMAIL ONLY. Tony declined WhatsApp on 28 September 2026. He has too many
+things running to be reachable by the hour and checks email when he has
+time and energy. Reconsider only if he raises it.
+
+John writes to vc@needpedia.org, the public volunteer inbox. It is
+public on purpose: anyone on the team can read it, and Adele can
+assemble it so anybody can catch up on what volunteers and leaders are
+doing. Everything John sends there becomes material the next volunteer
+can learn from.
+
+NEVER put a password, key or token in that inbox.
+
+THE RULE THAT CAME OUT OF A MISTAKE: anything time-limited must have a
+window agreed with Tony BEFORE it is built, not after. On 22 September
+John sent a link to a copy that expires after 30 minutes of inactivity,
+at 4 AM Tony's time. It was dead before Tony saw it. His AI had warned
+him not to send it; he sent it anyway.
+
+
+===========================================================
+MONEY
+===========================================================
+
+50/50 split on every milestone. Half paid to John immediately, half held
+by Tony in an equipment fund. Tony shows the running total every time.
+
+Why Tony holds it: money passed to John before evaporated, because he is
+at subsistence and cannot save on his end. John once framed the holding
+as distrust; Tony held the line but softened the language, and asks him
+to hold onto a portion if he can. This is settled between them.
+
+Equipment priority: microphone first, then laptop, then phone. Skip
+lights and tripods until there is a camera. Never buy a camcorder — a
+midrange phone beats one.
+
+NEVER SHIP HARDWARE TO NIGERIA. Customs duty and VAT add 30-50%,
+packages sit for weeks, things disappear. Send money, he buys local, he
+sends a photo of the receipt.
+
+His own market research, January 2026 prices:
+  Laptop, HP EliteBook Folio 9470m, i7, 8GB, 512GB:  ~$115-135
+  Clip-on microphone:                                ~$4-21
+  Phone, non-Samsung:                                ~$93-128
+Exchange rate roughly N1,400 to $1.
+
+Free tool that makes phone audio sound near-studio, no editing skill
+needed: https://podcast.adobe.com/enhance  (one hour of audio a day,
+files up to 30 minutes, audio only). Same site has a free Mic Check.
+
+MILESTONE LEDGER — append each one:
+  M1  onboarding notes, merged                 $60   ($30 to fund)
+  M2  code-picture tool bake-off               raised above $20, exact figure not recorded
+  M5  login fix in a Codespace                 $40   ($20 to fund)
+  M6  self-hosted test-site package            $100  ($50 to fund)
+
+
+===========================================================
+ACCESS RULES — DO NOT BREAK THESE
+===========================================================
+
+- John is NEVER added as a collaborator on the real project. On a
+  personal account that means write access, and there is no read-only
+  middle setting. He works in his own copy and submits for review. That
+  review step is the entire safety net.
+- He never needs credentials, tokens, passwords, server access or
+  certificates. Never ask him for any, never give him any.
+- NEVER run or suggest a deploy command, including anything starting
+  with "cap". Deployment is the lead developer's alone.
+- Tony can read every conversation John has with the Nexus AIs and with
+  Adele. John has been told this. Keep it that way.
+
+
+===========================================================
+TOOLS AND STANDING CAPABILITIES
+===========================================================
+
+John's AI studio: the Nexus, hit Edit, enter Ubuntu2. Model DeepSeek 4
+v0813. Roughly $10/month on it. John must tell Tony when he has had a
+good session so it can be topped up before he hits a wall.
+
+Reading the project needs no account and no token:
+  git clone --depth 1 https://github.com/Queuevius/Needpedia.git
+The wiki is a separate project, readable the same way:
+  git clone --depth 1 https://github.com/Queuevius/Needpedia.wiki.git
+
+Two files beat any documentation when a fact is needed fast:
+  config/routes.rb   every address the site answers
+  db/schema.rb       every piece of data it stores
+
+Code-picture tools, tested September 2026:
+  GitDiagram   https://gitdiagram.com/Queuevius/Needpedia   works; for developers and AI
+  DeepWiki     https://deepwiki.com/Queuevius/Needpedia     needs one-time indexing
+  Google       https://codewiki.google                      Needpedia not in its catalog
+  Gource View  https://schlunsen.github.io/gource-view/?repo=Queuevius/Needpedia
+               works; animated 13-year history with music and a contributor
+               leaderboard; can export tall phone-shaped video
+  CodeCharta   https://codecharta.com/                      untested; 3D city, built for non-coders
+
+Tony's split on those: code maps are for developers and AI. Eye candy is
+for pitches, crowdfunding, videos and volunteer morale.
+
+Dev group with paid tasks: https://needpedia.org/groups/10
+Discord: https://discord.gg/B7VNVQmHwG
+CAUTION: Tony is sloppy about deleting finished tasks and marking who is
+working on what. The task list is not always current. John must check
+with Tony before starting anything.
+
+
+===========================================================
+STANDING FACTS ABOUT TONY'S MACHINE
+===========================================================
+
+Docker needs sudo. His user was added to the docker group on 27
+September 2026 but the change needs a logout or reboot, and he has not
+done one. After his next reboot, plain docker will work.
+
+Compose commands for a test copy need the settings passed in or they
+emit a wall of warnings. Working shape:
+
+cd ~/m6-test && COPY_NAME=copy1 DOMAIN=copy1.needpedia.test WEB_PORT=0 sudo -E docker compose -p np-copy1 -f m6/needpedia-copy.yml <command>
+
+
+===========================================================
+WHAT WE HAVE LEARNED ABOUT VOLUNTEERS
+===========================================================
+
+- The lightweight browser editor (press the period key on any project
+  page) needs no install and carried John's entire first session. It
+  should be the DEFAULT path for volunteers, not a fallback.
+- A newcomer whose FIRST action is a comment on an existing discussion
+  is twice as likely to become a core contributor. Not a code
+  submission — a comment. So the first thing a newcomer does should be
+  low-stakes with a fast reply.
+- Heavy onboarding backfires. Mozilla's formal programme made
+  participants HALF as likely to stay long-term. Light door, fast reply,
+  real task.
+- Base rates are brutal: roughly 1 in 16.67 newcomers stays, half of all
+  contributors make exactly one contribution, under 20% become core.
+- Recruiting model John proposed and Tony accepted: don't hunt for
+  "volunteers" in the abstract. Tony says what needs doing, John finds a
+  person who can do that specific thing.
+- Two onboarding traps to warn every newcomer about: pasting the
+  formatting marks around a code block into the file itself, and
+  clicking "Close Pull Request" after submitting, which cancels the
+  work.
+- Documentation and tool-setup work moves at full speed. Code work moves
+  at the lead developer's pace, and he takes days. Size the task to the
+  review, not to the ambition.
+- Tony's own framing, worth repeating to volunteers: the things he is
+  picky about are the things with his voice in them. Setting up a tool
+  has no voice in it — it either runs or it doesn't. That is why tool
+  setup is good volunteer work and why nobody has to learn the whole
+  project to do it well.
+
+
+----- ADDED IN SESSION JOHN 3, 30 September 2026 -----
+
+MILESTONE 6 STATUS (30 Sep 2026)
+- Not done yet. It counts as done only when Tony has put John's finished
+  code on his own desktop and run it himself (Tony, 30 Sep 2026).
+- Payment: fully paid. John confirmed on 30 Sep 2026 that he received it.
+- John reported on 30 Sep 2026 that he did the four fixes Tony asked for:
+  the build fix submitted on its own, the cosmetic reformatting removed,
+  the database startup problem fixed, and the example port setting
+  changed. Tony has not re-tested yet.
+- His branch:
+  https://github.com/eberechi10/Needpedia/tree/milestone6-testsite
+- John's note: any machine running the test copies needs the build fix
+  merged and at least 4 GB of memory.
+
+THE BUILD FIX (30 Sep 2026)
+- What it is: since 31 Aug 2026, building Needpedia from scratch fails
+  for everyone, because Debian 11 lost support and its packages moved to
+  an archive address. The live site keeps running. The fix tells the
+  build where the packages are now.
+- John submitted it to the main project on 30 Sep 2026:
+  https://github.com/Queuevius/Needpedia/pull/195
+- Checked 30 Sep 2026: one file (Dockerfile), 9 lines added, nothing
+  else. The reformatting is gone. Not reviewed yet.
+- Decided (Tony, 30 Sep 2026): test first, then ask Murtaza. Tony's
+  re-test of John's package on his desktop builds with this same fix, so
+  one run proves both. After it passes, Tony tells Murtaza it is tested.
+- Unknown from outside: whether Murtaza's own updates to the live site go
+  through this same build. If they do, his next update fails until the
+  fix is merged. Worth asking him.
+- It is a patch, not an upgrade. Debian 11 still gets no security
+  updates, and the rest of the foundation is past end of support too.
+
+WHERE THE MILESTONE 7 CANDIDATES WENT (30 Sep 2026)
+- Fixing the database startup problem: John did it as part of milestone
+  6 cleanup (reported 30 Sep, not yet re-tested).
+- Daily build check: Tony builds it himself in this thread. Not a John
+  milestone. Design below.
+- Automatic test copies, with one spare copy always awake and waiting:
+  a likely future milestone for John. Design lives in the TS prompt
+  accomplice: https://nexus.needpedia.org/PA-TS.txt
+- Version history for task cards: still a candidate.
+- Milestone 7 is not chosen yet.
+
+DAILY BUILD CHECK — BUILT BY TONY IN THIS THREAD (decided 30 Sep 2026)
+What it is: a job on GitHub's computers that builds Needpedia from
+scratch once a day, starts it and loads one page, so the next outside
+expiry (like Debian 11) is caught within a day instead of a month.
+- Runs on GitHub's computers, from a small separate GitHub project Tony
+  owns. Needs no review from Murtaza and loads nothing on his desktop.
+- Once a day. A full build takes roughly 10 to 30 minutes, so building
+  every 5 minutes is not possible.
+- Tests: build it, start it, load one page. That would have caught both
+  the Debian 11 problem and the database startup problem.
+- Shown on https://nexus.needpedia.org/activity-monitor.html on a NEW
+  line beneath the existing "Accounts · Posts · Actions · Updated" line,
+  which stays exactly as it is. Example:
+    Build check: passed · last build 30 Sep · Checked 1 minute ago
+  The page looks for a new result on its existing 5-minute refresh.
+- A failed build shows a warning sign. Clicking it opens a report: which
+  step failed, the error lines, when it last passed, and a link to the
+  full record.
+- The warning stays until Tony clicks to dismiss it. If a later build
+  passes, the report gets a line added, like "Working again since 3 Oct".
+  It never disappears on its own.
+- The Nexus thread was told on 30 Sep 2026 through its updates post.
+- Checked 30 Sep 2026: nothing on GitHub already watches the build. The
+  only automatic jobs on the main project are one that sends the staging
+  branch to the server, and one that suggests package updates.
+- OPEN, Tony's call: until the build fix is merged, should the check
+  build the real project as it is (warning from day one, until the fix
+  merges), or the real project with John's fix added on top (passing
+  now, catches the next problem)?
+
+TALKING WITH JOHN (Tony, 30 Sep 2026)
+- No WhatsApp group. John asked again on 30 Sep 2026. Tony's reasons:
+  he already replies as fast as he can, instant messaging would not
+  change that, and he is turning the VC email page and the Nexus into
+  his own messaging system soon.
+- The volunteer AI studios on the Nexus are public (Nexus thread,
+  30 Sep 2026). John's task instructions must say plainly that nothing
+  private (keys, passwords, access codes, personal details) ever goes
+  into a studio.
+
+JOHN'S COSTS (30 Sep 2026)
+- The Windows rental does not save him money (John, 30 Sep 2026). Docker
+  on Windows needs large downloads that use up his paid internet data,
+  and the owner wipes the laptop afterward, so he would download it all
+  again every time. Counting data, it costs about the same as the Linux
+  rental. Relevant to the laptop decision, which is still open.
+
+LOOSE ENDS (30 Sep 2026)
+- This thread has no devlog yet.
+- This file may not yet say at its top that the universal rules live in
+  https://nexus.needpedia.org/working-with-tony.txt (asked by the Nexus
+  thread, 29 Sep 2026). Check the first lines and add it if missing.
+- notice_nexus_thread.txt and notice_np1_thread.txt were never published
+  (checked 30 Sep 2026). This session's update to NEXUS and note to NP1
+  may cover the same ground. The old files may be in
+  ~/Downloads/thread-john/.
+- Murtaza has not been messaged about the build fix. Waits for Tony's
+  re-test.
+- John's AI conversation from milestone 6 has not been questioned: where
+  our documents misled him, dead ends, where the AI was confidently
+  wrong, and what one change to how tasks are handed out would have
+  saved him the most.
+- Mailgun, the email-sending service, is still switched off on
+  needpedia.org, so new volunteers get no confirmation or password
+  reset emails. Needs no code change to recover.
+- The equipment-fund ledger still has the milestone 2 gap; laptop
+  purchase undecided.
+
+
+----- ADDED IN SESSION JOHN 4, 30 September 2026 -----
+
+CORRECTIONS (checked 30 Sep 2026)
+- Docker works without sudo on Tony's desktop. The section "STANDING
+  FACTS ABOUT TONY'S MACHINE" above is out of date. Working shape now:
+  cd ~/m6-test && COPY_NAME=copy1 DOMAIN=copy1.needpedia.test WEB_PORT=0 docker compose -p np-copy1 -f m6/needpedia-copy.yml <command>
+- The activity page reloads its numbers every 60 seconds, not every 5
+  minutes. The collector behind it runs every 5 minutes.
+- John's AI studio on the Nexus is Ubuntu3, not Ubuntu2.
+- Milestone 2 paid $40, so $20 went to the fund. The ledger gap is
+  closed.
+
+MILESTONE 6 PASSED (30 Sep 2026), tested by Tony on his desktop
+- John's 30 Sep changes pulled into ~/m6-test (commits 54053ad and
+  85f2cb0): the site now waits for its database and retries; the
+  example settings pick a free port; the front door keeps its
+  downloaded add-on between restarts.
+- Full build from scratch passed:
+  cd ~/m6-test && docker build --no-cache -t needpedia-m6:latest .
+  Note: "docker compose ... build" builds nothing here. The copy recipe
+  uses the ready-built needpedia-m6 image, made by the line above.
+- John's Dockerfile on his branch matches his submitted fix (PR 195)
+  except for spacing, so the same run proved the fix builds.
+- Two brand-new copies (copy3, copy4) set up their own databases on
+  first start, 80 tables each, no hand fix; took different ports; both
+  loaded through the front door. Left running.
+- One awake copy uses about 490 MB of memory at idle (site 403 MB,
+  database 70 MB, cache 17 MB).
+- Murtaza emailed by Tony on 30 Sep 2026 about reviewing PR 195.
+
+MONEY (30 Sep 2026)
+- Milestone 6 fully paid.
+- Equipment fund: $120 (M1 $30, M2 $20, M5 $20, M6 $50).
+- Next jobs offered 30 Sep 2026: both for $80 total ($30 build check,
+  $50 bot council kit), 50/50 split, so the fund would reach $160.
+  Waiting for John's answer.
+- Laptop: John's January research put a used HP EliteBook (i7) at
+  about $115 to $135. A laptop of his own ends re-downloading
+  everything on every wiped rental. Not decided.
+
+JOHN'S NEXT JOBS (offered 30 Sep 2026)
+- Longer-term focus (Tony): the test sites, starting with automatic
+  copies with a spare always waiting.
+- Job 1, daily build check, GitHub part. John builds it in his own
+  public GitHub project, then transfers it to Tony. It builds
+  Queuevius/Needpedia's default branch with its own Dockerfile as is,
+  no fix on top (Tony: assume Murtaza merges PR 195, so it goes green
+  by itself). It starts the site, loads the home page, and saves
+  results/latest.json and results/history.csv every run; the daily save
+  also stops GitHub switching the schedule off after 60 days. Tony's
+  part: show it on the activity page. Still open: how the page fetches
+  the result (a small timer job copying it into the public folder; the
+  page asking GitHub directly; or the Nexus collector).
+  This replaces the 30 Sep plan for Tony to build the whole check.
+- Job 2, bot council starter kit, first version: the thread system
+  only (several chatbots feeding each other comes later). Tony's
+  threads.py and make_tony_page.py made general with a settings file,
+  an address-card command, templates, and two hosting routes: own
+  computer (default, in a container) or GitHub's free hosting. John
+  tests the GitHub route; Tony tests the own-computer route.
+- Public copies of Tony's two scripts for John (online, checked
+  30 Sep 2026):
+  https://nexus.needpedia.org/botcouncil/threads-script.txt
+  https://nexus.needpedia.org/botcouncil/make-tony-page-script.txt
+  Copies in the same folder named with ".py" in them are refused by the
+  web server.
+- John's studio Ubuntu3 holds a preload for both jobs. Tony's copy:
+  ~/Downloads/thread-john/john_studio_preload_jobs.txt
+- Cancelled 30 Sep 2026: an admin and master_admin capabilities sheet
+  for John. Tony identifies those features himself (NP1 told).
+- No AI key is needed for either job as written.
+
+THE PROJECT SEED (Tony, 30 Sep 2026)
+Goal: a self-contained package any AI could unpack until a new person
+sits where Tony is now: the code and accounts, their own Nexus,
+master_admin, the thread system, the scheduling tool, the VC email,
+the test sites. Project Unstoppable (PU) owns it. Tony inventories what
+is built; John's two jobs are the first pieces. The chunks list and the
+research on handing over access went to PU on 30 Sep 2026.
+
+LOOSE ENDS (30 Sep 2026)
+- The test-site code lives only in John's GitHub account and in
+  ~/m6-test on Tony's desktop. Put it in a repository Tony owns.
+- needpedia.org's email-sending service is switched off, so approved
+  volunteers may never get their confirmation link. A volunteer got
+  stuck at "admin approval". NP1 told.
+- Idea, owner thread not decided: an AI reader for the live server's
+  activity records, using Tony's server key file. The key and the
+  records stay private. The Nexus prompt accomplice says Tony's desktop
+  key is refused by that server, so check which key this is first.
+- Idea for the Nexus thread, Tony to decide: a timed job that checks
+  every public address in the botskill post and flags any that stop
+  answering on the activity page.
+- copy3 and copy4: whether the doorman puts them to sleep after 15
+  minutes was not checked.
+- Still open from before: this thread has no devlog; questioning
+  John's milestone 6 AI conversation; the laptop.
+
+
+----- ADDED IN SESSION JOHN 5, 1 October 2026 -----
+
+THE PROJECT SEED, AS TONY DEFINED IT ON 1 OCT 2026
+(Replaces the 30 Sep description above wherever the two differ.)
+- The seed is for ANYONE. It is a public package any person can unpack,
+  with an AI's help, to get their own independent version of
+  everything: their own Needpedia site (starting empty, under their own
+  name if they like), their own Nexus, the thread system, the public
+  email page with its assistant, the scheduling app, the phone
+  notification app, and the test sites.
+- Keys handover is a separate job, not part of the seed (Tony). The
+  seed holds no passwords, no keys and no private contact details.
+- The seed carries a contact note: the email addresses that exist, and
+  contact details for Tony, Murtaza and John, in case any of them are
+  still around and available. Which company hosted the email is left
+  out (Tony: "No one cares who hosted our emails").
+- Every document goes INTO the seed as a file copy, not as a link: the
+  Nexus articles, the botskill posts, the capabilities file, the
+  glossary, the core facts and the working-with-Tony post. A "start
+  here" file says what each one is and what each support system does.
+  Fresh copies are taken each time the seed is repacked. Why: AI fetch
+  tools cannot open addresses written inside a text file, and links die
+  if the Nexus is down.
+- The seed tells its reader to look online for other people's copies of
+  the seed.
+- The phone notification app must be in it. Tony: it is critical for
+  bringing people back when there is activity, so they can collaborate
+  and build communities.
+- The Chrome capture extension (it saves Claude conversations into the
+  Nexus sidebar) is an option, listed alongside the thread system and
+  the other Nexus pieces.
+- Back up copies of everything possible into it.
+- Domain names: Needpedia's are with IONOS. Seed users choose their own.
+- AI: everything Needpedia runs uses OpenRouter (one account that
+  reaches many AI models). The seed recommends DeepSeek V4 v0813: very
+  cheap, and it can run on European servers that protect user data.
+  Removing OpenRouter from the setup may be possible; not looked into.
+
+TEST-SITE CODE (Tony, 1 Oct 2026)
+- Goes in its own separate project under Tony's GitHub account
+  (Queuevius), not as a branch of the main project. Public, because the
+  seed is for anyone.
+
+FOUND ON TONY'S DESKTOP (checked 1 Oct 2026)
+- ~/Needpedia_Nexus: tracked by git, no online copy.
+- ~/Threads_private, ~/Nexus_private, ~/PublicComs: not tracked by git.
+- ~/m6-test: linked only to John's GitHub copy.
+- Chrome capture extension code: ~/nexus-capture-extension
+- devlog_append.py: two copies, one in ~/Needpedia_Nexus/ and one in
+  the home folder.
+- Possibly the scheduling app's original plan:
+  ~/Downloads/Gdrive backup/Simple International Scheduler - Needpedia.docx
+- The scheduling app, https://timezone-meeting-app.vercel.app, is a
+  website for finding meeting times across time zones. It is separate
+  from the phone notification app. Gemini called them the same thing on
+  1 Oct 2026; that looks wrong. Its code has not been found yet. A web
+  search found no public GitHub project by that name.
+- For whoever puts the Nexus code online: before an earlier security
+  lockdown, keys could be downloaded from the Nexus web folder, so that
+  folder's git history may still hold old keys. Check before any copy
+  of its history goes online. That is the Nexus thread's job.
+
+WHAT IS LEFT FOR THE SEED (1 Oct 2026)
+1. Code copies online. Already online: Needpedia itself, the public
+   email page (Queuevius/vc-email), the phone app
+   (Queuevius/Needpedia-phone-app). Still to do: test sites (started
+   John 5); the Nexus with keys removed (Nexus thread); the thread
+   scripts (John's bot council kit is the general version); the capture
+   extension; the scheduling app (find it first).
+2. Content that lives in needpedia.org's database rather than its code:
+   the assistants' instructions (AI KBs), email templates, how-tos,
+   FAQs, page pop-up guides, homepage messages. A brand-new empty site
+   has none of it. It needs an export.
+3. Rebuild-from-zero instructions for each system, each written by the
+   thread that owns that system.
+4. The inventory sheet, public version (Tony plus an AI).
+5. The start-here file, the contact note, the AI recommendation and the
+   "look for other copies" note.
+6. The packing script.
+7. A test run on a blank machine by someone who is not Tony.
+
+
+----- ADDED IN SESSION JOHN 5, PART 2, 1 October 2026 -----
+
+TEST-SITE CODE NOW IN TONY'S GITHUB (1 Oct 2026)
+- https://github.com/Queuevius/needpedia-test-sites (public). It holds
+  the version Tony tested on 30 Sep (commit 85f2cb0) with its full
+  history, so every change keeps John's name on it (Tony: "We should
+  probably give John credit"). The description credits John Sunday
+  (eberechi10).
+- To get it there: ~/m6-test had been downloaded with only its recent
+  history, so the rest was downloaded from John's copy first. Then
+  GitHub's check for secret keys flagged old service keys in the
+  project's history, and Tony allowed them through. Today's code reads
+  those keys from the server's settings, not from the code. Whether the
+  old keys still work has not been checked (loose end; NP1 told; details
+  in the handoff, not here).
+- ~/m6-test still points at John's GitHub copy. Nothing else changed.
+- GitHub's command-line tool (gh) is signed in as Queuevius on Tony's
+  desktop (checked 1 Oct 2026).
+- OPEN, Tony's call when John's next test-site job starts: how John's
+  future test-site work reaches this project.
+
+WHAT GOES IN THE SEED, MORE DECISIONS (Tony, 1 Oct 2026)
+- Florence and Lotte go in. Florence: Queuevius/needpedia-greeter-production.
+  Lotte: Queuevius/needpedia-assistant-production. Both were copied from
+  Murtaza's originals, and both run live from Tony's own Vercel account
+  (a website hosting service) at
+    https://needpedia-greeter-production.vercel.app
+    https://needpedia-assistant-production.vercel.app
+  last updated 20 Aug 2026, when conversation saving was added. The
+  Needpedia code never names those addresses, so how needpedia.org
+  reaches them is not known yet.
+- Adele and the VC email account go in (Queuevius/vc-email, also on
+  Tony's Vercel).
+- An "old work" folder holds whole systems no longer in use, so no AI
+  system is lost: Queuevius/Assistant (Needpedia's first AI assistant,
+  last changed March 2024, not running anywhere) and Queuevius/npdragonfly
+  (it became the Public Coms system).
+- Left out: the three Scrap-Yard projects, and layout_fe (one packed
+  homepage file from 2019, named nowhere in Needpedia's code). Tony's
+  rule: strip out anything not being used, without breaking the seed.
+  The "old work" folder can never break the seed, because nothing in the
+  seed uses it.
+- The scheduler is left out. Its GitHub project
+  (Queuevius/timezone-meeting-app) is empty, and it is not on Tony's
+  Vercel. The seed carries only a mention, in Tony's words: we had to
+  create our own due to others not letting us schedule at any time;
+  Needpedia's so international that wouldn't work. Seed users can pick
+  an existing app or build their own with AI.
+- The thread system in the seed gets a thread for each part, plus a
+  thread for the person's own ideal workflow, with Tony's note: for him
+  it turned out more practical to work on his workflow as he used the
+  other threads. "Still you never know..."
+
+
+----- ADDED IN SESSION JOHN 5, PART 3, 1 October 2026 -----
+
+INVENTORY SHEET, EDITION 1 (1 Oct 2026)
+- Main copy in two places (Tony): https://nexus.needpedia.org/needpedia-inventory.txt
+  and https://github.com/Queuevius/Needpedia/wiki/Needpedia-Inventory
+  Same text in both. The seed packs a fresh copy each time.
+- Public, no passwords or keys. Contacts in it, with Tony's labels:
+  Designer and founder (Tony), Lead Dev (Murtaza), New support staff /
+  freelancer (John), each with an email address.
+- Tony: whoever sprouts the seed will have to edit their "about us"
+  section too.
+- The assistants are described with the capabilities file's words:
+  named after librarians who resisted fascism (Tony chose this wording).
+
+WHICH AI SERVICE THE ASSISTANTS USE (checked in the code, 1 Oct 2026)
+- Lotte (Queuevius/needpedia-assistant-production): OpenRouter, with
+  settings for a full model and a cheaper "eco" model. No OpenAI key
+  setting anywhere.
+- Florence (Queuevius/needpedia-greeter-production): OpenAI's free
+  software toolkit, pointed at OpenRouter's address with an OpenRouter
+  key. No OpenAI key setting anywhere.
+- Needpedia's own Ruby code (latest master) mentions no AI service at
+  all. The assistants do the AI work and use Needpedia's public API to
+  read and make posts.
+- So no OpenAI account is needed. The "OpenAI" in both GitHub
+  descriptions is left over from the starter kit. Whether Tony still
+  has an old OpenAI account that charges him is not something the code
+  shows.
+- Copies of both assistants' code were downloaded to ~/seed-check/ on
+  Tony's desktop for this check.
+
+
+----- ADDED IN SESSION JOHN 5, PART 4, 1 October 2026 -----
+
+INVENTORY SHEET, EDITION 2 (1 Oct 2026)
+- New: seed users can use any AI setup (Tony asked that the seed say
+  so). Florence switches AI service by changing three settings; Lotte by
+  changing one line of code, app/api/chat/route.ts, where her address
+  is written in (baseURL: 'https://openrouter.ai/api/v1').
+- Edition 1 saved in full in ARCHIVE-JOHN.md. The wiki keeps its own
+  history too.
+
+THE WIKI PAGE NAME (1 Oct 2026)
+- A wiki page made by typing "Needpedia-Inventory" into GitHub's
+  new-page title box was saved with a look-alike dash in its file name,
+  so the ordinary raw address returned "404: Not Found". Fixed by
+  renaming the file in a downloaded copy of the wiki (~/seed-check/wiki)
+  and sending it back. Expect the same with any wiki title typed with a
+  dash: publish through ~/seed-check/wiki instead, or rename afterwards.
+- Also: GitHub's raw-file service remembers "not found" for a few
+  minutes. Add ?fresh= plus anything new to the address when checking.
+- Pushing to the wiki works with the gh sign-in; no separate token
+  needed (1 Oct 2026). The "WHERE DOCUMENTATION GOES" section above says
+  otherwise; it is out of date.
+
+GITHUB DOCUMENTATION FIXED (1 Oct 2026)
+- Lotte's and Florence's GitHub project descriptions now say what they
+  are and that their AI runs through OpenRouter (before: "OpenAI
+  Assistants").
+- Florence's front-page document (README) rewritten from her code:
+  every setting she reads, how to switch AI service, how to run her,
+  her history. The old one was OpenAI's template instructions. Change
+  went live on Vercel; her address answered normally afterwards.
+- Florence uses OpenAI's free, open-source software toolkit pointed at
+  OpenRouter; if OpenAI went under, she would keep working.
+- Not done: Lotte's README is right about OpenRouter but names old
+  example models. Low priority.
+
+LOOSE ENDS ADDED (1 Oct 2026)
+- Old service keys in Queuevius/Needpedia's history: whether they still
+  work is unchecked (details in the handoff).
+- Content that lives only in needpedia.org's database (assistants'
+  instructions, email templates, how-tos, FAQs, pop-up guides, homepage
+  messages) needs an export for the seed.
+- Florence and Lotte were downloaded to ~/seed-check/ on Tony's desktop.
+
+
+----- ADDED IN SESSION JOHN 5, PART 5, 1 October 2026 -----
+
+THE ASSISTANTS' KNOWLEDGE BASES (KBs) IN THE SEED (1 Oct 2026)
+- Decided (Tony): the seed carries copies taken from the newest saved
+  files on his computer, not fetched live.
+- The newest, checked 1 Oct 2026, all in
+  ~/Documents/About Needpedia/From Claude Fable 5/AI KBs/
+    ADELE — KNOWLEDGE BASE V2.1.docx     (inside: v2.2, 2026-07-24)
+    FLORENCE — KNOWLEDGE BASE V2.1.docx  (inside: v2.2, 2026-07-25)
+    LOTTE — KNOWLEDGE BASE V2.1.docx     (inside: v2.2, 2026-07-25)
+  The file names say V2.1 but the text inside says v2.2. Older copies:
+  Downloads (v2.1 "_filled", 2 July; V2 PDFs) and _phase1_backups (V2).
+- Privacy scan of email addresses and phone-like numbers, 1 Oct 2026:
+  only Needpedia@gmail.com and VC@Needpedia.org, plus dates and one
+  10-digit number in all three (1753127961, not a valid phone number;
+  line not yet looked at). A pattern scan cannot catch everything
+  private, such as names or personal stories.
+- Where the live KBs are: Florence and Lotte in needpedia.org's database
+  (master admin, "Ai Prompts"); Florence fetches hers from
+  /api/v1/ai_prompt?ai_type=Florence&token=(prompt token). Adele's main
+  sheet in Upstash, edited on the email page's Update KB page; a short
+  built-in set in her code (src/lib/ai.ts).
+- ~/Needpedia_Nexus/kb exists and is empty. ~/read_kbs.py only searches
+  the three KB files for the old "myth token" mistake.
+
+WHAT ELSE WAS DECIDED (Tony, 1 Oct 2026)
+- The seed says sprouters can use a different AI setup.
+- The contacts section says, in Tony's words: if we're still around, we
+  might have all kinds of useful updates to share.
+- The README rewritten tonight is Florence's project description, not
+  her KB. Her KB was not touched.
+
+INVENTORY SHEET, EDITION 3 (1 Oct 2026)
+- Adds the KBs (section 9 and 12) and the contacts note. Edition 2
+  archived in ARCHIVE-JOHN.md first.
+
+
+----- ADDED IN SESSION JOHN 5, PART 6, 1 October 2026 -----
+
+MONEY LINKS IN THE KBs (Tony, 1 Oct 2026)
+- The 10-digit number found in all three KBs is part of
+  powr.io/checkout_screen?unique_label=c180d20e_1753127961 : the
+  donation portal of Needpedia's fiscal sponsor, The Know Agenda
+  Foundation (tax-deductible donations). The KBs also name Needpedia's
+  Patreon, patreon.com/cw/Needpedia, and say using Needpedia is free.
+- Decided (Tony): the KB copies in the seed stay as they are. The
+  inventory tells sprouters to put their own money links and contacts
+  in their copies instead. Sprouters won't need the donation portal.
+
+INVENTORY SHEET, EDITION 4 (1 Oct 2026)
+- Adds the donation portal and Patreon (section 11) and the note about
+  replacing money links and contacts in the KBs (section 15). Edition 3
+  archived in ARCHIVE-JOHN.md first.
+
+
+----- ADDED IN SESSION JOHN 5, PART 7 (CLOSE), 1 October 2026 -----
+
+ROADMAP TO A TESTABLE SEED (Tony asked for it, 1 Oct 2026)
+- https://nexus.needpedia.org/seed-roadmap.txt
+  Six pieces left: start-here file; code copies online (Nexus without
+  keys, capture extension, John's thread-system kit); export of the
+  database-only content; rebuild instructions per system; a read-through
+  for anything private; the packing script and where the seed lives.
+  Rough total: 12 to 18 sessions across threads. The order is a
+  proposal; Tony decides.
+
+STATE AT CLOSE OF JOHN 5 (1 October 2026)
+- No answer from John yet to the 30 Sep offer (daily build check $30,
+  bot council kit $50, 50/50 split). Equipment fund still $120.
+- Inventory sheet: edition 4, on the Nexus and the wiki. Editions 1-3
+  in ARCHIVE-JOHN.md.
+- Sent at close: NEXUS update (Nexus code online without keys); notes
+  to NP1, PC and PU.
+- Asked, not answered: the botskill post says use Claude Code whenever
+  it helps; Tony's 29 Sep preference says not until its text can be
+  copied out. Should the post change?
+- Suggested for the botskill post, not decided: GitHub's wiki form saves
+  a title typed with a dash using a look-alike dash, breaking the page's
+  ordinary address.
+
+=====================================================================
+PART 8 (SESSION JOHN 6), 2 October 2026
+=====================================================================
+Public. Nothing sensitive goes in this file.
+
+DECISIONS (Tony, 1 and 2 October 2026)
+- 2026-10-01: Move fast on the seed. No 12-18 session plan. The JOHN
+  thread writes all rebuild instructions itself from the public code;
+  other threads only review. Gather whatever can be gathered quickly;
+  the seed can be updated later.
+- 2026-10-01: Needpedia's database is NOT saved in the seed. Its public
+  info pages (homepage how-tos, FAQ, about us, terms, privacy, careers,
+  contact) ARE saved, incomplete as they are.
+- 2026-10-02: Pack what exists into a trial seed and let John's test
+  show what's missing, instead of writing everything first.
+- 2026-10-02: Seed published on the Nexus AND on GitHub.
+- 2026-10-02: Passwords and keys are stripped from the seed; rebuilders
+  make their own. Tony isn't worried about the Nexus's volunteer
+  passwords for now (limits are low; security gets upgraded as the
+  project gains attention).
+- 2026-10-02: The Nexus code goes into the seed (trial 2), plus the
+  Chrome capture extension, Tony's "The Thread System" document, every
+  thread's public prompt accomplice and posts (job search left out),
+  and the Nexus's images. No videos, audio or mixed media.
+- 2026-10-02: Paying John: think like a director. Pay him for work that
+  needs hands on a real computer and hours of trial and error, not for
+  writing an AI can do in minutes. Seed first, bot council second.
+
+WHAT EXISTS (2 October 2026)
+- Trial 1 of the seed, 23 MB zip:
+  https://github.com/Queuevius/needpedia-seed
+  https://nexus.needpedia.org/seed/needpedia-seed-trial-1.zip
+  Built in ~/seed-build/needpedia-seed-trial-1/ by pack-seed.py.
+- Project Seed page (dark, download button):
+  https://nexus.needpedia.org/seed/index.html
+  Reached from a "Project Seed" tile on the Nexus front page
+  (gallery.html). Its download button still points at trial 1.
+- Prompt for a seed tester's AI:
+  https://nexus.needpedia.org/seed/trial-1-test-prompt.txt
+- Info pages saved by save-info-resources.py into
+  ~/seed-check/info-resources-2026-10-02/
+- The JOHN thread's helper scripts and drafts are in
+  ~/Downloads/thread-john/ (pack-seed.py, pack-seed-2.py,
+  save-info-resources.py, START-HERE-draft.txt and others).
+
+JOHN (2 October 2026)
+- Bot council starter kit offer ($50) stands. If he already did work
+  on it, Tony pays for that too. Bot council design may change: it is
+  about bots talking to each other, working for Tony first.
+- New job ($50): test-unpack the seed with only an AI's help and send
+  a screen recording of Needpedia running plus a list of every spot
+  where he got stuck. Email drafted; Tony sends it at the end of
+  session John 6. It also asks what computer he uses and whether Linux
+  costs him extra, and whether he sees the lightbulb logo as the VC
+  account's profile picture.
+- Cheaper computer options if he pays for Linux: Windows' free
+  built-in Linux mode; a free virtual machine (needs about 8 GB of
+  memory); or a rented online Linux computer Tony pays for (around
+  $5-10 a month for 4 GB). Tony decides once John answers.
+
+FINDINGS (2 October 2026)
+- Fediverse code: following people on other servers works; sending
+  posts out is built but switched off and untested (post.rb lines
+  114-115); incoming messages aren't properly verified; there are NO
+  server-to-server backups in the code. Sent to NP1 and PU as updates.
+  The seed page and trial 2's MISSING.txt say the network is a plan
+  and how far along it is.
+
+OPEN (2 October 2026)
+- AI tiles show on the Nexus front page in a private window, though
+  gallery.html's code shows them only after a login. Visitors get
+  exactly gallery.html. Screenshot requested.
+- Trial 2: pack-seed-2.py builds it without publishing; its report
+  must be checked before zipping and publishing, then the seed page's
+  download button and the GitHub copy move to trial 2.
+- Whether the assistants' knowledge bases changed since July (seed
+  carries version 2.2): not answered yet.

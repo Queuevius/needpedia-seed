@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity Monitor</title>
+<style>
+  :root{
+    --c1:#3aa0ff; --c2:#2ee66b; --c3:#ffd400; --c4:#ff8a1f;
+    --c5:#ff3b30; --c6:#c46bff; --c7:#7b2ff7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#000;color:#e8e8ee;
+       font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:22px 16px 40px}
+  .stale{display:none;background:#2a1a00;border:1px solid #7a4a00;color:#ffcf7a;
+         padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:16px}
+  .hero{padding:6px 0 18px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:10px;text-align:center}
+  .herolabel{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7d8590}
+  .big{font-size:20px;font-weight:700;color:#e8e8ee}
+  .detail a,.detail{color:#8b98a5;font-size:15px;text-decoration:none}
+  .detail a:hover{color:#e8e8ee;text-decoration:underline}
+  svg.graph{width:100%;height:190px;display:block;background:#000;
+            border:1px solid #16181d;border-radius:10px;margin:4px 0 44px}
+  .ln{fill:none;stroke-width:2;opacity:.95;pointer-events:stroke;stroke-linejoin:round;mix-blend-mode:screen}
+  .ln:hover{stroke-width:4;opacity:1}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6f7883;
+     font-weight:500;text-align:right;padding:0 0 8px}
+  th:first-child{text-align:left}
+  td{padding:9px 0;border-top:1px solid #14161b;text-align:right;
+     font-variant-numeric:tabular-nums}
+  td:first-child{text-align:left;font-weight:600;letter-spacing:.01em}
+  td a{color:inherit;text-decoration:none;border-bottom:1px dotted currentColor}
+  .zero{color:#3a3f47}
+  .r1 td:first-child{color:var(--c1);text-shadow:0 0 14px var(--c1)}
+  .r2 td:first-child{color:var(--c2);text-shadow:0 0 14px var(--c2)}
+  .r3 td:first-child{color:var(--c3);text-shadow:0 0 14px var(--c3)}
+  .r4 td:first-child{color:var(--c4);text-shadow:0 0 14px var(--c4)}
+  .r5 td:first-child{color:var(--c5);text-shadow:0 0 14px var(--c5)}
+  .r6 td:first-child{color:var(--c6);text-shadow:0 0 14px var(--c6)}
+  .r7 td:first-child{color:var(--c7);text-shadow:0 0 16px var(--c7)}
+  .flag{cursor:help;margin-left:7px;filter:drop-shadow(0 0 6px #ff3b30)}
+  .sub{display:block;font-size:11px;font-weight:400;color:#5d646d;
+       letter-spacing:.02em;text-shadow:none;margin-top:2px}
+  .totals{margin-top:44px;color:#9aa4af;font-size:15px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stale" id="stale"></div>
+  <div class="hero">
+    <span class="herolabel">Last Action:</span>
+    <span class="big" id="heroBig">loading…</span>
+    <span class="detail" id="heroDetail"></span>
+  </div>
+  <svg class="graph" id="graph" viewBox="0 0 600 190"></svg>
+  <table>
+    <thead><tr><th></th><th>1d</th><th>7d</th><th>30d</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="totals" id="totals"></div>
+</div>
+<script>
+const AI_URL = 'https://needpedia.org/master_admin/chat_threads';
+const POSTS_URL = 'https://needpedia.org/posts';
+
+function g(d,k,f){ return (d[k] && d[k][f]!=null) ? d[k][f] : 0; }
+
+function buildRows(d){
+  const sum = (keys,f) => keys.reduce((a,k)=>a+g(d,k,f),0);
+  return [
+    {cls:'r1', name:'Newbies', sub:'signups and confirmed emails',
+     v:f=>sum(['signups','confirmed'],f)},
+    {cls:'r2', name:'AI Convos', sub:'questions asked of the assistants',
+     link:AI_URL, v:f=>g(d,'ai_questions',f)},
+    {cls:'r3', name:'Logins and New Groups', sub:'group accounts created or changed',
+     v:f=>sum(['logins','groups_new','groups_edited'],f)},
+    {cls:'r4', name:'New Posts', sub:'problems, ideas, subjects, layers, map pins, social, time bank, quick shares',
+     v:f=>g(d,'posts',f)},
+    {cls:'r5', name:'Edits', sub:'every post type, private included, plus comments',
+     v:f=>sum(['edits','comments'],f)},
+    {cls:'r6', name:'Tasks', sub:'task cards created or changed',
+     v:f=>g(d,'tasks_activity',f)},
+    {cls:'r7', name:'Strange', sub:'failed logins, unconfirmed signups, machine requests',
+     v:f=>sum(['failed_logins','unconfirmed_signups','machine_hits'],f)}
+  ];
+}
+
+function ago(s){
+  if(s==null||s===0) return "never";
+  const d=Math.floor(Date.now()/1000)-s;
+  if(d<60) return d+" seconds ago";
+  if(d<3600) return Math.floor(d/60)+" minutes ago";
+  if(d<86400) return Math.floor(d/3600)+" hours ago";
+  return Math.floor(d/86400)+" days ago";
+}
+
+function drawGraph(rows,d){
+  const W=600,H=190,P=16,N=30;
+  const S=d.series||{};
+  const KEYS=['newbies','ai','logins_groups','posts','edits','tasks','strange'];
+  const xs=i=>P+(i*(W-2*P)/(N-1));
+  let s='';
+  [0,14,29].forEach(i=>{
+    s+='<line x1="'+xs(i)+'" y1="'+P+'" x2="'+xs(i)+'" y2="'+(H-P-10)+
+       '" stroke="#15171c" stroke-width="1"/>';
+  });
+  rows.forEach((r,i)=>{
+    const v=S[KEYS[i]]||[];
+    if(!v.length) return;
+    const mx=Math.max(1,...v);
+    const tot=v.reduce((a,b)=>a+b,0);
+    const pts=v.map((val,j)=>xs(j)+','+(H-P-10-((val/mx)*(H-P*2-10)))).join(' ');
+    const c='var(--c'+(i+1)+')';
+    s+='<polyline class="ln" points="'+pts+'" stroke="'+c+'"><title>'+
+       r.name+' - '+tot+' in 30 days, busiest day '+mx+', today '+v[v.length-1]+
+       '</title></polyline>';
+  });
+  const fmt=n=>{const t=new Date(Date.now()-n*86400000);
+    return t.toLocaleDateString(undefined,{month:'short',day:'numeric'});};
+  s+='<text x="'+xs(0)+'" y="'+(H-4)+'" fill="#4a5058" font-size="10">'+fmt(29)+'</text>';
+  s+='<text x="'+xs(29)+'" y="'+(H-4)+'" fill="#4a5058" font-size="10" text-anchor="end">today</text>';
+  s+='<text x="'+(W/2)+'" y="'+(P-4)+'" fill="#33383f" font-size="9" text-anchor="middle">each line scaled to its own busiest day - hover a line for numbers</text>';
+  document.getElementById('graph').innerHTML=s;
+}
+
+function cell(n){
+  return n>0 ? '<td>'+n+'</td>' : '<td class="zero">0</td>';
+}
+
+async function load(){
+  try{
+    const r = await fetch('/admin-activity?t='+Date.now(), {
+      headers: { 'X-Admin-Token': sessionStorage.getItem('np_admin_token') || '' }
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+
+    const age = Math.floor(Date.now()/1000) - d.generated_at;
+    const st = document.getElementById('stale');
+    if(age > 3600){
+      st.style.display='block';
+      st.textContent = 'These numbers are '+ago(d.generated_at)+
+        '. The collector may have stopped or lost its connection.';
+    } else { st.style.display='none'; }
+
+    const newest = Math.max(d.last_action_at||0, d.last_ai_question_at||0);
+    document.getElementById('heroBig').textContent = ago(newest);
+    const isAI = (d.last_ai_question_at||0) >= (d.last_action_at||0);
+    document.getElementById('heroDetail').innerHTML = isAI
+      ? '<a href="'+AI_URL+'" target="_blank">someone asked an assistant a question</a>'
+      : '<a href="'+POSTS_URL+'" target="_blank">'+
+        (d.last_action_key ? d.last_action_key.replace('.',' — ') : 'no recorded actions')+
+        '</a>';
+
+    const rows = buildRows(d);
+    let html='';
+    rows.forEach(r=>{
+      let flag='';
+      if(r.cls==='r1'){
+        const s30=g(d,'signups','d30'), c30=g(d,'confirmed','d30');
+        if(s30>=3 && c30 < s30/2){
+          flag='<span class="flag" title="'+s30+' signups but only '+c30+
+               ' confirmed an email address. Automated signups look like this.">&#9888;</span>';
+        }
+      }
+      const label = r.link
+        ? '<a href="'+r.link+'" target="_blank">'+r.name+'</a>'
+        : r.name;
+      html += '<tr class="'+r.cls+'"><td>'+label+flag+
+              (r.sub?'<span class="sub">'+r.sub+'</span>':'')+'</td>'+
+              cell(r.v('h24'))+cell(r.v('d7'))+cell(r.v('d30'))+'</tr>';
+    });
+    document.getElementById('rows').innerHTML=html;
+    drawGraph(rows,d);
+
+    document.getElementById('totals').textContent =
+      'Accounts: '+d.total_users+' · Posts: '+d.total_posts+
+      ' · Actions: '+d.total_activities+' · Updated '+ago(d.generated_at)+'.';
+  }catch(e){
+    document.getElementById('heroBig').textContent='cannot reach the activity data';
+    document.getElementById('heroDetail').textContent=e.message;
+  }
+}
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>

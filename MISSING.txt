@@ -1,12 +1,28 @@
-WHAT'S MISSING FROM TRIAL 1
+WHAT'S MISSING FROM TRIAL 2, AND WHAT ISN'T FINISHED
 
 - rebuild/: step-by-step rebuild instructions are not written yet.
   For now, work from inventory.txt, the code in code/, and the
   test-site package instructions in documents/developer-wiki/
   (Needpedia-Test-Site-Package.md).
-- The Nexus code and the Chrome capture extension: not included yet.
+- Passwords, keys and tokens: every one in the code was replaced
+  with REPLACE_ME. Make your own.
+- The Nexus's videos, audio and mixed media: left out. Its images
+  are in media/images/.
+- The Nexus's volunteer accounts: left out. Make your own.
 - Email templates and page pop-up guides from Needpedia's admin
   pages: not saved. Write your own.
 
+THE NETWORK OF NEEDPEDIA SERVERS: A PLAN, PARTLY BUILT
+We plan to link Needpedia servers into a global network that
+interacts and backs itself up, largely inspired by the fediverse.
+How far along it is (checked in the code, 2 October 2026):
+- Working: following people on other fediverse servers (Mastodon
+  and similar) and showing their posts.
+- Built but switched off and untested: sending Needpedia posts out
+  to other servers (app/models/post.rb, lines 114 and 115).
+- Must be fixed before switching that on: incoming messages are not
+  properly checked for who sent them.
+- Not built yet: servers backing each other up.
+
 If you get stuck, write down exactly where and why. That
-list is the most useful result of this trial.
+list is the most useful result of a trial.
